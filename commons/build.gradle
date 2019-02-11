@@ -1,0 +1,132 @@
+apply plugin: 'org.unbroken-dome.xjc'
+apply plugin: 'distribution'
+
+// Define directories for generated source and filtered schema files
+ext {
+  buildSchemaDir = file("$project.buildDir/schema")
+  schemaDir = file("$project.projectDir/src/main/resources")
+  genSrcDir = file("$project.buildDir/gensrc")
+}
+
+sourceSets.main.java.srcDirs += genSrcDir
+
+configurations {
+  generate
+  testing
+}
+
+dependencies {
+  compile ('org.apache.santuario:xmlsec:2.1.0') {
+    exclude group: 'org.codehaus.woodstox'
+    exclude group: 'org.slf4j'
+  }
+  compile 'org.bouncycastle:bcpkix-jdk15on:1.59'
+
+  generate 'org.glassfish.metro:webservices-tools:2.4.0'
+}
+
+// Allow parsing of mixed content in meta tags
+task fixSchema(type: Copy) {
+  from schemaDir
+  include "*.xsd"
+  include "*.wsdl"
+  include "*.xml"
+  into buildSchemaDir
+
+  eachFile { file ->
+    file.filter( { line ->
+      if( file.getName() == 'tr-esor-xaip-v1_2.xsd' ) {
+        return line.replaceAll('<xs:complexType name="metaDataObjectType">', '<xs:complexType name="metaDataObjectType" mixed="true">')
+      }
+      return line
+    })
+  }
+}
+
+sonarqube {
+  properties {
+    property 'sonar.sources', 'src/main/java' // Exclude generated sources
+  }
+}
+
+// Generate TR-ESOR web service classes
+task genWSClasses(type: DefaultTask, dependsOn: fixSchema) {
+  outputs.dir(project.genSrcDir)
+  ant.taskdef( name: 'wsimport',
+               classname: 'com.sun.tools.ws.ant.WsImport',
+               classpath: project.configurations.generate.asPath)
+  ant.setLifecycleLogLevel("ERROR")
+  doLast {
+    mkdir(project.genSrcDir)
+    ant.wsimport(wsdl: "${project.buildSchemaDir}/tr-esor-S-4-v1_2.wsdl", sourcedestdir: project.genSrcDir, xnocompile:'true', encoding:'UTF-8') {
+      catalog = "${project.buildSchemaDir}/catalog.xml"
+      binding(file: "${project.buildSchemaDir}/tr-esor-verification-report-V1_2.xsd")
+      xjcarg(line: '-encoding UTF-8')
+    }
+    ant.wsimport(wsdl: "${project.buildSchemaDir}/eCard.wsdl", sourcedestdir: project.genSrcDir, xnocompile:'true', encoding:'UTF-8') {
+      catalog = "${project.buildSchemaDir}/catalog.xml"
+      xjcarg(line: '-encoding UTF-8')
+    }
+  }
+}
+
+// Generate configuration classes
+xjcGenerate {
+  dependsOn fixSchema
+  source = "${project.buildSchemaDir}/Config.xsd"
+}
+
+compileJava.dependsOn xjcGenerate, genWSClasses
+
+// Generate javadoc
+javadoc {
+  includes = ['de/bund/bsi/tr_esor/checktool/**']
+  options.addBooleanOption('Xdoclint:html,reference,accessibility', true)
+  failOnError = false
+}
+
+distributions {
+  main {
+    baseName = project.baseName
+    contents {
+      from (javadoc) {
+        into 'apidocs'
+      }
+      from (configurations.runtime) {
+        into 'lib'
+      }
+      from (jar) {
+        into 'lib'
+      }
+      from ('src/main/assembly') {
+        expand('version': project.version)
+      }
+    }
+  }
+}
+
+assemble.dependsOn javadoc, installDist
+
+// Create additional jar with test classes for other sub-projects
+task testJar(type: Jar) {
+  classifier = 'tests'
+  from sourceSets.test.output
+}
+
+artifacts {
+  archives distZip
+  testing testJar
+}
+
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+      artifactId project.baseName
+      artifact testJar
+      artifact distZip {
+        classifier = 'bin'
+      }
+    }
+  }
+}

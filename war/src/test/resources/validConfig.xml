@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2">
+  <General>
+    <VerifierID>urn:Beispiel</VerifierID>
+    <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
+    <!-- <ConfiguredObjects> -->
+    <!-- <Validator> -->
+    <!-- <className>de.bund.bsi.tr_esor.checktool.MyTimestampValidator</className> -->
+    <!-- <parameter name="URL">http://localhost:3232/ecard/VI</parameter> -->
+    <!-- <parameter name="clientId">ID47234863482223214423122</parameter> -->
+    <!-- <targetType>org.bouncycastle.tsp.TimeStampToken</targetType> -->
+    <!-- </Validator> -->
+    <!-- </ConfiguredObjects> -->
+  </General>
+</Configuration>

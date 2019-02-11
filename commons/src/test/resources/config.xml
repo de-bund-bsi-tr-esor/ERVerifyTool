@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2">
+  <General>
+    <VerifierID>urn:Beispiel</VerifierID>
+    <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
+    <!-- This is how to add a validator to all profiles: -->
+    <!--
+    <ConfiguredObjects>
+      <Validator>
+        <className>de.bund.bsi.tr_esor.checktool.MyTimestampValidator</className>
+        <parameter name="URL">http://localhost:3232/ecard/VI</parameter>
+        <parameter name="clientId">ID47234863482223214423122</parameter>
+        <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+      </Validator>
+    </ConfiguredObjects>
+    -->
+  </General>
+  <!-- For online verification of time stamps, activate: -->
+  <!--
+  <Profile name="https://tools.ietf.org/html/rfc4998">
+    <Validator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
+      <parameter name="eCardURL">http://vtf-crypto2.tf.bos-test.de:8080/vi-ecard-webservice/eCard?wsdl</parameter>
+      <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+    </Validator>
+  </Profile>
+  <Profile
+    name="http://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03125/BSI_TR_03125_Anlage_ERS_V1_2.html#Basis-ERS-Profil">
+    <Validator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator
+      </className>
+      <parameter name="eCardURL">http://vtf-crypto2.tf.bos-test.de:8080/vi-ecard-webservice/eCard?wsdl</parameter>
+      <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+    </Validator>
+  </Profile>
+  -->
+  <!-- You may specify own profiles with any number of new or replaced validators: -->
+  <Profile name="online_profile">
+    <Validator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
+      <parameter name="eCardURL">http://vtf-crypto2.tf.bos-test.de:8080/vi-ecard-webservice/eCard?wsdl</parameter>
+      <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+    </Validator>
+  </Profile>
+</Configuration>

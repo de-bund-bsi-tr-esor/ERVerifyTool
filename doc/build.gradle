@@ -1,0 +1,31 @@
+apply plugin: 'distribution'
+
+task buildDoc(type:Exec) {
+  commandLine 'python', 'doc.py'
+}
+
+distributions {
+  main {
+    baseName = project.baseName
+    contents {
+      from buildDoc
+      from ('_build/html') {
+        into 'html'
+      }
+      from ('_build/latex') {
+        include '*.pdf'
+        into 'pdf'
+      }
+    }
+  }
+}
+
+assemble.dependsOn installDist
+[buildDoc, distTar, distZip, installDist, assemble, build].each {
+  it.onlyIf { project.hasProperty('release') }
+}
+
+clean {
+  delete '_build'
+  delete 'javadoc'
+}

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+  <Match>
+    <Or>
+      <Package name="~.*\._1" />
+      <Package name="~ietf\..*" />
+      <Package name="~iso\..*" />
+      <Package name="~oasis\..*" />
+      <Package name="~org\..*" />
+    </Or>
+  </Match>
+</FindBugsFilter>

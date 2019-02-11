@@ -1,0 +1,30 @@
+// This build script is used to run a fresh tomcat server for automatic integration test execution
+
+buildscript {
+  repositories {
+    jcenter()
+  }
+  dependencies {
+    classpath 'com.bmuschko:gradle-tomcat-plugin:2.4.2'
+  }
+}
+
+repositories {
+  mavenCentral()
+}
+
+apply plugin: 'com.bmuschko.tomcat-base'
+
+dependencies {
+  def tomcatVersion = '7.0.82'
+  tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+         "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatVersion}",
+         "org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+}
+
+war.enabled = false
+
+task integrationTomcatRun(type: com.bmuschko.gradle.tomcat.tasks.TomcatRunWar) {
+  webApp = file('ErVerifyTool.war')
+  contextPath = 'ErVerifyTool'
+}

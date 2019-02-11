@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2">
+  <General>
+    <VerifierID>urn:Beispiel</VerifierID>
+    <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
+    <HashCreator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.TestValidatorFactory$OtherHashCreator</className>
+    </HashCreator>
+    <ConfiguredObjects />
+  </General>
+  <Profile name="test_profile">
+    <Validator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.TestValidatorFactory$OtherErValidator</className>
+      <targetType>de.bund.bsi.tr_esor.checktool.data.EvidenceRecord</targetType>
+    </Validator>
+  </Profile>
+</Configuration>

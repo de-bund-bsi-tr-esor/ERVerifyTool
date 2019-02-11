@@ -1,0 +1,32 @@
+<esor:XAIP xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip/1.2">
+  <esor:packageHeader packageID="x1cb4d0c8-f921-41b1-913e-528cbefe09c5">
+    <esor:AOID>adc7ae71-bd2b-496f-83ec-1e8b11ad3161</esor:AOID>
+    <esor:versionManifest VersionID="V001">
+      <esor:preservationInfo>
+        <esor:retentionPeriod>2036-01-01+01:00</esor:retentionPeriod>
+      </esor:preservationInfo>
+      <esor:submissionInfo>
+        <esor:clientID>remotebean_esor12</esor:clientID>
+        <esor:submissionTime>2016-12-07T15:56:28.449+01:00</esor:submissionTime>
+      </esor:submissionInfo>
+      <esor:packageInfoUnit packageUnitID="_idxVersions_V001">
+        <esor:protectedObjectPointer>V001</esor:protectedObjectPointer>
+        <esor:protectedObjectPointer>data2_V001</esor:protectedObjectPointer>
+        <esor:protectedObjectPointer>data2_meta_V001</esor:protectedObjectPointer>
+      </esor:packageInfoUnit>
+    </esor:versionManifest>
+    <ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"></ds:CanonicalizationMethod>
+  </esor:packageHeader>
+  <esor:metaDataSection>
+    <esor:metaDataObject dataObjectID="data2_V001" metaDataID="data2_meta_V001">data for qualified signature</esor:metaDataObject>
+  </esor:metaDataSection>
+  <esor:dataObjectsSection>
+    <esor:dataObject dataObjectID="data2_V001">
+      <esor:binaryData>RGllcyBpc3QgZWluIFRlc3Rkb2t1bWVudCBtaXQgcXVhbGlmaXppZXJ0ZXIgU2lnbmF0dXIuCg==</esor:binaryData>
+      <esor:checkSum>
+        <esor:checkSumAlgorithm>SHA-256</esor:checkSumAlgorithm>
+        <esor:checkSum>2FA377BCFBEB56F1E87E3F95F8CAD4AB7C30B5AF8BEDFBDC24B6DDA0E9E11A27</esor:checkSum>
+      </esor:checkSum>
+    </esor:dataObject>
+  </esor:dataObjectsSection>
+</esor:XAIP>

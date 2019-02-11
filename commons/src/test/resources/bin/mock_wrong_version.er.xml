@@ -1,0 +1,3 @@
+<esor:evidenceRecord AOID="adc7ae71-bd2b-496f-83ec-1e8b11ad3161" VersionID="V003" xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip/1.2">
+	<ecard:asn1EvidenceRecord xmlns:ecard="http://www.bsi.bund.de/ecard/api/1.1">THIS+IS+A+BROKEN+MOCK+BELONGING+TO+xaip+ok+xml=</ecard:asn1EvidenceRecord>
+</esor:evidenceRecord>

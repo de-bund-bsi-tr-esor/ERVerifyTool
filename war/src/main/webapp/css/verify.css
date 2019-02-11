@@ -1,0 +1,39 @@
+body {
+	font-family: Arial, sans-serif;
+	color: #000000;
+	margin-top: 1vw;
+	padding-left: 1vw;
+	padding-right: 1vw;
+	padding-bottom: 4vh;
+}
+
+a {
+	color: #0069a1;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #05a8ff;
+	transition: 0.2s;
+}
+
+a:active {
+	color: #87d3fb;
+}
+
+h1 {
+	color: #0069a1;
+	display: inline;
+	font-size: 2.2em;
+	font-weight: lighter;
+}
+
+p label {
+	float: left;
+	min-width: 300px;
+	max-width: 300px;
+}
+
+p strong {
+	color: #aa0000;
+}

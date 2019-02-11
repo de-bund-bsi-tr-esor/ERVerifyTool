@@ -1,0 +1,22 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="css/verify.css"/>
+</head>
+<body>
+<h1>BSI Verify Tool for Evidence Records</h1>
+<p><label>Application version</label>  <span>{{version}}</span></p>
+<p><label>Path to the configuration file</label>  <span>{{pathToConfiguration}}</span></p>
+<p><label>Reload configuration</label>  <a href="{{reloadConfigurationUrl}}">reload now</a></p>
+<p>
+<strong>The configuration was not loaded.</strong>
+</p>
+<p>
+{{errorMessage}}
+</p>
+<p>
+Make sure a valid XML file is readable under the above path. See log file for further details.
+</p>
+</body>
+</html>

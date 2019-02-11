@@ -1,0 +1,129 @@
+{
+  "DSA": {
+    "oids": [
+      {
+        "description": "x9algorithm",
+        "oid": "1.2.840.10040.4"
+      }
+    ],
+    "parameter": {
+      "plength": "2048",
+      "qlength": "256"
+    },
+    "validity": "2022-12-31T23:59:59.999+01:00"
+  },
+  "ECDSA": {
+    "oids": [
+      {
+        "description": "ecdsa-with-SHA1",
+        "oid": "1.2.840.10045.1"
+      }
+    ],
+    "parameter": {
+      "mlength": "0",
+      "qlength": "250"
+    },
+    "validity": "2022-12-31T23:59:59.999+01:00"
+  },
+  "RIPEMD160": {
+    "oids": [
+      {
+        "description": "RIPEMD-160",
+        "oid": "1.3.36.3.2.1"
+      }
+    ],
+    "validity": "2015-12-31T23:59:59.999+01:00"
+  },
+  "RSA": {
+    "oids": [
+      {
+        "description": "pbeWithSHA1AndRC2_CBC",
+        "oid": "1.2.840.113549.1.5.11"
+      }
+    ],
+    "parameter": {
+      "moduluslength": "2048"
+    },
+    "validity": "2022-12-31T23:59:59.999+01:00"
+  },
+  "SHA1": {
+    "oids": [
+      {
+        "description": "npki-alg",
+        "oid": "1.2.410.200004.1"
+      },
+      {
+        "description": "SHA1",
+        "oid": "1.3.14.3.2.26"
+      }
+    ],
+    "validity": "2015-12-31T23:59:59.999+01:00"
+  },
+  "SHA224": {
+    "oids": [
+      {
+        "description": "SHA224",
+        "oid": "2.16.840.1.101.3.4.2.4"
+      }
+    ],
+    "validity": "2015-12-31T23:59:59.999+01:00"
+  },
+  "SHA256": {
+    "oids": [
+      {
+        "description": "PBKDF2 id-hmacWithSHA256",
+        "oid": "1.2.840.113549.2.9"
+      },
+      {
+        "description": "SHA256",
+        "oid": "2.16.840.1.101.3.4.2.1"
+      }
+    ],
+    "validity": "2023-12-31T23:59:59.999+01:00"
+  },
+  "SHA3-256": {
+    "oids": [
+      {
+        "description": "SHA3-256",
+        "oid": "2.16.840.1.101.3.4.2.8"
+      }
+    ],
+    "validity": "2023-12-31T23:59:59.999+01:00"
+  },
+  "SHA3-384": {
+    "oids": [
+      {
+        "description": "SHA3-384",
+        "oid": "2.16.840.1.101.3.4.2.9"
+      }
+    ],
+    "validity": "2023-12-31T23:59:59.999+01:00"
+  },
+  "SHA3-512": {
+    "oids": [
+      {
+        "description": "SHA3-512",
+        "oid": "2.16.840.1.101.3.4.2.10"
+      }
+    ],
+    "validity": "2023-12-31T23:59:59.999+01:00"
+  },
+  "SHA384": {
+    "oids": [
+      {
+        "description": "SHA384",
+        "oid": "2.16.840.1.101.3.4.2.2"
+      }
+    ],
+    "validity": "2023-12-31T23:59:59.999+01:00"
+  },
+  "SHA512": {
+    "oids": [
+      {
+        "description": "SHA512",
+        "oid": "2.16.840.1.101.3.4.2.3"
+      }
+    ],
+    "validity": "2023-12-31T23:59:59.999+01:00"
+  }
+}
