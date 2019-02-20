@@ -62,7 +62,7 @@ Get the sources of ErVerifyTool from the github (e.g. in ~/working)
 
 - `git clone https://github.com/ervta/ERVerifyTool.git`
 
-Setup gradle (optional, if you are about to use the gradle wrapper)
+Setup gradle wrapper (optional, if you are about to use the gradle wrapper)
 
 - `cd ~/working/ERVerifyTool`
 - `gradle -version`
@@ -73,7 +73,7 @@ Build the binaries
 
 - `cd ~/working/ERVerifyTool`
 - in case the wrapper should be used: `sh gradlew clean build -Prelease -DskipIntegrationTests --continue` (in order to perform integration tests a special infrastructure is needed, which is not a part of the open source package)
-- or only with gradle `sh gradlew clean build -Prelease -DskipIntegrationTests --continue`
+- or only with gradle `gradle clean build -Prelease -DskipIntegrationTests --continue`
 
 Build the documentation
 
