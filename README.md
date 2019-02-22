@@ -44,11 +44,11 @@ Following software packages are necessary in order to build the binaries and doc
 - gradle,
 - python (at leat version 2.7.*), 
 - python-pip, 
-- git,  
+- git,
 - latex, 
 - python-sphinx, 
 - latexmk, 
-- javasphinx,   
+- javasphinx,
 
 How to build the ERVerifyTool on Ubuntu 18.04 LTS
 -----
@@ -79,6 +79,20 @@ Build the documentation
 
 - `cd ~/working/ERVerifyTool/doc`
 - `python doc.py` 
+
+How to install and use the ErVerifyTool
+----
+
+After successfull built of the ErVerifyTool, the distribution file can be found under `ERVerifyTool/all/build/dists/`. 
+In order to install the tool and do some first tests, please follow those steps:
+
+1. Copy the distribution package into your test directory, e.g.: `cp ~/src/ERVerifyTool/all/build/dists/ErVerifyTool-all-1.0.7-bin.zip ~/apps/`
+2. change to test directory: `cd ~/apps`
+3. unzip the binaries: `unzip ErVerifyTool-all-1.0.7-bin.zip`
+4. copy the configuration into distribution. `cp ~/src/ERVerifyTool/config/config-rfc4998-offline.xml ~/apps/ErVerifyTool-all-1.0.7/config/`
+5. run: `~/apps/ErVerifyTool-all-1.0.7/cli/bin/checktool -conf ~/apps/ErVerifyTool-all-1.0.7/config/config-rfc4998-offline.xml -data ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN.bin -er ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN_ER.ers`- which will produce an output on the console or `~/apps/ErVerifyTool-all-1.0.7/cli/bin/checktool -conf ~/apps/ErVerifyTool-all-1.0.7/config/config-rfc4998-offline.xml -data ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN.bin -er ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN_ER.ers -out /tmp/1.RFC4998-bin-data_er-VR.xml` - will store the output under `/tmp/1.RFC4998-bin-data_er-VR.xml`, which is a verfification report in XML.
+6. run: `~/apps/ErVerifyTool-all-1.0.7/cli/bin/checktool -conf ~/apps/ErVerifyTool-all-1.0.7/config/config-rfc4998-offline.xml -data ~/src/ERVerifyTool/test/2.RFC4998-XAIP-ER/XAIP_OK_V1_V2_ER1.xml`- will produce output on the console
+
   
 
 Known Issues
@@ -87,3 +101,4 @@ Known Issues
 * [**KI-001**] - a XAIP containing two versions (V1 and V2) and an ebmedded evidence record belonging to version V1; element `xaip:evidenceRecord` points to the wrong version (to V2 instead of to V1); uncaught exception on the console -> no reports is returned.
 * [**KI-002**] - a XAIP containing two versions (V1 and V2) and an ebmedded evidence record belonging to version V1; the element `xaip:relatedObjects` is pointing to an not existing version; the minor code of the result states a hash value mismatch, which is not quite accuratly.
 * [**KI-003**] - a XAIP containing two versions (V1 and V2) and an ebmedded evidence record belonging to version V1; wrong AOID in the element `xaip:evidenceRecord`; `majorReult` contains *valid* intead of expected *indetermind* in case of online check.
+* [**KI-004**] - output on the console doesn't produce the closing `LF`
