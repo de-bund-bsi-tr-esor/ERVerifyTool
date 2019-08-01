@@ -130,9 +130,11 @@ public class TestContentInfoChecker
                                  "algorithm must be equal to one of SignedData.digestAlgorithms",
                                  "signatureAlgorithm must be present", "signatureValue must be present",
                                  "unsignedAttrs must be omitted", "attributes must be DER encoded",
-                                 "attribute set must contain exactly one content-type, message-digest and SigningCertificateV2 attribute",
+                                 //"attribute set must contain exactly one content-type, message-digest and SigningCertificateV2 attribute",
+                                 "attribute set does contain more signed attributes than reqired content-type, message-digest and SigningCertificateV2",
                                  "attribute must contain a type and a value set",
-                                 "attribute with OID 1.2.3.4 is not allowed",
+                                 //"attribute with OID 1.2.3.4 is not allowed",
+                                 "signed attribute with OID 1.2.3.4 is contained additionally",
                                  "content-type must be " + ContentInfoChecker.OID_TST_INFO,
                                  "attribute must have a value set",
                                  "SigningCertificateV2 must contain at least one ESSCertIDv2"};

@@ -345,8 +345,12 @@ public class ContentInfoChecker
     final int requiredAttributeCount = 3;
     if (attrs.size() != requiredAttributeCount)
     {
+    	/*
       formatOk.invalidate("attribute set must contain exactly one content-type, message-digest and SigningCertificateV2 attribute",
                           ref.newChild("content"));
+                          */
+      formatOk.updateCodes(null,  null,  null, "attribute set does contain more signed attributes than reqired content-type, message-digest and SigningCertificateV2",
+              ref.newChild("content"));
     }
     Iterator<ASN1Encodable> attributes = attrs.iterator();
     int attrCount = 0;
@@ -376,8 +380,10 @@ public class ContentInfoChecker
             checkSigningCertificateAttribute(ref.newChild("signing-certificate-v2"), attr);
             break;
           default:
-            formatOk.invalidate("attribute with OID " + attr.getAttrType().getId() + " is not allowed",
-                                ref.newChild(Integer.toString(attrCount)));
+            /*formatOk.invalidate("attribute with OID " + attr.getAttrType().getId() + " is not allowed",
+                                ref.newChild(Integer.toString(attrCount)));*/
+            formatOk.updateCodes(null, null, null, "signed attribute with OID " + attr.getAttrType().getId() + " is contained additionally",
+                    ref.newChild(Integer.toString(attrCount)));
             break;
         }
       }
