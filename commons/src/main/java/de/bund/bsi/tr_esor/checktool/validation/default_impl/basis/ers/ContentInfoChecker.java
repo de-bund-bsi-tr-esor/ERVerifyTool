@@ -77,6 +77,10 @@ public class ContentInfoChecker
   static final String OID_SIGNING_CERTIFICATTE_V2 = "1.2.840.113549.1.9.16.2.47";
 
   static final String OID_TST_INFO = "1.2.840.113549.1.9.16.1.4";
+  
+  static int ATTR_CONTENT_TYPE = 2;
+  static int ATTR_MESSAGE_DIGEST = 4;
+  static int ATTR_CERT_V2 = 8;
 
   private final List<AlgorithmIdentifier> digestIdentifiers = new ArrayList<>();
 
@@ -343,7 +347,7 @@ public class ContentInfoChecker
   {
     checkAttributesIsDERSet(ref, attrs);
     final int requiredAttributeCount = 3;
-    if (attrs.size() != requiredAttributeCount)
+    if (attrs.size() > requiredAttributeCount)
     {
     	/*
       formatOk.invalidate("attribute set must contain exactly one content-type, message-digest and SigningCertificateV2 attribute",
@@ -354,6 +358,8 @@ public class ContentInfoChecker
     }
     Iterator<ASN1Encodable> attributes = attrs.iterator();
     int attrCount = 0;
+    
+    int attrsFound = 0;
     for ( Attribute attr ; attributes.hasNext() ; attrCount++ )
     {
       attr = getInstance(Attribute::getInstance, attributes.next());
@@ -372,12 +378,15 @@ public class ContentInfoChecker
         {
           case OID_CONTENT_TYPE:
             checkContentTypeAttribute(ref.newChild("content-type"), attr);
+            attrsFound += ATTR_CONTENT_TYPE;
             break;
           case OID_MESSAGE_DIGEST:
             checkMessageDigestAttribute(ref.newChild("message-digest"), attr);
+            attrsFound += ATTR_MESSAGE_DIGEST;
             break;
           case OID_SIGNING_CERTIFICATTE_V2:
             checkSigningCertificateAttribute(ref.newChild("signing-certificate-v2"), attr);
+            attrsFound += ATTR_CERT_V2;
             break;
           default:
             /*formatOk.invalidate("attribute with OID " + attr.getAttrType().getId() + " is not allowed",
@@ -387,6 +396,18 @@ public class ContentInfoChecker
             break;
         }
       }
+    }
+    if (ATTR_CONTENT_TYPE != (attrsFound & ATTR_CONTENT_TYPE))
+    {
+    	formatOk.invalidate("missing required signed attribute: content-type", ref.newChild("content-type"));
+    }
+    if (ATTR_MESSAGE_DIGEST != (attrsFound & ATTR_MESSAGE_DIGEST))
+    {
+    	formatOk.invalidate("missing required signed attribute: message-digest", ref.newChild("message-digest"));
+    }
+    if (ATTR_CERT_V2 != (attrsFound & ATTR_CERT_V2))
+    {
+    	formatOk.invalidate("missing required signed attribute: signing-certificate-v2", ref.newChild("signing-certificate-v2"));
     }
   }
 
