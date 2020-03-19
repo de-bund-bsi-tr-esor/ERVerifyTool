@@ -62,6 +62,11 @@ Get the sources of ErVerifyTool from the github (e.g. in ~/working)
 
 - `git clone https://github.com/ervta/ERVerifyTool.git`
 
+Optional check and set up the java version
+
+- required is java 1.8, as installed above, thus check with java -version, if the correct one is setup as default
+- in case a newer java verion as 1.8 (e.g. in case of Ubuntu 18.04.4 it is a java 11), it has to be changed e.g. by using `update-alternatives`.
+
 Setup gradle wrapper (optional, if you are about to use the gradle wrapper)
 
 - `cd ~/working/ERVerifyTool`
