@@ -1,6 +1,8 @@
 ER Verify Tool
 ==============
 
+**_NOTE:_** We are working on the new release of the ER verify tool, which is free of the log4j-vulnarability, see https://nvd.nist.gov/vuln/detail/CVE-2021-44228 for more information on this topic.
+
 **Version: 1.0.7**
 
 The _ER Verify Tool_ is used to check the conformity of an evidence record to
