@@ -97,7 +97,7 @@ public final class Main
         }
         if (cmd.hasOption("server"))
         {
-          runServer(cmd.getOptionValue("port", "9999"));
+          runServer(cmd.getOptionValue("host", "localhost"), cmd.getOptionValue("port", "9999"));
           return;
         }
         checkGivenProfile(cmd.getOptionValue(PROFILE_NAME));
@@ -168,6 +168,7 @@ public final class Main
                       false,
                       "start as web service (optional, ignores all other parameters except -conf and -port)");
     options.addOption("port", true, "listen port for server mode, defaults to 9999");
+    options.addOption("host", true, "hostname for the server mode, default is localhost");
     options.addOption("conf", true, "path to the configuration file");
     options.addOption(PROFILE_NAME,
                       true,
@@ -233,9 +234,9 @@ public final class Main
   /**
    * Runs the web service.
    */
-  private static void runServer(String port)
+  private static void runServer(String host, String port)
   {
-    var address = "http://localhost:" + port + "/ErVerifyTool/esor13/exec";
+    var address = "http://" + host + ":" + port + "/ErVerifyTool/esor13/exec";
     out.println("Running S4 webservice on address " + address);
     Endpoint.publish(address, new S4VerifyOnly());
   }
