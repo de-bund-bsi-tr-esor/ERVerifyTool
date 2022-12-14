@@ -27,8 +27,8 @@ The CLI consists of the following files:
 Requirements
 ------------
 
-- Java 1.8.0
-- Environment variable `\$JAVA_HOME` has been set correctly.
+- Java 11 on the PATH
+- or the environment variable `JAVA_HOME` has been set correctly.
 
 
 Installation
@@ -48,10 +48,10 @@ To show usage information call:
 
     checktool -h
 
-To verify evidence records call:
+To verify evidence records and signatures call:
 
     checktool -conf <file> [-profile <profile name>] -data <XAIP or bin file> \
-    [-er <detached evidence record>]
+    [-er <detached evidence record>] [-out <folder for output report and xaip parts>]
 
 To start the stand-alone web service call:
 

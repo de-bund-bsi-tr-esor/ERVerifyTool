@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xaip:XAIP XAIPVersion="1.3.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xaip="http://www.bsi.bund.de/tr-esor/xaip" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xmlers="urn:ietf:params:xml:ns:ers">
+    <xaip:packageHeader packageID="x2a52eb65-e345-4fdc-a803-888693ec3468">
+        <xaip:AOID>d9984bc6-2268-4d93-a9ea-50b20dfde3db</xaip:AOID>
+        <xaip:versionManifest VersionID="V001">
+            <xaip:preservationInfo>
+                <xaip:retentionPeriod>2035-02-18Z</xaip:retentionPeriod>
+            </xaip:preservationInfo>
+            <xaip:submissionInfo>
+                <xaip:clientID>remotebean_esor13</xaip:clientID>
+                <xaip:submissionTime>2022-08-18T08:11:04.658Z</xaip:submissionTime>
+            </xaip:submissionInfo>
+            <xaip:packageInfoUnit packageUnitID="_idxVersions_V001">
+                <xaip:protectedObjectPointer>HundesteuerAnmeldung_V001</xaip:protectedObjectPointer>
+                <xaip:protectedObjectPointer>Hundename_V001</xaip:protectedObjectPointer>
+                <xaip:protectedObjectPointer>fileSize_V001</xaip:protectedObjectPointer>
+                <xaip:protectedObjectPointer>V001_canonicalized</xaip:protectedObjectPointer>
+            </xaip:packageInfoUnit>
+        </xaip:versionManifest>
+        <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+    </xaip:packageHeader>
+    <xaip:metaDataSection>
+        <xaip:metaDataObject metaDataID="Hundename_V001" relatedObjects="HundesteuerAnmeldung_V001">
+            <xaip:binaryMetaData MimeType="application/octet-stream">
+                VGVzdERhdGE=
+            </xaip:binaryMetaData>
+        </xaip:metaDataObject>
+    </xaip:metaDataSection>
+    <xaip:dataObjectsSection>
+        <xaip:dataObject dataObjectID="HundesteuerAnmeldung_V001">
+            <xaip:binaryData>bXkgbmFtZSBpcwo=</xaip:binaryData>
+            <xaip:checkSum>
+                <xaip:checkSumAlgorithm>SHA-256</xaip:checkSumAlgorithm>
+                <xaip:checkSum>060A7B57B73CA0EC313B407A631B25567DC17A99ED43045F04D04AD44450F2A6</xaip:checkSum>
+            </xaip:checkSum>
+        </xaip:dataObject>
+        <xaip:dataObject dataObjectID="fileSize_V001">
+            <xaip:binaryData>
+                PHhhaXA6bWV0YURhdGFPYmplY3QgeG1sbnM6ZHM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvMDkveG1sZHNpZyMiIHhtbG5zOnhhaXA9Imh0dHA6Ly93d3cuYnNpLmJ1bmQuZGUvdHItZXNvci94YWlwIiB4bWxuczp4bWxlcnM9InVybjppZXRmOnBhcmFtczp4bWw6bnM6ZXJzIiBtZXRhRGF0YUlEPSJmaWxlU2l6ZV9WMDAxIiByZWxhdGVkT2JqZWN0cz0iSHVuZGVzdGV1ZXJBbm1lbGR1bmdfVjAwMSI+CiAgICAgICAgICAgIDx4YWlwOnhtbE1ldGFEYXRhPgogICAgICAgICAgICAgICAgPG5zOmZpbGVzaXplIHhtbG5zOm5zPSJodHRwOi8vZXhhbXBsZS9maWxlc2l6ZS54c2QiPjExPC9uczpmaWxlc2l6ZT4KICAgICAgICAgICAgPC94YWlwOnhtbE1ldGFEYXRhPgogICAgICAgIDwveGFpcDptZXRhRGF0YU9iamVjdD4=
+            </xaip:binaryData>
+        </xaip:dataObject>
+        <xaip:dataObject dataObjectID="V001_canonicalized">
+            <xaip:binaryData>
+                PHhhaXA6dmVyc2lvbk1hbmlmZXN0IHhtbG5zOmRzPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIiB4bWxuczp4YWlwPSJodHRwOi8vd3d3LmJzaS5idW5kLmRlL3RyLWVzb3IveGFpcCIgeG1sbnM6eG1sZXJzPSJ1cm46aWV0ZjpwYXJhbXM6eG1sOm5zOmVycyIgVmVyc2lvbklEPSJWMDAxIj4KICAgICAgICAgICAgPHhhaXA6cHJlc2VydmF0aW9uSW5mbz4KICAgICAgICAgICAgICAgIDx4YWlwOnJldGVudGlvblBlcmlvZD4yMDM1LTAyLTE4WjwveGFpcDpyZXRlbnRpb25QZXJpb2Q+CiAgICAgICAgICAgIDwveGFpcDpwcmVzZXJ2YXRpb25JbmZvPgogICAgICAgICAgICA8eGFpcDpzdWJtaXNzaW9uSW5mbz4KICAgICAgICAgICAgICAgIDx4YWlwOmNsaWVudElEPnJlbW90ZWJlYW5fZXNvcjEzPC94YWlwOmNsaWVudElEPgogICAgICAgICAgICAgICAgPHhhaXA6c3VibWlzc2lvblRpbWU+MjAyMi0wOC0xOFQwODoxMTowNC42NThaPC94YWlwOnN1Ym1pc3Npb25UaW1lPgogICAgICAgICAgICA8L3hhaXA6c3VibWlzc2lvbkluZm8+CiAgICAgICAgICAgIDx4YWlwOnBhY2thZ2VJbmZvVW5pdCBwYWNrYWdlVW5pdElEPSJfaWR4VmVyc2lvbnNfVjAwMSI+CiAgICAgICAgICAgICAgICA8eGFpcDpwcm90ZWN0ZWRPYmplY3RQb2ludGVyPkh1bmRlc3RldWVyQW5tZWxkdW5nX1YwMDE8L3hhaXA6cHJvdGVjdGVkT2JqZWN0UG9pbnRlcj4KICAgICAgICAgICAgICAgIDx4YWlwOnByb3RlY3RlZE9iamVjdFBvaW50ZXI+SHVuZGVuYW1lX1YwMDE8L3hhaXA6cHJvdGVjdGVkT2JqZWN0UG9pbnRlcj4KICAgICAgICAgICAgICAgIDx4YWlwOnByb3RlY3RlZE9iamVjdFBvaW50ZXI+ZmlsZVNpemVfVjAwMTwveGFpcDpwcm90ZWN0ZWRPYmplY3RQb2ludGVyPgogICAgICAgICAgICAgICAgPHhhaXA6cHJvdGVjdGVkT2JqZWN0UG9pbnRlcj5WMDAxPC94YWlwOnByb3RlY3RlZE9iamVjdFBvaW50ZXI+CiAgICAgICAgICAgIDwveGFpcDpwYWNrYWdlSW5mb1VuaXQ+CiAgICAgICAgPC94YWlwOnZlcnNpb25NYW5pZmVzdD4=
+            </xaip:binaryData>
+        </xaip:dataObject>
+    </xaip:dataObjectsSection>
+</xaip:XAIP>

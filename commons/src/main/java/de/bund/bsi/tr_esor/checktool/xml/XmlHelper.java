@@ -21,6 +21,8 @@
  */
 package de.bund.bsi.tr_esor.checktool.xml;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -30,10 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.datatype.DatatypeConfigurationException;
 import javax.xml.datatype.DatatypeFactory;
 import javax.xml.datatype.XMLGregorianCalendar;
@@ -42,11 +40,19 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamSource;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+
+import org.apache.xml.security.c14n.CanonicalizationException;
+import org.apache.xml.security.c14n.Canonicalizer;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.w3c.dom.Node;
 
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -59,14 +65,14 @@ public final class XmlHelper
 {
 
   /**
-   * Object factory for name space of details. Name space URI is "http://www.bsi.bund.de/tr-esor/vr/1.2".
+   * Object factory for name space of details. Name space URI is "http://www.bsi.bund.de/tr-esor/vr/1.3".
    */
-  public static final de.bund.bsi.tr_esor.vr._1.ObjectFactory FACTORY_ESOR_VR = new de.bund.bsi.tr_esor.vr._1.ObjectFactory();
+  public static final de.bund.bsi.tr_esor.vr.ObjectFactory FACTORY_ESOR_VR = new de.bund.bsi.tr_esor.vr.ObjectFactory();
 
   /**
-   * Object factory for name space XAIP. Name space URI is "http://www.bsi.bund.de/tr-esor/xaip/1.2".
+   * Object factory for name space XAIP. Name space URI is "http://www.bsi.bund.de/tr-esor/xaip".
    */
-  public static final de.bund.bsi.tr_esor.xaip._1.ObjectFactory FACTORY_XAIP = new de.bund.bsi.tr_esor.xaip._1.ObjectFactory();
+  public static final de.bund.bsi.tr_esor.xaip.ObjectFactory FACTORY_XAIP = new de.bund.bsi.tr_esor.xaip.ObjectFactory();
 
   /**
    * Object factory for DSS elements. Name space URI is "urn:oasis:names:tc:dss:1.0:core:schema".
@@ -91,11 +97,21 @@ public final class XmlHelper
   public static final org.etsi.uri._01903.v1_3.ObjectFactory FACTORY_ETSI = new org.etsi.uri._01903.v1_3.ObjectFactory();
 
   /**
+   * Object factory for ETSI Signature Verification Report
+   */
+  public static final org.etsi.uri._19102.v1_2.ObjectFactory FACTORY_ETSI_SVR = new org.etsi.uri._19102.v1_2.ObjectFactory();
+
+  /**
    * Object factory for name space ECARD. Name space URI is ""http://www.bsi.bund.de/ecard/api/1.1"".
    */
   public static final de.bund.bsi.ecard.api._1.ObjectFactory FACTORY_ECARD = new de.bund.bsi.ecard.api._1.ObjectFactory();
 
-  // de.bund.bsi.ecard.api._1.ObjectFactory
+  public static final de.governikus.ecard.ext.ObjectFactory FACTORY_ECARD_EXT = new de.governikus.ecard.ext.ObjectFactory();
+
+  /**
+   * Object factory for name for ASIC.
+   */
+  public static final org.etsi.uri._02918.v1_2.ObjectFactory FACTORY_ASIC = new org.etsi.uri._02918.v1_2.ObjectFactory();
 
   private static final Map<String, JAXBContext> CACHE = new HashMap<>();
 
@@ -112,7 +128,10 @@ public final class XmlHelper
    */
   public static XAIPType parseXaip(InputStream data) throws JAXBException
   {
-    return parse(new StreamSource(data), XAIPType.class, FACTORY_XAIP.getClass().getPackage().getName());
+    return parse(new StreamSource(data),
+                 XAIPType.class,
+                 FACTORY_XAIP.getClass().getPackage().getName() + ":"
+                                 + FACTORY_ASIC.getClass().getPackage().getName());
   }
 
   /**
@@ -123,12 +142,15 @@ public final class XmlHelper
    */
   public static XAIPType parseXaip(Element data) throws JAXBException
   {
-    return parse(new DOMSource(data), XAIPType.class, FACTORY_XAIP.getClass().getPackage().getName());
+    return parse(new DOMSource(data),
+                 XAIPType.class,
+                 FACTORY_XAIP.getClass().getPackage().getName() + ":"
+                                 + FACTORY_ASIC.getClass().getPackage().getName());
   }
 
   private static JAXBContext getContext(String path) throws JAXBException
   {
-    JAXBContext result = CACHE.get(path);
+    var result = CACHE.get(path);
     if (result == null)
     {
       result = JAXBContext.newInstance(path);
@@ -147,8 +169,8 @@ public final class XmlHelper
    */
   public static <T> T parse(Source data, Class<T> clazz, String contextPath) throws JAXBException
   {
-    JAXBContext ctx = getContext(contextPath);
-    Unmarshaller u = ctx.createUnmarshaller();
+    var ctx = getContext(contextPath);
+    var u = ctx.createUnmarshaller();
     return u.unmarshal(data, clazz).getValue();
   }
 
@@ -172,8 +194,8 @@ public final class XmlHelper
   public static <T> Element toElement(T data, String contextPath, Function<T, JAXBElement<T>> wrap)
     throws JAXBException
   {
-    JAXBContext ctx = getContext(contextPath);
-    DOMResult result = new DOMResult();
+    var ctx = getContext(contextPath);
+    var result = new DOMResult();
     ctx.createMarshaller().marshal(wrap == null ? data : wrap.apply(data), result);
     return ((Document)result.getNode()).getDocumentElement();
   }
@@ -216,9 +238,21 @@ public final class XmlHelper
    */
   public static void serialize(VerificationReportType report, OutputStream outs) throws JAXBException
   {
-    JAXBContext ctx = getContext(FACTORY_OASIS_VR.getClass().getPackage().getName() + ":"
-                                 + FACTORY_ESOR_VR.getClass().getPackage().getName());
+    var ctx = getContext(FACTORY_OASIS_VR.getClass().getPackage().getName() + ":"
+                         + FACTORY_ESOR_VR.getClass().getPackage().getName());
     ctx.createMarshaller().marshal(FACTORY_OASIS_VR.createVerificationReport(report), outs);
   }
 
+  /**
+   * Canonicalize a XML node into a byte array using the given canonicalizer
+   */
+  public static byte[] canonicalizeSubtree(Canonicalizer canonicalizer, Node node)
+    throws IOException, CanonicalizationException
+  {
+    try (var out = new ByteArrayOutputStream())
+    {
+      canonicalizer.canonicalizeSubtree(node, out);
+      return out.toByteArray();
+    }
+  }
 }

@@ -21,8 +21,8 @@
  */
 package de.bund.bsi.tr_esor.checktool.json;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.io.IOException;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class TestNativeJsonParsing
   @Before
   public void initEngine()
   {
-    ScriptEngineManager sem = new ScriptEngineManager();
+    var sem = new ScriptEngineManager();
     this.engine = sem.getEngineByName("javascript");
   }
 
@@ -65,13 +65,13 @@ public class TestNativeJsonParsing
   @Test
   public void parseJson() throws IOException, ScriptException
   {
-    String json = "{\"person\": {\"erster\": {\"name\":\"herbert\"} }}";
-    String script = "Java.asJSONCompatible(" + json + ")";
-    Object result = this.engine.eval(script);
+    var json = "{\"person\": {\"erster\": {\"name\":\"herbert\"} }}";
+    var script = "Java.asJSONCompatible(" + json + ")";
+    var result = this.engine.eval(script);
     @SuppressWarnings("unchecked")
-    String name = ((Map<String, Map<String, Map<String, String>>>)result).get("person")
-                                                                         .get("erster")
-                                                                         .get("name");
+    var name = ((Map<String, Map<String, Map<String, String>>>)result).get("person")
+                                                                      .get("erster")
+                                                                      .get("name");
     assertThat("Parsed Name", name, is("herbert"));
   }
 }

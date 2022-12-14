@@ -22,7 +22,6 @@
 package de.bund.bsi.tr_esor.checktool.parser;
 
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -54,24 +53,6 @@ public class BinaryParser implements Parser<byte[]>
   @Override
   public byte[] parse() throws IOException
   {
-    return readAll(input);
-  }
-
-  /**
-   * Reads complete content of a stream and returns it as byte array. We do not want dependency to another
-   * library for this one method
-   */
-  public static byte[] readAll(InputStream ins) throws IOException
-  {
-    byte[] buf = new byte[4 * 1024];
-    int nRead = 0;
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream())
-    {
-      while ((nRead = ins.read(buf)) != -1)
-      {
-        out.write(buf, 0, nRead);
-      }
-      return out.toByteArray();
-    }
+    return input.readAllBytes();
   }
 }

@@ -21,8 +21,9 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.AlgorithmValidityType;
+
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
 /**

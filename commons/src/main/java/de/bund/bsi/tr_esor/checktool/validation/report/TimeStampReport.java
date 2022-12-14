@@ -21,16 +21,13 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
-import java.util.List;
-
-import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import oasis.names.tc.dss._1_0.core.schema.Result;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityVerificationDetailType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificateValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignatureValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
+
+import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
 /**
@@ -80,7 +77,7 @@ public class TimeStampReport extends ReportPart implements OutputCreator<TimeSta
    */
   private FormatOkReport parseFormatOkFromReport(TimeStampValidityType tsvt)
   {
-    FormatOkReport result = new FormatOkReport(getReference());
+    var result = new FormatOkReport(getReference());
     updateCodesFromVR(getReference(), tsvt.getFormatOK(), result);
     return result;
   }
@@ -113,16 +110,15 @@ public class TimeStampReport extends ReportPart implements OutputCreator<TimeSta
 
   private void updateCodesFromCertPath()
   {
-    Reference certPathRef = getReference().newChild("CertPath");
+    var certPathRef = getReference().newChild("CertPath");
     if (xmlReport.getCertificatePathValidity().getPathValidityDetail() != null)
     {
-      CertificatePathValidityVerificationDetailType detail = xmlReport.getCertificatePathValidity()
-                                                                      .getPathValidityDetail();
-      List<CertificateValidityType> certValidity = detail.getCertificateValidity();
-      for ( int i = certValidity.size() - 1 ; i >= 0 ; i-- )
+      var detail = xmlReport.getCertificatePathValidity().getPathValidityDetail();
+      var certValidity = detail.getCertificateValidity();
+      for ( var i = certValidity.size() - 1 ; i >= 0 ; i-- )
       {
-        Reference certRef = certPathRef.newChild(Integer.toString(i));
-        CertificateValidityType cert = certValidity.get(i);
+        var certRef = certPathRef.newChild(Integer.toString(i));
+        var cert = certValidity.get(i);
         updateCodesFromVR(certRef.newChild("validityPeriod"), cert.getValidityPeriodOK(), this);
         updateCodesFromVR(certRef.newChild("chaining"), cert.getChainingOK(), this);
         updateCodesFromSig(certRef, cert.getSignatureOK());

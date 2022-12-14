@@ -39,7 +39,7 @@ public class BasisErsDummyTimeStampValidator extends DummyTimeStampValidator
   @Override
   protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
   {
-    ContentInfoChecker contentInfoChecker = new ContentInfoChecker(formatOk);
+    var contentInfoChecker = new ContentInfoChecker(formatOk);
     contentInfoChecker.checkContentInfo(formatOk.getReference(), ts.toCMSSignedData().toASN1Structure());
   }
 }

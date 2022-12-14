@@ -35,11 +35,11 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
-import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 
@@ -51,31 +51,28 @@ import org.junit.Test;
 public class TestConfigurationServlet
 {
 
-  private File validConfigFile;
+  private static File VALID_CONFIG;
 
-  private File invalidConfigFile;
+  private static File IVALID_CONFIG;
 
   /**
    * Creates temporary files for test.
-   *
-   * @throws IOException
    */
-  @Before
-  public void setUp() throws IOException
+  @BeforeClass
+  public static void beforeClass() throws Exception
   {
-    validConfigFile = fromResource("/validConfig.xml");
-    invalidConfigFile = fromResource("/invalidConfig.xml");
+    VALID_CONFIG = fromResource("/validConfig.xml");
+    IVALID_CONFIG = fromResource("/invalidConfig.xml");
   }
 
   /**
    * Deletes temporary test files.
    */
-  @After
-  public void tearDown()
+  @AfterClass
+  public static void afterClass()
   {
-    boolean ok = validConfigFile.delete();
-    ok = invalidConfigFile.delete() && ok;
-    assertTrue("deleted temp files", ok);
+    assertTrue(VALID_CONFIG.delete());
+    assertTrue(IVALID_CONFIG.delete());
   }
 
   /**
@@ -92,12 +89,12 @@ public class TestConfigurationServlet
   public void responseForVariousConfigurations() throws Exception
   {
     testConfiguration("valid config",
-                      validConfigFile,
+                      VALID_CONFIG,
                       "<p><label>Default Profile</label>  <span>https://tools.ietf.org/html/rfc4998</span></p>");
     testConfiguration("missing config",
                       new File("mich_gibt_es_nicht.xml"),
                       "The configuration was not loaded.");
-    testConfiguration("invalid config", invalidConfigFile, "The configuration was not loaded.");
+    testConfiguration("invalid config", IVALID_CONFIG, "The configuration was not loaded.");
   }
 
   /**
@@ -106,8 +103,8 @@ public class TestConfigurationServlet
   @Test
   public void useConfigFromClasspath() throws IOException
   {
-    FakedConfigConfiguration systemUnderTest = new FakedConfigConfiguration();
-    FakedConfigConfiguration.setConfigFile(invalidConfigFile);
+    var systemUnderTest = new FakedConfigConfiguration();
+    FakedConfigConfiguration.setConfigFile(IVALID_CONFIG);
 
     makeRequestAndAssert("config from classpath",
                          "<p><label>Default Profile</label>  <span>https://tools.ietf.org/html/rfc4998</span></p>",
@@ -117,7 +114,7 @@ public class TestConfigurationServlet
 
   private void testConfiguration(String label, File configFile, String expectedContent) throws Exception
   {
-    ConfigurationServlet systemUnderTest = new ConfigurationServlet();
+    var systemUnderTest = new ConfigurationServlet();
     ConfigurationServlet.configFile = configFile;
     makeRequestAndAssert(label, expectedContent, systemUnderTest);
   }
@@ -125,31 +122,25 @@ public class TestConfigurationServlet
   void makeRequestAndAssert(String label, String expectedContent, ConfigurationServlet systemUnderTest)
     throws IOException
   {
-    HttpServletRequest req = mock(HttpServletRequest.class);
+    var req = mock(HttpServletRequest.class);
     when(req.getServletPath()).thenReturn("/loadConfiguration");
-    HttpServletResponse resp = mock(HttpServletResponse.class);
-    try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw))
+    var resp = mock(HttpServletResponse.class);
+    try (var sw = new StringWriter(); var pw = new PrintWriter(sw))
     {
       when(resp.getWriter()).thenReturn(pw);
       systemUnderTest.doGet(req, resp);
-      String html = sw.toString();
+      var html = sw.toString();
       assertThat(label, html, containsString(expectedContent));
     }
   }
 
-  private File fromResource(String resource) throws IOException
+  private static File fromResource(String resource) throws IOException
   {
-    File file = File.createTempFile(getClass().getSimpleName() + "_config", ".xml");
-    try (InputStream is = getClass().getResourceAsStream(resource);
+    var file = File.createTempFile(TestConfigurationServlet.class.getSimpleName() + "_config", ".xml");
+    try (var is = TestConfigurationServlet.class.getResourceAsStream(resource);
       OutputStream os = new FileOutputStream(file))
     {
-      byte[] buf = new byte[1024];
-      int len = is.read(buf);
-      while (len > 0)
-      {
-        os.write(buf, 0, len);
-        len = is.read(buf);
-      }
+      is.transferTo(os);
     }
     return file;
   }

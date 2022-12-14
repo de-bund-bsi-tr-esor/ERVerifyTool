@@ -1,109 +1,78 @@
-ER Verify Tool
-==============
+# ER Verify Tool
 
-**Version: 1.0.8**
+The _ER Verify Tool_ is used to check the conformity of an evidence record against requirements 
+of TR-ESOR-ERS in version 1.3.
 
-The _ER Verify Tool_ is used to check the conformity of an evidence record to
-requirements of TR-ESOR-ERS in the version of 1.2.1.
+More information about the _ER Verify Tool_ can be found in the product documentation (cf. `doc/ErVerifyTool.pdf`).
 
-More information about the _ER Verify Tool_ can be found in the product
-documentation, which can be generated as a part of the building process. 
-(Start reading with `doc/pdf/ErVerifyTool.pdf`)
+## License
 
-Please note that all `README.md` files in this distribution are plain text
-files in markdown syntax. You can read these files with any text viewer or use
-a markdown viewer, for instance a
-[Firefox plugin](https://addons.mozilla.org/en-US/firefox/addon/markdown-viewer-webext/)
-for nicer formatting.
-
-License
------
-This software is underlying the rules of the following license: 
+This software is underlying the rules of the following license:
 [Apache License Version 2.0, January 2004](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-Files
------
+## Prerequisites
 
-The ER Verify Tool consists of the following files:
+To run the application at least the following is required:
 
-- `cli`       : directory containing the command line interface of ER Verify
-                Tool
+- Java 11 (e.g. OpenJDK)
+- Tomcat 10 for Application Server Web Service mode
+
+The gradle build system does not need to be installed.
+Instead, all gradle build commands can be executed using the gradle wrapper (gradlew), which is located in
+the main folder of the source code distribution.
+
+## Project Structure
+
+The project is structured as follows:
+
+- `cli`       : directory containing the command line interface of ER Verify Tool
 - `war`       : directory with web application archive of ER Verify Tool
-- `config`    : directory with example configuration and schema
+- `config`    : directory with example configuration and configuration schema
 - `doc`       : directory with the product documentation
-- `sdk`       : directory with libraries for implementing extensions and Java
-                clients
-- `LICENSE`   : text file with license description
-- `README.md` : this file
+- `sdk`       : directory with libraries for implementing extensions and Java clients
 
-Prerequisites
------
-Following software packages are necessary in order to build the binaries and documentation from sources: 
+# Build instructions
 
-- openjdk-8-jdk (the tool has been tested with this version of java),
-- gradle,
-- python (at leat version 2.7.*), 
-- python-pip, 
-- git,
-- latex, 
-- python-sphinx, 
-- latexmk, 
-- javasphinx,
+Install a version of the Java 11 development kit.
 
-How to build the ERVerifyTool on Ubuntu 18.04 LTS
------
-Install software (if not already existing)
+For Ubuntu 20.04 LTS e.g.:
+```
+sudo apt-get install openjdk-11-jdk
+```
 
-- `sudo apt-get install python python-pip git openjdk-8-jdk python-sphinx latexmk gradle`
-- `sudo apt-get install texlive texlive-binaries texlive-extra-utils texlive-fonts-extra texlive-fonts-recommended texlive-publishers texlive-font-utils texlive-latex-extra texlive-latex-recommended`
-- `sudo pip install javasphinx`
+Make sure Java 11 is installed correctly:
+Either the `java` command is available on the PATH or the `JAVA_HOME` environment variable is set up accordingly.
 
-Get the sources of ErVerifyTool from the github (e.g. in ~/working)
+Build the artifact with
 
-- `git clone https://github.com/ervta/ERVerifyTool.git`
+```
+./gradlew clean build -Prelease -DskipIntegrationTests
+```
 
-Optional check and set up the java version
+You may replace `./gradlew` with an installed version of `gradle` of the same version (see URL in gradle/wrapper/gradle-wrapper.properties).
 
-- required is java 1.8, as installed above, thus check with java -version, if the correct one is setup as default
-- in case a newer java verion as 1.8 (e.g. in case of Ubuntu 18.04.4 it is a java 11), it has to be changed e.g. by using `update-alternatives`.
+In order to perform all integration tests online timestamp validation must be configured correctly (cf. product documentation)
 
-Setup gradle wrapper (optional, if you are about to use the gradle wrapper)
+```
+./gradlew integrationTest
+```
 
-- `cd ~/working/ERVerifyTool`
-- `gradle -version`
-- setup the gradle version in ~/working/ERVerifyTool/gradle/wrapper/gradle-wrapper.properties (e.g. on if gradle version is 3.4.1, than the property distributionUrl should be set to `https\://services.gradle.org/distributions/gradle-3.4.1-bin.zip`)
-- Test it with `sh gradlew -version`
+# Run CLI
 
-Build the binaries
+The *ER Verify Tool* provides a CLI. For webserver mode and WAR deployment see the product documentation.
 
-- `cd ~/working/ERVerifyTool`
-- in case the wrapper should be used: `sh gradlew clean build -Prelease -DskipIntegrationTests --continue` (in order to perform integration tests a special infrastructure is needed, which is not a part of the open source package)
-- or only with gradle `gradle clean build -Prelease -DskipIntegrationTests --continue`
+The zip artifact is located at `all/build/dists/`. Unzip the build artifact and change into the `cli/bin` directory.
 
-Build the documentation
+Running `./checktool` without any arguments will provide you with a help message
+```
+cli/bin$ ./checktool
+```
 
-- `cd ~/working/ERVerifyTool/doc`
-- `python doc.py` 
+To use the default `config.xml` run the CLI as follows
+```
+cli/bin$ ./checktool -conf ../../config/config.xml -data some-xaip.xml -er some-er.er
+```
 
-How to install and use the ErVerifyTool
-----
+This will print the XML *VerificationReport* to standard out.
 
-After successfull built of the ErVerifyTool, the distribution file can be found under `ERVerifyTool/all/build/dists/`. 
-In order to install the tool and do some first tests, please follow those steps:
-
-1. Copy the distribution package into your test directory, e.g.: `cp ~/src/ERVerifyTool/all/build/dists/ErVerifyTool-all-1.0.7-bin.zip ~/apps/`
-2. change to test directory: `cd ~/apps`
-3. unzip the binaries: `unzip ErVerifyTool-all-1.0.7-bin.zip`
-4. copy the configuration into distribution. `cp ~/src/ERVerifyTool/config/config-rfc4998-offline.xml ~/apps/ErVerifyTool-all-1.0.7/config/`
-5. run: `~/apps/ErVerifyTool-all-1.0.7/cli/bin/checktool -conf ~/apps/ErVerifyTool-all-1.0.7/config/config-rfc4998-offline.xml -data ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN.bin -er ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN_ER.ers`- which will produce an output on the console or `~/apps/ErVerifyTool-all-1.0.7/cli/bin/checktool -conf ~/apps/ErVerifyTool-all-1.0.7/config/config-rfc4998-offline.xml -data ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN.bin -er ~/src/ERVerifyTool/test/1.RFC4998-bin-data_er/BIN_ER.ers -out /tmp/1.RFC4998-bin-data_er-VR.xml` - will store the output under `/tmp/1.RFC4998-bin-data_er-VR.xml`, which is a verfification report in XML.
-6. run: `~/apps/ErVerifyTool-all-1.0.7/cli/bin/checktool -conf ~/apps/ErVerifyTool-all-1.0.7/config/config-rfc4998-offline.xml -data ~/src/ERVerifyTool/test/2.RFC4998-XAIP-ER/XAIP_OK_V1_V2_ER1.xml`- will produce output on the console
-
-  
-
-Known Issues
-----
-
-* [**KI-001**] - a XAIP containing two versions (V1 and V2) and an ebmedded evidence record belonging to version V1; element `xaip:evidenceRecord` points to the wrong version (to V2 instead of to V1); uncaught exception on the console -> no reports is returned.
-* [**KI-002**] - a XAIP containing two versions (V1 and V2) and an ebmedded evidence record belonging to version V1; the element `xaip:relatedObjects` is pointing to an not existing version; the minor code of the result states a hash value mismatch, which is not quite accuratly.
-* [**KI-003**] - a XAIP containing two versions (V1 and V2) and an ebmedded evidence record belonging to version V1; wrong AOID in the element `xaip:evidenceRecord`; `majorReult` contains *valid* intead of expected *indetermind* in case of online check.
-* [**KI-004**] - output on the console doesn't produce the closing `LF`
+See the product documentation for more options and possible configurations.

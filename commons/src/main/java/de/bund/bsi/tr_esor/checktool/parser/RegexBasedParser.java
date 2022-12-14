@@ -69,10 +69,10 @@ public abstract class RegexBasedParser<T> implements Parser<T>
   public boolean canParse() throws IOException
   {
     input.mark(BUF_SIZE);
-    byte[] buf = new byte[BUF_SIZE];
-    int len = input.read(buf, 0, BUF_SIZE);
+    var buf = new byte[BUF_SIZE];
+    var len = input.read(buf, 0, BUF_SIZE);
     input.reset();
-    String beginning = new String(buf, 0, len, StandardCharsets.UTF_8);
+    var beginning = new String(buf, 0, len, StandardCharsets.UTF_8);
     return pattern.matcher(beginning).find();
   }
 
@@ -84,7 +84,7 @@ public abstract class RegexBasedParser<T> implements Parser<T>
    */
   protected static String regexForMainTag(String localName, String namespaceURI)
   {
-    return "\\A(<\\?xml [^>]*>[^<]*)?(<([a-zA-Z]\\w*):" + localName + " [^>]*xmlns:\\3=\"" + namespaceURI
-           + "\")|(<" + localName + " [^>]*xmlns=\"" + namespaceURI + "\")";
+    return "\\A(<\\?xml [^>]*>[^<]*)?(<([a-zA-Z]\\w*):" + localName + "[\\s\\n][^>]*xmlns:\\3=\""
+           + namespaceURI + "\")|(<" + localName + " [^>]*xmlns=\"" + namespaceURI + "\")";
   }
 }

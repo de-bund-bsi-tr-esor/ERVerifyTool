@@ -24,10 +24,8 @@ package de.bund.bsi.tr_esor.checktool.parser;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1Primitive;
@@ -74,24 +72,24 @@ public class ASN1EvidenceRecordParser implements Parser<EvidenceRecord>
   public boolean canParse() throws IOException
   {
     input.mark(BUF_SIZE);
-    byte[] buf = new byte[BUF_SIZE];
-    int length = input.read(buf, 0, BUF_SIZE);
+    var buf = new byte[BUF_SIZE];
+    var length = input.read(buf, 0, BUF_SIZE);
     input.reset();
 
-    final int sequenceTag = 0x30;
+    final var sequenceTag = 0x30;
     if (length < BUF_SIZE || buf[0] != sequenceTag)
     {
       return false;
     }
 
-    int versionOffset = 1 + getNumberLengthOctets(buf, 1);
-    final int integerTag = 0x02;
+    var versionOffset = 1 + getNumberLengthOctets(buf, 1);
+    final var integerTag = 0x02;
     return buf[versionOffset] == integerTag && buf[versionOffset + 3] == sequenceTag;
   }
 
   private int getNumberLengthOctets(byte[] buffer, int offset)
   {
-    final byte indefiniteLength = (byte)0x80;
+    final var indefiniteLength = (byte)0x80;
     if (buffer[offset] == indefiniteLength)
     {
       return 1;
@@ -106,7 +104,7 @@ public class ASN1EvidenceRecordParser implements Parser<EvidenceRecord>
   @Override
   public EvidenceRecord parse() throws IOException
   {
-    return parse(BinaryParser.readAll(input));
+    return parse(input.readAllBytes());
   }
 
   /**
@@ -118,29 +116,30 @@ public class ASN1EvidenceRecordParser implements Parser<EvidenceRecord>
    */
   public EvidenceRecord parse(byte[] derEncodedER) throws IOException
   {
+
     return parse(ASN1Primitive.fromByteArray(derEncodedER));
   }
 
   private EvidenceRecord parse(ASN1Object asn1Object) throws IOException
   {
 
-    ASN1Sequence rootSequence = Checked.cast(asn1Object).to(ASN1Sequence.class);
-    Iterator<ASN1Encodable> iter = rootSequence.iterator();
+    var rootSequence = Checked.cast(asn1Object).to(ASN1Sequence.class);
+    var iter = rootSequence.iterator();
     // position 0 - version
-    ASN1Integer asn1Version = Checked.cast(iter.next()).to(ASN1Integer.class);
-    int version = asn1Version.getValue().intValue();
+    var asn1Version = Checked.cast(iter.next()).to(ASN1Integer.class);
+    var version = asn1Version.getValue().intValue();
     // position 1
     // get all digest algorithms from digestAlgorithm sequence in the asn.1 this data is stored in
     // sequence[AlgoIdentifier], AlgoIdentifier is a sequence[digestAlgo, parameter]
     List<AlgorithmIdentifier> digestAlgos = new ArrayList<>();
-    ASN1Sequence algoList = Checked.cast(iter.next()).to(ASN1Sequence.class);
-    for ( ASN1Encodable algo : algoList )
+    var algoList = Checked.cast(iter.next()).to(ASN1Sequence.class);
+    for ( var algo : algoList )
     {
       digestAlgos.add(ASN1Utils.parseAlgorithmIdentifier(algo));
     }
 
     // check crypto info (optional tagged object)
-    ASN1Encodable element = iter.next();
+    var element = iter.next();
     CryptoInfo cryptoInfo = null;
     if (element instanceof ASN1TaggedObject && ((ASN1TaggedObject)element).getTagNo() == TAGNO_CRYPTO_INFOS)
     {
@@ -158,7 +157,7 @@ public class ASN1EvidenceRecordParser implements Parser<EvidenceRecord>
     }
 
     // ArchiveTimestampSequence
-    ArchiveTimeStampSequence atss = new ArchiveTimeStampSequence(element);
+    var atss = new ArchiveTimeStampSequence(element);
     return new EvidenceRecord(version, digestAlgos, atss, cryptoInfo, encryptInfo);
   }
 }

@@ -21,10 +21,11 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation;
 
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
+
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
 /**
@@ -57,12 +58,20 @@ public final class VerificationResultCreator
    */
   public static VerificationResultType create(ValidationResultMajor major, String minor, String message)
   {
-    VerificationResultType result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+    return getVerificationResultType(major, minor, message, result);
+  }
+
+  private static VerificationResultType getVerificationResultType(ValidationResultMajor major,
+                                                                  String minor,
+                                                                  String message,
+                                                                  VerificationResultType result)
+  {
     result.setResultMajor(major.toString());
     result.setResultMinor(minor);
     if (message != null)
     {
-      InternationalStringType is = XmlHelper.FACTORY_DSS.createInternationalStringType();
+      var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
       is.setLang("en");
       is.setValue(message);
       result.setResultMessage(is);
@@ -77,19 +86,18 @@ public final class VerificationResultCreator
    * @param minor
    * @param message
    */
-  public static Result createDssResult(ValidationResultMajor major, String minor, String message)
+  public static Result createDssResult(OasisDssResultMajor major, String minor, String message)
   {
-    Result result = XmlHelper.FACTORY_DSS.createResult();
+    var result = XmlHelper.FACTORY_DSS.createResult();
     result.setResultMajor(major.toString());
     result.setResultMinor(minor);
     if (message != null)
     {
-      InternationalStringType is = XmlHelper.FACTORY_DSS.createInternationalStringType();
+      var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
       is.setLang("en");
       is.setValue(message);
       result.setResultMessage(is);
     }
     return result;
   }
-
 }

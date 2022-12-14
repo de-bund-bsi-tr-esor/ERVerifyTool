@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xaip:XAIP XAIPVersion="1.3.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ec="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ers="http://www.setcce.org/schemas/ers" xmlns:esor13api="http://www.bsi.bund.de/tr-esor/api/1.3" xmlns:evr="http://www.bsi.bund.de/tr-esor/vr" xmlns:ext="http://www.governikus.de/ecard/ext" xmlns:iso-24727="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns11="http://uri.etsi.org/02918/v1.2.1#" xmlns:ns12="http://uri.etsi.org/19512/v1.1.2#" xmlns:ns13="http://docs.oasis-open.org/dss-x/ns/metadata" xmlns:ns14="http://docs.oasis-open.org/dss-x/ns/xmldsig/rewritten" xmlns:ns15="http://docs.oasis-open.org/dss-x/ns/nsList" xmlns:ns16="http://docs.oasis-open.org/dss-x/ns/base" xmlns:svr="http://uri.etsi.org/19102/v1.2.1#" xmlns:tsl="http://uri.etsi.org/02231/v2#" xmlns:vr="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xaip="http://www.bsi.bund.de/tr-esor/xaip" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xmlers="urn:ietf:params:xml:ns:ers">
+	<xaip:packageHeader packageID="x9053e5eb-f23d-4833-bd12-1d32ff1ad873">
+		<xaip:AOID>singed_det_meta</xaip:AOID>
+		<xaip:versionManifest VersionID="V001">
+			<xaip:preservationInfo>
+				<xaip:retentionPeriod>2022-09-22Z</xaip:retentionPeriod>
+			</xaip:preservationInfo>
+			<xaip:submissionInfo>
+				<xaip:clientID>remotebean_esor13</xaip:clientID>
+				<xaip:submissionUnit>*</xaip:submissionUnit>
+				<xaip:submissionAuthor>*</xaip:submissionAuthor>
+				<xaip:submissionTime>2022-09-22T08:13:16.821Z</xaip:submissionTime>
+			</xaip:submissionInfo>
+			<xaip:packageInfoUnit packageUnitID="_idxVersions_V001">
+				<xaip:protectedObjectPointer>DO_01</xaip:protectedObjectPointer>
+				<xaip:protectedObjectPointer>MD_01</xaip:protectedObjectPointer>
+				<xaip:protectedObjectPointer>V001</xaip:protectedObjectPointer>
+			</xaip:packageInfoUnit>
+			<xaip:packageInfoUnit packageUnitID="_idx_sig_V001">
+				<xaip:protectedObjectPointer>detachedSignature</xaip:protectedObjectPointer>
+			</xaip:packageInfoUnit>
+		</xaip:versionManifest>
+		<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+	</xaip:packageHeader>
+	<xaip:metaDataSection>
+		<xaip:metaDataObject metaDataID="MD_01" relatedObjects="DO_01">
+			<xaip:binaryMetaData MimeType="application/octet-stream">Y29tcGxpYW5jZSB0ZXN0IGRhdGE=</xaip:binaryMetaData>
+		</xaip:metaDataObject>
+	</xaip:metaDataSection>
+	<xaip:dataObjectsSection>
+		<xaip:dataObject dataObjectID="DO_01">
+			<xaip:binaryData>Y29udGVudA==
+			</xaip:binaryData>
+			<xaip:checkSum>
+				<xaip:checkSumAlgorithm>SHA-256</xaip:checkSumAlgorithm>
+				<xaip:checkSum>9CE2D7D350F9418407439F0CA11DCC12AB9F7CDB15F9ECC5ECA935482602B872
+				</xaip:checkSum>
+			</xaip:checkSum>
+		</xaip:dataObject>
+	</xaip:dataObjectsSection>
+	<xaip:credentialsSection>
+		<xaip:credential credentialID="detachedSignature"
+						 relatedObjects="MD_01">
+			<dss:SignatureObject xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
+				<dss:Base64Signature Type="urn:ietf:rfc:3369">
+					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
+				</dss:Base64Signature>
+			</dss:SignatureObject>
+		</xaip:credential>
+	</xaip:credentialsSection>
+</xaip:XAIP>

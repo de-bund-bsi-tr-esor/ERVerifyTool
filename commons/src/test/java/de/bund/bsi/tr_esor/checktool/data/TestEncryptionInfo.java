@@ -28,13 +28,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
 
 import java.io.IOException;
-import java.util.Iterator;
 
 import org.bouncycastle.asn1.ASN1Boolean;
-import org.bouncycastle.asn1.ASN1Encodable;
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 import org.bouncycastle.asn1.DERSet;
@@ -57,10 +54,10 @@ public class TestEncryptionInfo
   @Test
   public void testCryptoInfo() throws Exception
   {
-    EncryptionInfo encryptionInfo = new EncryptionInfo("1.2.3.4.5", new DERSet().toASN1Primitive().getEncoded());
-    ASN1Primitive primitive = encryptionInfo.toASN1Primitive();
+    var encryptionInfo = new EncryptionInfo("1.2.3.4.5", new DERSet().toASN1Primitive().getEncoded());
+    var primitive = encryptionInfo.toASN1Primitive();
     assertThat(primitive, instanceOf(DERSequence.class));
-    Iterator<ASN1Encodable> iterator = ((DERSequence)primitive).iterator();
+    var iterator = ((DERSequence)primitive).iterator();
     assertThat(iterator.next(), is(new ASN1ObjectIdentifier("1.2.3.4.5")));
     assertThat(iterator.next(), is(new DEROctetString(new DERSet())));
     assertFalse(iterator.hasNext());

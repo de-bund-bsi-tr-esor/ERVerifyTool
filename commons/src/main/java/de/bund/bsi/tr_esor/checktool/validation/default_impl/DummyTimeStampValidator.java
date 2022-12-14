@@ -23,6 +23,9 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
 import java.math.BigInteger;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignatureValidityType;
+
 import org.bouncycastle.tsp.TimeStampToken;
 
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
@@ -31,10 +34,6 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignatureValidityType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
 
 
 /**
@@ -49,8 +48,8 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
   @Override
   protected TimeStampReport validateInternal(Reference ref, TimeStampToken toCheck)
   {
-    TimeStampReport tsReport = new TimeStampReport(ref);
-    FormatOkReport formatOk = new FormatOkReport(ref);
+    var tsReport = new TimeStampReport(ref);
+    var formatOk = new FormatOkReport(ref);
     checkUnsignedAttributes(toCheck, formatOk);
     tsReport.getFormatted().setCertificatePathValidity(mockCertificatePathValidity());
     tsReport.getFormatted().setSignatureOK(mockSignatureValidity());
@@ -65,13 +64,13 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
 
   private SignatureValidityType mockSignatureValidity()
   {
-    SignatureValidityType sig = XmlHelper.FACTORY_OASIS_VR.createSignatureValidityType();
-    VerificationResultType result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#warning");
-    result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.2/resultminor/arl/notSupported");
-    InternationalStringType message = XmlHelper.FACTORY_DSS.createInternationalStringType();
-    message.setLang("de-de");
-    message.setValue("Die Prüfung von digitalen Signaturen wird nicht unterstützt.");
+    var sig = XmlHelper.FACTORY_OASIS_VR.createSignatureValidityType();
+    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+    result.setResultMajor("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#indetermined");
+    result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported");
+    var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
+    message.setLang("en-en");
+    message.setValue("Checking digital signatures is not supported by this tool. To check signatures comprehensively, configure an online eCard validation service.");
     result.setResultMessage(message);
     sig.setSigMathOK(result);
     return sig;
@@ -80,17 +79,17 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
 
   private CertificatePathValidityType mockCertificatePathValidity()
   {
-    CertificatePathValidityType certValidity = XmlHelper.FACTORY_OASIS_VR.createCertificatePathValidityType();
-    VerificationResultType result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+    var certValidity = XmlHelper.FACTORY_OASIS_VR.createCertificatePathValidityType();
+    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
     result.setResultMajor("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#warning");
-    result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.2/resultminor/arl/notSupported");
-    InternationalStringType message = XmlHelper.FACTORY_DSS.createInternationalStringType();
-    message.setLang("de-de");
-    message.setValue("Die Prüfung der Zertifikatspfade wird nicht unterstützt.");
+    result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported");
+    var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
+    message.setLang("en-en");
+    message.setValue("Checking digital signatures is not supported by this tool. To check signatures comprehensively, configure an online eCard validation service.");
     result.setResultMessage(message);
     certValidity.setPathValiditySummary(result);
     certValidity.setCertificateIdentifier(XmlHelper.FACTORY_DSIG.createX509IssuerSerialType());
-    certValidity.getCertificateIdentifier().setX509IssuerName("unbekannt");
+    certValidity.getCertificateIdentifier().setX509IssuerName("unknown");
     certValidity.getCertificateIdentifier().setX509SerialNumber(BigInteger.ZERO);
     return certValidity;
   }

@@ -27,11 +27,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.bouncycastle.asn1.ASN1Encodable;
-import org.bouncycastle.asn1.ASN1EncodableVector;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.Attribute;
-import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
@@ -89,22 +86,22 @@ public class CmsSignedDataReader
   {
     Map<Reference, EvidenceRecord> result = new HashMap<>();
 
-    for ( SignerInformation signerInformation : cms.getSignerInfos() )
+    for ( var signerInformation : cms.getSignerInfos() )
     {
-      AttributeTable unsignedAttributes = signerInformation.getUnsignedAttributes();
+      var unsignedAttributes = signerInformation.getUnsignedAttributes();
       if (unsignedAttributes == null)
       {
         continue;
       }
-      ASN1EncodableVector all = unsignedAttributes.getAll(oid);
-      for ( int i = 0 ; i < all.size() ; i++ )
+      var all = unsignedAttributes.getAll(oid);
+      for ( var i = 0 ; i < all.size() ; i++ )
       {
-        Attribute attribute = (Attribute)all.get(i);
-        ASN1Encodable[] encodables = attribute.getAttributeValues();
-        ASN1Encodable asn1Encodable = encodables[0];
-        byte[] encodedER = asn1Encodable.toASN1Primitive().getEncoded();
-        Reference erRef = ref.newChild(ASN1Utils.sidToString(signerInformation.getSID()))
-                             .newChild(Integer.toString(i));
+        var attribute = (Attribute)all.get(i);
+        var encodables = attribute.getAttributeValues();
+        var asn1Encodable = encodables[0];
+        var encodedER = asn1Encodable.toASN1Primitive().getEncoded();
+        var erRef = ref.newChild(ASN1Utils.sidToString(signerInformation.getSID()))
+                       .newChild(Integer.toString(i));
 
         result.put(erRef, new ASN1EvidenceRecordParser().parse(encodedER));
         signerIdByReference.put(erRef, signerInformation.getSID());
@@ -123,7 +120,7 @@ public class CmsSignedDataReader
    */
   public byte[] getContentInfoProtectedByEr(Reference erRef) throws IOException
   {
-    SignerId sid = signerIdByReference.get(erRef);
+    var sid = signerIdByReference.get(erRef);
     if (sid == null)
     {
       return cms.getEncoded();
@@ -149,18 +146,19 @@ public class CmsSignedDataReader
    * @param i
    * @throws IOException
    */
+  @SuppressWarnings("PMD.NullAssignment")
   private static byte[] cmsWithout(CMSSignedData cms, SignerId sid, ASN1ObjectIdentifier oid, int i)
     throws IOException
   {
     List<SignerInformation> si = new ArrayList<>();
-    for ( SignerInformation signerInformation : cms.getSignerInfos() )
+    for ( var signerInformation : cms.getSignerInfos() )
     {
       if (signerInformation.getSID().equals(sid))
       {
-        AttributeTable at = signerInformation.getUnsignedAttributes();
-        ASN1EncodableVector all = at.getAll(oid);
+        var at = signerInformation.getUnsignedAttributes();
+        var all = at.getAll(oid);
         at = at.remove(oid);
-        for ( int k = 0 ; k < i ; k++ )
+        for ( var k = 0 ; k < i ; k++ )
         {
           at = at.add(oid, all.get(k));
         }

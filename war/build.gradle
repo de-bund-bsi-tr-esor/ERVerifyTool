@@ -1,131 +1,133 @@
-plugins {
-  id 'com.github.psxpaul.execfork' version '0.1.7'
-}
+plugins { id 'com.github.psxpaul.execfork' version '0.1.15' }
 
 apply plugin: 'distribution'
 apply plugin: 'war'
 
 ext.tomcatDir = "$project.buildDir/tomcat"
+ext.tomcatUrl = "https://archive.apache.org/dist/tomcat/tomcat-10/v10.0.23/bin"
+ext.tomcatVersion = "apache-tomcat-10.0.23"
 
 dependencies {
-  compile project(':commons')
-  compile group: 'org.apache.logging.log4j', name: 'log4j-api', version:'2.16.0'
-  compile group: 'org.apache.logging.log4j', name: 'log4j-core', version:'2.16.0'
-  compileOnly 'javax.servlet:javax.servlet-api:3.1.0'
-  runtime 'com.sun.xml.ws:jaxws-rt:2.3.0'
-  testCompile project(path: ':commons', configuration: 'testing')
-  testCompile 'javax.servlet:javax.servlet-api:3.1.0'
+    implementation project(':commons')
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:3.0.2'
+    implementation 'com.sun.xml.ws:jaxws-rt:3.0.2'
+    implementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
+    testImplementation project(path: ':commons', configuration: 'testing')
+    testImplementation 'jakarta.servlet:jakarta.servlet-api:5.0.0'
 }
 
-war.baseName = 'ErVerifyTool'
+war.archiveBaseName.set('ErVerifyTool')
 
 distributions {
-  main {
-    baseName = project.baseName
-    contents {
-      from ('src/main/assembly') {
-        expand('version': project.version)
-      }
-      from war
+    main {
+        distributionBaseName = project.baseName
+        contents {
+            from ('src/main/assembly') {
+                expand('version': project.version)
+            }
+            from war
+        }
     }
-  }
 }
 
 /*
  * Beginning of automatic integration test setup.
  *
- * The following section copies a wrapper gradle project to build/tomcat, copies the ErVerifyTool.war and
- * a test configuration to it and executes the task integrationTomcatRun of the gradle project. This will
+ * The following section copies a script to download Tomcat to build/tomcat, copies the ErVerifyTool.war and
+ * a test configuration to it and executes the task the script to deploy and run Tomcat. This will
  * launch a tomcat server with a deployed ErVerifyTool for automated integration testing.
- * The reason for this approach is, that the CATALINA_HOME/working dir values of the tomcat executor
- * plugins can not be configured and are set to the current projectDir. ErVerifyTool requires its
- * configuration to be present in CATALINA_HOME/conf/ErVerifyTool.xml, so we execute the gradle tomcat
- * plugin in a build directory to prevent source directory pollution.
  */
 
 // Prepare integration tests by copying own tomcat startup script to build dir
 task prepareIntegrationTest(type: Copy) {
-  destinationDir file(project.tomcatDir)
-  from ('src/test/gradle')
-  from (configurations.testCompile.collect { zipTree(it) }) {
-    into 'conf'
-    include 'config.xml'
-    rename 'config.xml', 'ErVerifyTool.xml'
-  }
-  from (war) {
-    rename ('.*.war', 'ErVerifyTool.war')
-  }
+    dependsOn ':commons:testJar'
+    destinationDir file(project.tomcatDir)
+    from ('src/test/scripts')
+    from (configurations.testRuntimeClasspath.collect { zipTree(it) }) {
+        into 'conf'
+        include 'config.xml'
+        rename 'config.xml', 'ErVerifyTool.xml'
+    }
+    from (war) { rename ('.*.war', 'ErVerifyTool.war') }
 }
 
-// Create gradle wrapper for tomcat startup script in build dir
-task createWrapper(type: GradleBuild) {
-  outputs.upToDateWhen {
-    file("$project.tomcatDir/gradlew").exists()
-  }
-  dependsOn prepareIntegrationTest
-  buildFile = project.tomcatDir + '/tomcat.gradle'
-  dir = project.tomcatDir
-  tasks = ['wrapper']
-}
-
-// Run tomcat for integration tests. We use ExecFork to call the gradle wrapper in
-// --no-daemon mode, because the gradle tomcat plugin pollutes some static context
-// in the gradle wrapper process, preventing re-runs of that plugin.
+// Run tomcat for integration tests. We use ExecFork to call a script to download, deploy and run tomcat
+// When tomcat is started, the integration tests can be executed
 task integrationTomcatStart(type: com.github.psxpaul.task.ExecFork) {
-  dependsOn createWrapper
-  commandLine = './gradlew'
-  args = [ '--no-daemon', '-b', 'tomcat.gradle', 'integrationTomcatRun' ]
-  workingDir = project.tomcatDir
-  stopAfter = integrationTest
-  waitForPort = 8080
-  waitForOutput = 'The Server is running at'
-  timeout = 120
+    dependsOn prepareIntegrationTest
+    dependsOn ':commons:testJar'
+    dependsOn ':war:compileTestJava'
+    dependsOn ':war:processTestResources'
+
+    workingDir = project.tomcatDir
+    commandLine = "${project.tomcatDir}/tomcat.sh"
+    args = [
+        "${project.tomcatVersion}",
+        "${project.tomcatUrl}"
+    ]
+    environment = ['CATALINA_BASE': "${project.tomcatDir}"]
+    stopAfter = integrationTest
+    waitForPort = 8080
+    waitForOutput = 'org.apache.catalina.startup.Catalina.start Server startup in'
+    timeout = 120
 }
 
 // Start tomcat for integration tests
 integrationTest.dependsOn integrationTomcatStart
 
-// Skip integration tests if requested
-[prepareIntegrationTest, createWrapper, integrationTomcatStart].each {
-  it.onlyIf { System.getProperty('skipTests') == null &&
-              System.getProperty('skipIntegrationTests') == null }
+import org.apache.tools.ant.taskdefs.condition.Os
+
+// Skip integration tests if requested or not running on Linux
+[
+    prepareIntegrationTest,
+    integrationTest,
+    integrationTomcatStart
+].each {
+    it.onlyIf {
+        Os.isFamily(Os.FAMILY_UNIX) &&
+                System.getProperty('skipTests') == null &&
+                System.getProperty('skipIntegrationTests') == null }
 }
 
 // Only start tomcat if integration tests need to run
 File itFailed = project.file("${project.buildDir}/itFailed")
 
 gradle.taskGraph.whenReady { TaskExecutionGraph taskGraph ->
-  integrationTomcatStart.inputs.files(integrationTest.inputs.files, itFailed)
-  integrationTomcatStart.outputs.dirs(integrationTest.outputs.files.filter {
-    it.getName() != 'jacoco-integration.exec'
-  })
+    integrationTomcatStart.inputs.files(integrationTest.inputs.files, itFailed)
+    integrationTomcatStart.outputs.dirs(integrationTest.outputs.files.filter {
+        it.getName() != 'jacoco-integration.exec'
+    })
 }
 
 gradle.taskGraph.afterTask { Task task, TaskState state ->
-  if (task.name == 'integrationTest' && state.failure) {
-    itFailed << new Date()
-  }
+    if (task.name == 'integrationTest' && state.failure) {
+        itFailed << new Date()
+    }
 }
 
 // Clean tomcat build dir
-clean {
-  delete project.tomcatDir
-}
+clean { delete project.tomcatDir }
 
 assemble.dependsOn installDist
 
-artifacts {
-  archives distZip
+artifacts { archives distZip }
+
+
+// Create additional jar with sources
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
+
 publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.web
-      artifactId project.baseName
-      artifact distZip {
-        classifier = 'bin'
-      }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.web
+            artifactId project.baseName
+            artifact sourcesJar
+            artifact distZip { classifier = 'bin' }
+        }
     }
-  }
 }

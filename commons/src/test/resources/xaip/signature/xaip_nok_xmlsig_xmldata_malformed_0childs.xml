@@ -1,0 +1,24 @@
+<esor:XAIP xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip/1.2" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#">
+	<esor:packageHeader packageID="x373f4e59-69dc-4a77-9ea6-75e91a74bfc4">
+		<esor:AOID>xaip_nok_xmlsig_xmldata_malformed_0childs</esor:AOID>
+		<esor:versionManifest VersionID="V001">
+			<esor:preservationInfo>
+				<esor:retentionPeriod>2100-01-01+01:00</esor:retentionPeriod>
+			</esor:preservationInfo>
+			<esor:submissionInfo>
+				<esor:clientID>remotebean_esor12</esor:clientID>
+				<esor:submissionTime>2017-02-10T14:43:26.898+01:00</esor:submissionTime>
+			</esor:submissionInfo>
+			<esor:packageInfoUnit packageUnitID="_idx_DO-01_V001">
+				<esor:protectedObjectPointer>DO-01</esor:protectedObjectPointer>
+				<esor:protectedObjectPointer>CR-01</esor:protectedObjectPointer>
+			</esor:packageInfoUnit>
+		</esor:versionManifest>
+		<ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+	</esor:packageHeader>
+	<esor:dataObjectsSection>
+		<esor:dataObject dataObjectID="DO-01">
+			<esor:xmlData></esor:xmlData>
+		</esor:dataObject>
+	</esor:dataObjectsSection>
+</esor:XAIP>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xaip:XAIP XAIPVersion="1.3.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xaip="http://www.bsi.bund.de/tr-esor/xaip" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xmlers="urn:ietf:params:xml:ns:ers">
+    <xaip:packageHeader packageID="x2a52eb65-e345-4fdc-a803-888693ec3468">
+        <xaip:AOID>d9984bc6-2268-4d93-a9ea-50b20dfde3db</xaip:AOID>
+        <xaip:versionManifest VersionID="V001">
+            <xaip:preservationInfo>
+                <xaip:retentionPeriod>2035-02-18Z</xaip:retentionPeriod>
+            </xaip:preservationInfo>
+            <xaip:submissionInfo>
+                <xaip:clientID>remotebean_esor13</xaip:clientID>
+                <xaip:submissionTime>2022-08-18T08:11:04.658Z</xaip:submissionTime>
+            </xaip:submissionInfo>
+            <xaip:packageInfoUnit packageUnitID="_idxVersions_V001">
+                <xaip:protectedObjectPointer>HundesteuerAnmeldung_V001</xaip:protectedObjectPointer>
+                <xaip:protectedObjectPointer>Hundename_V001</xaip:protectedObjectPointer>
+                <xaip:protectedObjectPointer>fileSize_V001</xaip:protectedObjectPointer>
+                <xaip:protectedObjectPointer>V001</xaip:protectedObjectPointer>
+            </xaip:packageInfoUnit>
+        </xaip:versionManifest>
+        <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+    </xaip:packageHeader>
+    <xaip:metaDataSection>
+        <xaip:metaDataObject metaDataID="fileSize_V001" relatedObjects="HundesteuerAnmeldung_V001">
+            <xaip:xmlMetaData>
+                <ns:filesize xmlns:ns="http://example/filesize.xsd">11</ns:filesize>
+            </xaip:xmlMetaData>
+        </xaip:metaDataObject>
+        <xaip:metaDataObject metaDataID="Hundename_V001" relatedObjects="HundesteuerAnmeldung_V001">
+            <xaip:binaryMetaData MimeType="application/octet-stream">
+                VGVzdERhdGE=
+            </xaip:binaryMetaData>
+        </xaip:metaDataObject>
+    </xaip:metaDataSection>
+    <xaip:dataObjectsSection>
+        <xaip:dataObject dataObjectID="HundesteuerAnmeldung_V001">
+            <xaip:binaryData>bXkgbmFtZSBpcwo=</xaip:binaryData>
+            <xaip:checkSum>
+                <xaip:checkSumAlgorithm>SHA-256</xaip:checkSumAlgorithm>
+                <xaip:checkSum>060A7B57B73CA0EC313B407A631B25567DC17A99ED43045F04D04AD44450F2A6</xaip:checkSum>
+            </xaip:checkSum>
+        </xaip:dataObject>
+    </xaip:dataObjectsSection>
+</xaip:XAIP>

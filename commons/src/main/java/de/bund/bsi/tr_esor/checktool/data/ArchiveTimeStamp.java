@@ -85,12 +85,12 @@ public class ArchiveTimeStamp implements ASN1Encodable
   public ArchiveTimeStamp(ASN1Encodable obj) throws IOException
   {
 
-    int indexOfLastElementInDef = -1; // number of element in definition, some may be skipped
-    for ( ASN1Encodable element : Checked.cast(obj).to(ASN1Sequence.class) )
+    var indexOfLastElementInDef = -1; // number of element in definition, some may be skipped
+    for ( var element : Checked.cast(obj).to(ASN1Sequence.class) )
     {
       if (element instanceof DERTaggedObject)
       {
-        DERTaggedObject tagged = (DERTaggedObject)element;
+        var tagged = (DERTaggedObject)element;
         switch (tagged.getTagNo())
         {
           case TAGNO_DIGESTALGO:
@@ -102,7 +102,7 @@ public class ArchiveTimeStamp implements ASN1Encodable
             parseAttributes(tagged);
             break;
           case TAGNO_REDUCEDHASHTREE:
-            final int defPosRHT = 3;
+            final var defPosRHT = 3;
             indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, defPosRHT);
             parseReducedHashtree(tagged);
             break;
@@ -112,7 +112,7 @@ public class ArchiveTimeStamp implements ASN1Encodable
       }
       else
       {
-        final int defPosTsp = 4;
+        final var defPosTsp = 4;
         indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, defPosTsp);
         timeStampToken = parseTimeStampToken((ASN1Sequence)element);
       }
@@ -133,7 +133,7 @@ public class ArchiveTimeStamp implements ASN1Encodable
     Objects.requireNonNull(e, "ASN.1 encoded time stamp token");
     try
     {
-      byte[] encodedBytes = e.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+      var encodedBytes = e.toASN1Primitive().getEncoded(ASN1Encoding.DER);
       Objects.requireNonNull(e, "encoded bytes");
       return new TimeStampToken(new CMSSignedData(encodedBytes));
     }
@@ -146,8 +146,8 @@ public class ArchiveTimeStamp implements ASN1Encodable
   private void parseReducedHashtree(ASN1TaggedObject t) throws IOException
   {
     reducedHashtree = new ArrayList<>();
-    ASN1Sequence stt = ASN1Sequence.getInstance(t, false);
-    for ( ASN1Encodable et : stt )
+    var stt = ASN1Sequence.getInstance(t, false);
+    for ( var et : stt )
     {
       reducedHashtree.add(new PartialHashtree((ASN1Object)et));
     }
@@ -243,9 +243,9 @@ public class ArchiveTimeStamp implements ASN1Encodable
    */
   public byte[] getContentOfTimeStampField() throws IOException
   {
-    try (ASN1InputStream ais = new ASN1InputStream(timeStampToken.getEncoded()))
+    try (var ais = new ASN1InputStream(timeStampToken.getEncoded()))
     {
-      ContentInfo info = ContentInfo.getInstance(ais.readObject());
+      var info = ContentInfo.getInstance(ais.readObject());
       return info.getEncoded(ASN1Encoding.DER);
     }
   }
@@ -269,31 +269,31 @@ public class ArchiveTimeStamp implements ASN1Encodable
   @Override
   public ASN1Primitive toASN1Primitive()
   {
-    ASN1EncodableVector ats = new ASN1EncodableVector();
+    var ats = new ASN1EncodableVector();
     if (digestAlgo != null)
     {
-      DERTaggedObject t = new DERTaggedObject(false, TAGNO_DIGESTALGO, digestAlgo);
+      var t = new DERTaggedObject(false, TAGNO_DIGESTALGO, digestAlgo);
       ats.add(t);
     }
     if (attributes != null)
     {
-      DERTaggedObject t = new DERTaggedObject(false, TAGNO_ATTRIBUTES, attributes);
+      var t = new DERTaggedObject(false, TAGNO_ATTRIBUTES, attributes);
       ats.add(t);
     }
     if (reducedHashtree != null)
     {
-      ASN1EncodableVector va = new ASN1EncodableVector();
-      for ( int i = 0 ; i < reducedHashtree.size() ; i++ )
+      var va = new ASN1EncodableVector();
+      for ( var i = 0 ; i < reducedHashtree.size() ; i++ )
       {
         va.add(reducedHashtree.get(i).toASN1Primitive());
       }
-      DERTaggedObject t = new DERTaggedObject(false, TAGNO_REDUCEDHASHTREE, new DERSequence(va));
+      var t = new DERTaggedObject(false, TAGNO_REDUCEDHASHTREE, new DERSequence(va));
       ats.add(t);
     }
 
-    try (ASN1InputStream ais = new ASN1InputStream(timeStampToken.getEncoded()))
+    try (var ais = new ASN1InputStream(timeStampToken.getEncoded()))
     {
-      ContentInfo info = ContentInfo.getInstance(ais.readObject());
+      var info = ContentInfo.getInstance(ais.readObject());
       ats.add(info);
       return new DERSequence(ats);
     }

@@ -27,16 +27,15 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
+
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
 
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStamp;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.hash.HashCreator;
 import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
-
 
 
 /**
@@ -57,6 +56,8 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   private final FormatOkReport formatOk;
 
+  private boolean checkForAdditionalHashes;
+
   /**
    * Key is algorithm OID, value is secured date of latest usage.
    */
@@ -70,44 +71,36 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   /**
    * Creates instance for a successfully parsed evidence record.
-   *
-   * @param reference
-   * @param objectToValidate
-   * @param profileName
-   * @param returnVerificationReport
-   * @throws ReflectiveOperationException
    */
+  @SuppressWarnings("PMD.NullAssignment")
   public ErValidationContext(Reference reference,
                              EvidenceRecord objectToValidate,
                              String profileName,
-                             ReturnVerificationReport returnVerificationReport)
+                             ReturnVerificationReport returnVerificationReport,
+                             boolean checkForAdditionalHashes)
     throws ReflectiveOperationException
   {
     super(reference, objectToValidate, profileName, returnVerificationReport);
     this.hashCreator = ValidatorFactory.getInstance().getHashCreator();
     this.parseFailMessage = null;
     this.formatOk = new FormatOkReport(reference);
+    this.checkForAdditionalHashes = checkForAdditionalHashes;
   }
 
   /**
    * Creates instance in case the evidence record cannot be parsed.
-   *
-   * @param reference
-   * @param parseFailMessage
-   * @param profileName
    */
+  @SuppressWarnings("PMD.NullAssignment")
   public ErValidationContext(Reference reference, String parseFailMessage, String profileName)
   {
     super(reference, null, profileName, null);
     this.parseFailMessage = parseFailMessage;
     this.formatOk = null;
+    this.checkForAdditionalHashes = false;
   }
 
   /**
    * Adds protected data so that the hash is checked in the evidence record.
-   *
-   * @param key
-   * @param data
    */
   public void addProtectedData(Reference key, byte[] data)
   {
@@ -122,14 +115,11 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
   /**
    * Returns a map of digests of all protected data by a unique ID which can be used to report a missing
    * digest.
-   *
-   * @param digestOID
-   * @throws NoSuchAlgorithmException
    */
   public Map<Reference, byte[]> getRequiredDigests(String digestOID) throws NoSuchAlgorithmException
   {
     Map<Reference, byte[]> result = new HashMap<>();
-    for ( Entry<Reference, byte[]> entry : protectedDataByID.entrySet() )
+    for ( var entry : protectedDataByID.entrySet() )
     {
       result.put(entry.getKey(), hashCreator.calculateHash(entry.getValue(), digestOID));
     }
@@ -137,10 +127,18 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
   }
 
   /**
+   * Returns true if for this context, the completeness of the required digests should be checked. This means
+   * that if this returns true, only the digests returned by getRequiredDigests() should be present in an
+   * evidence record. If false is returned, other hashes in the evidence record are acceptable.
+   */
+  public boolean isCheckForAdditionalHashes()
+  {
+    return checkForAdditionalHashes;
+  }
+
+  /**
    * Returns <code>true</code> if a specified digest has been declared in the algorithms section of the
    * evidence record.
-   *
-   * @param digestOID
    */
   public boolean isAlgorithmDeclared(String digestOID)
   {
@@ -149,8 +147,6 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   /**
    * Returns a time after which the given algorithm is definitely not used in the ER.
-   *
-   * @param algoOID
    */
   public Date getLatestPossibleUsage(String algoOID)
   {
@@ -159,13 +155,10 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   /**
    * Specifies a time after which the given algorithm is definitely not used in the ER.
-   *
-   * @param algoOID
-   * @param possibleUsage
    */
   public void setPossibleAlgorithmUsage(String algoOID, Date possibleUsage)
   {
-    Date known = latestUsage.get(algoOID);
+    var known = latestUsage.get(algoOID);
     if (known == null || known.after(possibleUsage))
     {
       latestUsage.put(algoOID, possibleUsage);
@@ -176,6 +169,12 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
   public Class<EvidenceRecord> getTargetClass()
   {
     return EvidenceRecord.class;
+  }
+
+  @Override
+  public boolean isRestrictedValidation()
+  {
+    return false;
   }
 
   /**
@@ -198,8 +197,6 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   /**
    * Defines which digest algorithms are specified in the evidence record.
-   *
-   * @param declaredDigestOIDs
    */
   public void setDeclaredDigestOIDs(List<String> declaredDigestOIDs)
   {
@@ -208,8 +205,6 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   /**
    * Returns the time when the given ATS was secured.
-   *
-   * @param ats
    */
   public Date getSecureDate(ArchiveTimeStamp ats)
   {
@@ -218,12 +213,26 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   /**
    * Sets the given secure time for the given ATS.
-   *
-   * @param ats
-   * @param date
    */
   public void setSecureData(ArchiveTimeStamp ats, Date date)
   {
     securedByDate.put(ats, date);
+  }
+
+  /**
+   * Disable the additional hash check
+   */
+  public void disableCheckForAdditionalHashes()
+  {
+    this.checkForAdditionalHashes = false;
+  }
+
+  /**
+   * Returns the single protected data (which is required in an edge case of the online timestamp validation)
+   * or null otherwise
+   */
+  public byte[] singleProtectedData()
+  {
+    return protectedDataByID.size() == 1 ? protectedDataByID.values().iterator().next() : null;
   }
 }

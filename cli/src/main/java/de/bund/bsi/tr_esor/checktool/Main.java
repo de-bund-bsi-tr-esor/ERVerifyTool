@@ -22,18 +22,17 @@
 package de.bund.bsi.tr_esor.checktool;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.file.Paths;
 import java.util.Optional;
 
-import javax.xml.bind.JAXBException;
-import javax.xml.ws.Endpoint;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
-import org.apache.commons.cli.CommandLine;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.ws.Endpoint;
+
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
@@ -47,9 +46,12 @@ import de.bund.bsi.tr_esor.checktool.entry.FileParameterFinder;
 import de.bund.bsi.tr_esor.checktool.entry.InputPreparator;
 import de.bund.bsi.tr_esor.checktool.entry.ParameterFinder;
 import de.bund.bsi.tr_esor.checktool.entry.S4VerifyOnly;
+import de.bund.bsi.tr_esor.checktool.out.OutputFolder;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationScheduler;
+import de.bund.bsi.tr_esor.checktool.xml.ComprehensiveXaipSerializer;
+import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -82,11 +84,11 @@ public final class Main
    */
   public static void main(String[] args)
   {
-    Options options = getCliOptions();
+    var options = getCliOptions();
 
     try
     {
-      CommandLine cmd = new DefaultParser().parse(options, args);
+      var cmd = new DefaultParser().parse(options, args);
       if (cmd.hasOption("conf"))
       {
         if (!loadConfig(cmd.getOptionValue("conf")))
@@ -112,11 +114,10 @@ public final class Main
     catch (ParseException e)
     {
       err.println(e.getMessage());
-      LOG.error("cannot understand parameters", e);
-      return;
+      LOG.error("cannot understand parameters: {}", e.getMessage());
     }
 
-    HelpFormatter formatter = new HelpFormatter();
+    var formatter = new HelpFormatter();
     formatter.printHelp("java -jar ErVerifyTool-cli*.jar", options);
   }
 
@@ -127,7 +128,7 @@ public final class Main
   {
     if (profileName != null && !Configurator.getInstance().isProfileSupported(profileName))
     {
-      StringBuilder msg = new StringBuilder("Unsupported profile specified. Supported values are:");
+      var msg = new StringBuilder("Unsupported profile specified. Supported values are:");
       Configurator.getInstance().getSupportedProfileNames().forEach(n -> msg.append("\n  ").append(n));
       throw new ParseException(msg.toString());
     }
@@ -162,7 +163,7 @@ public final class Main
    */
   private static Options getCliOptions()
   {
-    Options options = new Options();
+    var options = new Options();
     options.addOption("server",
                       false,
                       "start as web service (optional, ignores all other parameters except -conf and -port)");
@@ -177,7 +178,7 @@ public final class Main
                       true,
                       "path to the file containing the secured data (optional if parameter -er is specified), "
                             + "if omitted, the ER will be validated in itself but result will be indetermined at best.");
-    options.addOption("out", true, "path to the output file (optional, default is standard out)");
+    options.addOption("out", true, "path to the output folder (optional, default is standard out)");
     options.addOption("h", false, "print this message and exit");
     return options;
   }
@@ -197,18 +198,15 @@ public final class Main
       ParameterFinder params = new FileParameterFinder(Optional.ofNullable(data).map(Paths::get).orElse(null),
                                                        Optional.ofNullable(er).map(Paths::get).orElse(null),
                                                        profile);
-      InputPreparator prep = new InputPreparator(params);
-      VerificationReportType report = ValidationScheduler.validate(prep.getValidations());
+      var prep = new InputPreparator(params);
+      var report = ValidationScheduler.validate(prep.getValidations());
       if (destination == null)
       {
         XmlHelper.serialize(report, out);
       }
       else
       {
-        try (OutputStream outs = new FileOutputStream(destination))
-        {
-          XmlHelper.serialize(report, outs);
-        }
+        dump(destination, report, params.getXaip(), params.getSerializer());
       }
     }
 
@@ -219,13 +217,25 @@ public final class Main
     }
   }
 
+  private static void dump(String destination,
+                           VerificationReportType report,
+                           XAIPType xaip,
+                           XaipSerializer serializer)
+    throws IOException, JAXBException
+  {
+    var outputFolder = new OutputFolder(Paths.get(destination));
+    var dumpHandler = new DumpHandler(outputFolder);
+    dumpHandler.dumpXaip(xaip, (ComprehensiveXaipSerializer)serializer);
+    dumpHandler.dumpReport(report);
+  }
+
 
   /**
    * Runs the web service.
    */
   private static void runServer(String port)
   {
-    String address = "http://localhost:" + port + "/ErVerifyTool/esor12/exec";
+    var address = "http://localhost:" + port + "/ErVerifyTool/esor13/exec";
     out.println("Running S4 webservice on address " + address);
     Endpoint.publish(address, new S4VerifyOnly());
   }

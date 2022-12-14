@@ -21,10 +21,10 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers;
 
-import java.util.Map;
 
 import org.bouncycastle.tsp.TimeStampToken;
 
+import de.bund.bsi.ecard.api._1.ECard_Service;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator;
 import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
 
@@ -39,17 +39,28 @@ public class BasisErsECardTimeStampValidator extends ECardTimeStampValidator
 {
 
   /**
-   * @see ECardTimeStampValidator#ECardTimeStampValidator(Map)
+   * @see ECardTimeStampValidator#ECardTimeStampValidator()
    */
-  public BasisErsECardTimeStampValidator(Map<String, String> parameters)
+  public BasisErsECardTimeStampValidator()
   {
-    super(parameters);
+    super();
   }
+
+  /**
+   * @see ECardTimeStampValidator#ECardTimeStampValidator(ECard_Service)
+   */
+  public BasisErsECardTimeStampValidator(ECard_Service eCardWebService)
+  {
+    super(eCardWebService);
+  }
+
 
   @Override
   protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
   {
-    ContentInfoChecker contentInfoChecker = new ContentInfoChecker(formatOk);
+    super.checkUnsignedAttributes(ts, formatOk);
+    var contentInfoChecker = new ContentInfoChecker(formatOk);
     contentInfoChecker.checkContentInfo(formatOk.getReference(), ts.toCMSSignedData().toASN1Structure());
+
   }
 }

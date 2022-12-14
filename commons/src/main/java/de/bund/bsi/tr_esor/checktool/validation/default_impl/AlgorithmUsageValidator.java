@@ -21,10 +21,7 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
-import java.util.Optional;
-
 import de.bund.bsi.tr_esor.checktool.conf.AlgorithmCatalog;
-import de.bund.bsi.tr_esor.checktool.conf.AlgorithmCatalog.SupportedHashAlgorithm;
 import de.bund.bsi.tr_esor.checktool.data.AlgorithmUsage;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
@@ -48,6 +45,7 @@ public class AlgorithmUsageValidator
    */
   protected enum ValidationResultMinor
   {
+
     /** Not suitable. */
     HASH_ALGORITHM_NOT_SUITABLE("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/algorithm#hashAlgorithmNotSuitable"),
     /** Unknown. */
@@ -74,9 +72,9 @@ public class AlgorithmUsageValidator
   @Override
   public AlgorithmValidityReport validate(Reference ref, AlgorithmUsage toCheck)
   {
-    AlgorithmValidityReport report = new AlgorithmValidityReport(ref, toCheck.getOid());
-    ValidationResultMinor minor = check(toCheck);
-    ValidationResultMajor major = minor == ValidationResultMinor.NULL ? ValidationResultMajor.VALID
+    var report = new AlgorithmValidityReport(ref, toCheck.getOid());
+    var minor = check(toCheck);
+    var major = minor == ValidationResultMinor.NULL ? ValidationResultMajor.VALID
       : ValidationResultMajor.INVALID;
     report.updateCodes(major, minor.toString(), MinorPriority.IMPORTANT, null, ref);
     return report;
@@ -91,13 +89,12 @@ public class AlgorithmUsageValidator
    */
   protected ValidationResultMinor check(AlgorithmUsage algo)
   {
-    AlgorithmCatalog catalog = AlgorithmCatalog.getInstance();
-    Optional<SupportedHashAlgorithm> supportedAlgo = catalog.getSupportedAlgorithms()
-                                                            .values()
-                                                            .stream()
-                                                            .filter(al -> al.getOids()
-                                                                            .contains(algo.getOid()))
-                                                            .findAny();
+    var catalog = AlgorithmCatalog.getInstance();
+    var supportedAlgo = catalog.getSupportedAlgorithms()
+                               .values()
+                               .stream()
+                               .filter(al -> al.getOids().contains(algo.getOid()))
+                               .findAny();
     if (supportedAlgo.isPresent())
     {
       return supportedAlgo.get().getValidity().getTime() > algo.getValidationDate().getTime()

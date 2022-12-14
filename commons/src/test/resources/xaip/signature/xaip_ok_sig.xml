@@ -1,0 +1,828 @@
+<esor:XAIP xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip" XAIPVersion="1.3.0">
+    <esor:packageHeader packageID="x54f05428-0b10-4030-bf35-479b54c6a55a">
+        <esor:AOID>xaip_ok_sig</esor:AOID>
+        <esor:versionManifest VersionID="V001">
+            <esor:preservationInfo>
+                <esor:retentionPeriod>2100-01-01+01:00
+                </esor:retentionPeriod>
+            </esor:preservationInfo>
+            <esor:submissionInfo>
+                <esor:clientID>remotebean_esor12</esor:clientID>
+                <esor:submissionTime>2020-01-13T16:13:05.490+02:00
+                </esor:submissionTime>
+            </esor:submissionInfo>
+            <esor:packageInfoUnit packageUnitID="_idx_DO-01_V001">
+                <esor:protectedObjectPointer>DO-01
+                </esor:protectedObjectPointer>
+                <esor:protectedObjectPointer>DO-02
+                </esor:protectedObjectPointer>
+                <esor:unprotectedObjectPointer>detachedSignature
+                </esor:unprotectedObjectPointer>
+            </esor:packageInfoUnit>
+            <esor:packageInfoUnit packageUnitID="_idx_detachedSignature_report_V001">
+                <esor:protectedObjectPointer>detachedSignature_report
+                </esor:protectedObjectPointer>
+            </esor:packageInfoUnit>
+        </esor:versionManifest>
+        <ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                   Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"></ds:CanonicalizationMethod>
+    </esor:packageHeader>
+    <esor:dataObjectsSection>
+        <esor:dataObject dataObjectID="DO-01">
+            <esor:binaryData>Y29tcGxpYW5jZSB0ZXN0IGRhdGE=</esor:binaryData>
+            <esor:checkSum>
+                <esor:checkSumAlgorithm>SHA-256</esor:checkSumAlgorithm>
+                <esor:checkSum>CB34C207AC846BDCE5A9E1B90B5A65842C022A1642066AF27AC083185C3D20A1
+                </esor:checkSum>
+            </esor:checkSum>
+        </esor:dataObject>
+        <esor:dataObject dataObjectID="DO-02">
+            <esor:binaryData>Y29udGVudCBvZiBkYXRhIG9iamVjdCBETy0wMg==
+            </esor:binaryData>
+            <esor:checkSum>
+                <esor:checkSumAlgorithm>SHA-256</esor:checkSumAlgorithm>
+                <esor:checkSum>9CE2D7D350F9418407439F0CA11DCC12AB9F7CDB15F9ECC5ECA935482602B872
+                </esor:checkSum>
+            </esor:checkSum>
+        </esor:dataObject>
+    </esor:dataObjectsSection>
+    <esor:credentialsSection>
+        <esor:credential credentialID="detachedSignature"
+                         relatedObjects="DO-01">
+            <dss:SignatureObject xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
+                <dss:Base64Signature Type="urn:ietf:rfc:3369">
+                    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
+                </dss:Base64Signature>
+            </dss:SignatureObject>
+        </esor:credential>
+        <esor:credential credentialID="detachedSignature_report"
+                         relatedObjects="detachedSignature">
+            <VerificationReport xmlns="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#"
+                                xmlns:ns2="urn:oasis:names:tc:dss:1.0:core:schema"
+                                xmlns:ns3="http://www.w3.org/2000/09/xmldsig#"
+                                xmlns:ns4="http://uri.etsi.org/01903/v1.3.2#"
+            >
+                <ns2:VerificationTimeInfo>
+                    <ns2:VerificationTime>2021-01-07T16:15:56.457+01:00</ns2:VerificationTime>
+                </ns2:VerificationTimeInfo>
+                <VerifierIdentity>
+                    <Other>
+                        <ns2:ClaimedIdentity>
+                            <ns2:Name>ECardService Version 10.2.0-SNAPSHOT(2021-01-06 11:09:06)</ns2:Name>
+                        </ns2:ClaimedIdentity>
+                    </Other>
+                </VerifierIdentity>
+                <IndividualReport>
+                    <SignedObjectIdentifier>
+                        <ns3:SignatureValue>
+                            kKRU+W93qjkMJbekudQ9AqKS+mKN5n6e7IYPXCwqjfhI+tAHLkqkZJmGglx3DFLd7BrR1sB6EqgSN12ttFCLdWC8dsABfgGkFu4RbX2RtoPNPlOF1p/NcpvHv7xnqOscM8hhNpWfcz0ry+NJxfmaCpApsJhTOsE11lsHq3Gt7NlR+/oVadesllp6WPQrhKJPVWIJndUqWTwLgQTEL2K5eSU0kQWtHl+wUO25zKHdU40Tz/m+0AjXLpy5WzJNU8Lprp/r/LpJe1UpFrQ5xmu6Y6Z3idD8Eg8qkdk900Crake0p1cbDvrYjvCq7TVXjfe9lu3TfI28jJWUhtgv/qWiaw==
+                        </ns3:SignatureValue>
+                    </SignedObjectIdentifier>
+                    <ns2:Result>
+                        <ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:Success</ns2:ResultMajor>
+                        <ns2:ResultMinor>urn:oasis:names:tc:dss:1.0:resultminor:valid:signature:OnAllDocuments
+                        </ns2:ResultMinor>
+                    </ns2:Result>
+                    <Details>
+                        <DetailedSignatureReport>
+                            <FormatOK>
+                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                            </FormatOK>
+                            <Properties>
+                                <SignedProperties>
+                                    <SignedSignatureProperties>
+                                        <ns4:SigningTime>2021-01-07T16:14:54.000+01:00</ns4:SigningTime>
+                                        <ns4:SigningCertificate>
+                                            <ns4:Cert>
+                                                <ns4:CertDigest>
+                                                    <ns3:DigestMethod
+                                                            Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                                                    <ns3:DigestValue>NiF2fK6IdUtFkeHU0n570Eto0qp9ZsFrFfER0nov21Q=
+                                                    </ns3:DigestValue>
+                                                </ns4:CertDigest>
+                                                <ns4:IssuerSerial>
+                                                    <ns3:X509IssuerName>CN=dgnservice CA 9:PN,O=DGN Deutsches
+                                                        Gesundheitsnetz Service GmbH,C=DE
+                                                    </ns3:X509IssuerName>
+                                                    <ns3:X509SerialNumber>136760</ns3:X509SerialNumber>
+                                                </ns4:IssuerSerial>
+                                            </ns4:Cert>
+                                        </ns4:SigningCertificate>
+                                    </SignedSignatureProperties>
+                                    <SignedDataObjectProperties/>
+                                </SignedProperties>
+                                <UnsignedProperties/>
+                            </Properties>
+                            <SignatureOK>
+                                <SigMathOK>
+                                    <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                </SigMathOK>
+                                <SignatureAlgorithm>
+                                    <Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</Algorithm>
+                                    <Suitability>
+                                        <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                    </Suitability>
+                                </SignatureAlgorithm>
+                            </SignatureOK>
+                            <CertificatePathValidity>
+                                <PathValiditySummary>
+                                    <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                    <ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+                                </PathValiditySummary>
+                                <CertificateIdentifier>
+                                    <ns3:X509IssuerName>CN=dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz Service
+                                        GmbH,C=DE
+                                    </ns3:X509IssuerName>
+                                    <ns3:X509SerialNumber>136760</ns3:X509SerialNumber>
+                                </CertificateIdentifier>
+                                <PathValidityDetail>
+                                    <CertificateValidity>
+                                        <CertificateIdentifier>
+                                            <ns3:X509IssuerName>CN=dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz
+                                                Service GmbH,C=DE
+                                            </ns3:X509IssuerName>
+                                            <ns3:X509SerialNumber>136760</ns3:X509SerialNumber>
+                                        </CertificateIdentifier>
+                                        <Subject>CN=Tobias Marcus
+                                            Nickel,2.5.4.5=#130e3135303030303030303535313732,C=DE
+                                        </Subject>
+                                        <ChainingOK>
+                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                        </ChainingOK>
+                                        <ValidityPeriodOK>
+                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                        </ValidityPeriodOK>
+                                        <ExtensionsOK>
+                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                        </ExtensionsOK>
+                                        <CertificateValue>
+                                            MIIE3zCCA8egAwIBAgIDAhY4MA0GCSqGSIb3DQEBDQUAMF8xCzAJBgNVBAYTAkRFMTMwMQYDVQQKDCpER04gRGV1dHNjaGVzIEdlc3VuZGhlaXRzbmV0eiBTZXJ2aWNlIEdtYkgxGzAZBgNVBAMMEmRnbnNlcnZpY2UgQ0EgOTpQTjAeFw0xNzEyMTExMzQ5MDVaFw0yMjEyMTExMzQ5MDVaMEUxCzAJBgNVBAYTAkRFMRcwFQYDVQQFEw4xNTAwMDAwMDA1NTE3MjEdMBsGA1UEAwwUVG9iaWFzIE1hcmN1cyBOaWNrZWwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDCsUzTHM97XAy+DA6uVYO+2yhKHKDPoN9apBXkewlSxj/sec8Ra/LYa9OseoDT3oQ8JxuNL2Qt83a2U/BJkP4P8ZhpuYZAHYfrcg81BzIF+y/LoFZNyGtHy65JNK5xmgbIygYv8q9G/Vn3YbdXJ/HQTm7qQi5pzkYA9g+ec/CGKYEJLzixc94EUiE2dRDCAMd6Ap1uTOoIvBYqXxgKEOhbwPQj1Q/hP/QLvMyKo17PiCkjjlPQuMMSeGqP5HhAll3LYuFxRnLnQYVF/tJ4StLMhQ8Q58tl7tGFb0zzdf+Rc5Z1ZZM0jwotjjbfr8YCYh1d4Ar6CPZ1eIc+N+HeRkw9AgMBAAGjggG8MIIBuDAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFAPGD+au1MahVei/tVzsN0guo2RzMIGVBggrBgEFBQcBAQSBiDCBhTBNBggrBgEFBQcwAoZBaHR0cDovL3d3dy5kZ25zZXJ2aWNlLmRlL3RydXN0Y2VudGVyL3B1YmxpYy9kZ25zZXJ2aWNlL2luZGV4Lmh0bWwwNAYIKwYBBQUHMAGGKGh0dHA6Ly9xb2NzcC1kZ24uZGduc2VydmljZS5kZTo4MDgwL29jc3AwagYDVR0gBGMwYTBfBgwrBgEEAfsrAgEEAgEwTzBNBggrBgEFBQcCARZBaHR0cDovL3d3dy5kZ25zZXJ2aWNlLmRlL3RydXN0Y2VudGVyL3B1YmxpYy9kZ25zZXJ2aWNlL2luZGV4Lmh0bWwwHQYDVR0OBBYEFJYQCWQkf68lhI3K82kRjFMRJgDPMA4GA1UdDwEB/wQEAwIGQDA3BggrBgEFBQcBAwQrMCkwCAYGBACORgEBMAgGBgQAjkYBBDATBgYEAI5GAQYwCQYHBACORgEGATAbBgkrBgEEAcBtAwUEDjAMBgorBgEEAcBtAwUBMA0GCSqGSIb3DQEBDQUAA4IBAQA/nihHeitDiIGgMqTWRJo75F1xhKeGk4ultOMTQK24kr3TUX2PHzFjD7ztNAC5GKxRETNxukCqMlIUyC0mwtQ/fEknU4Q1lGNpOQL/ZwcQlUnYYBJo6APo873ud7nIw3hHCsHAsFzzDLXKNoFtJWTExQtb8fYHiluNAHyOHXOB0hYLrBOq1Oi8RJ1CAOz6FBpFcgT6fFNp2Yyxyfi7YdAmJ8RnNXrOzkiSnn+Qvgot5i/IiaziyRyXSOvXbREijhkrlnQHhZQcejgSz8A1EYv9Tu21gAkadHn3q0BZdR57eD95NfqoQYlDYXRfl6K4oQ4nv6wOIl7IwhQP+OcmLR8h
+                                        </CertificateValue>
+                                        <CertificateContent>
+                                            <Version>3</Version>
+                                            <SerialNumber>136760</SerialNumber>
+                                            <SignatureAlgorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
+                                            </SignatureAlgorithm>
+                                            <Issuer>CN=dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz Service
+                                                GmbH,C=DE
+                                            </Issuer>
+                                            <ValidityPeriod>
+                                                <NotBefore>2017-12-11T14:49:05.000+01:00</NotBefore>
+                                                <NotAfter>2022-12-11T14:49:05.000+01:00</NotAfter>
+                                            </ValidityPeriod>
+                                            <Subject>CN=Tobias Marcus
+                                                Nickel,2.5.4.5=#130e3135303030303030303535313732,C=DE
+                                            </Subject>
+                                        </CertificateContent>
+                                        <SignatureOK>
+                                            <SigMathOK>
+                                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                            </SigMathOK>
+                                            <SignatureAlgorithm>
+                                                <Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512</Algorithm>
+                                                <Suitability>
+                                                    <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                                </Suitability>
+                                            </SignatureAlgorithm>
+                                        </SignatureOK>
+                                        <CertificateStatus>
+                                            <CertStatusOK>
+                                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                            </CertStatusOK>
+                                            <RevocationEvidence>
+                                                <OCSPValidity>
+                                                    <OCSPIdentifier>
+                                                        <ns4:ResponderID>
+                                                            <ns4:ByKey>Fe1Zi5GVdiGaIbZppf6kizTdSjk=</ns4:ByKey>
+                                                        </ns4:ResponderID>
+                                                        <ns4:ProducedAt>2021-01-07T16:15:43.000+01:00</ns4:ProducedAt>
+                                                    </OCSPIdentifier>
+                                                    <OCSPValue>
+                                                        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
+                                                    </OCSPValue>
+                                                    <OCSPContent>
+                                                        <Version>1</Version>
+                                                        <ResponderID>15ED598B919576219A21B669A5FEA48B34DD4A39
+                                                        </ResponderID>
+                                                        <producedAt>2021-01-07T16:15:43.000+01:00</producedAt>
+                                                        <Responses>
+                                                            <SingleResponse>
+                                                                <CertID>
+                                                                    <HashAlgorithm>1.3.14.3.2.26</HashAlgorithm>
+                                                                    <IssuerNameHash>
+                                                                        4FF45C04889A8258EC008DB2AF7BD671B9FFFBCE
+                                                                    </IssuerNameHash>
+                                                                    <IssuerKeyHash>
+                                                                        03C60FE6AED4C6A155E8BFB55CEC37482EA36473
+                                                                    </IssuerKeyHash>
+                                                                    <SerialNumber>136760</SerialNumber>
+                                                                </CertID>
+                                                                <CertStatus>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:certstatus:good
+                                                                    </ResultMajor>
+                                                                </CertStatus>
+                                                                <ThisUpdate>2021-01-07T16:15:43.000+01:00</ThisUpdate>
+                                                            </SingleResponse>
+                                                        </Responses>
+                                                    </OCSPContent>
+                                                    <SignatureOK>
+                                                        <SigMathOK>
+                                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid
+                                                            </ResultMajor>
+                                                        </SigMathOK>
+                                                        <SignatureAlgorithm>
+                                                            <Algorithm>
+                                                                http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1
+                                                            </Algorithm>
+                                                            <Suitability>
+                                                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                </ResultMajor>
+                                                            </Suitability>
+                                                        </SignatureAlgorithm>
+                                                    </SignatureOK>
+                                                    <CertificatePathValidity>
+                                                        <PathValiditySummary>
+                                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid
+                                                            </ResultMajor>
+                                                            <ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl
+                                                            </ResultMessage>
+                                                        </PathValiditySummary>
+                                                        <CertificateIdentifier>
+                                                            <ns3:X509IssuerName>CN=dgnservice qCA 12:PN,O=DGN Deutsches
+                                                                Gesundheitsnetz Service GmbH,C=DE
+                                                            </ns3:X509IssuerName>
+                                                            <ns3:X509SerialNumber>2050427384605209863
+                                                            </ns3:X509SerialNumber>
+                                                        </CertificateIdentifier>
+                                                        <PathValidityDetail>
+                                                            <CertificateValidity>
+                                                                <CertificateIdentifier>
+                                                                    <ns3:X509IssuerName>CN=dgnservice qCA 12:PN,O=DGN
+                                                                        Deutsches Gesundheitsnetz Service GmbH,C=DE
+                                                                    </ns3:X509IssuerName>
+                                                                    <ns3:X509SerialNumber>2050427384605209863
+                                                                    </ns3:X509SerialNumber>
+                                                                </CertificateIdentifier>
+                                                                <Subject>CN=dgnservice qOCSP 23:PN,O=DGN Deutsches
+                                                                    Gesundheitsnetz Service GmbH,C=DE
+                                                                </Subject>
+                                                                <ChainingOK>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                    </ResultMajor>
+                                                                </ChainingOK>
+                                                                <ValidityPeriodOK>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                    </ResultMajor>
+                                                                </ValidityPeriodOK>
+                                                                <ExtensionsOK>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                    </ResultMajor>
+                                                                </ExtensionsOK>
+                                                                <CertificateValue>
+                                                                    MIIFRzCCA/ugAwIBAgIIHHSU17kgdQcwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEFAKIDAgEgMGExCzAJBgNVBAYTAkRFMTMwMQYDVQQKDCpER04gRGV1dHNjaGVzIEdlc3VuZGhlaXRzbmV0eiBTZXJ2aWNlIEdtYkgxHTAbBgNVBAMMFGRnbnNlcnZpY2UgcUNBIDEyOlBOMB4XDTE5MDYxNDExMzczNVoXDTM3MDMzMTExMDAwMFowYzELMAkGA1UEBhMCREUxMzAxBgNVBAoMKkRHTiBEZXV0c2NoZXMgR2VzdW5kaGVpdHNuZXR6IFNlcnZpY2UgR21iSDEfMB0GA1UEAwwWZGduc2VydmljZSBxT0NTUCAyMzpQTjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKzoBHqfX+0C+jJuxAkuLNJZbiiaNNxprxL15m4H0A2/dySID4NMVGdUB+ccaIte5AxZKLY+0WzFkmqPvOOu1ru4d88EQeK8c4XzBlhtMWTiyjVWjSssdh4Ab4cE0TYLJEiQD7klH77drh0mruz1McTNPRRBBPnYOWbY+iiZdS5e0peNNCJq4vrtZeYUZJCOPcw29Z/AwYep/RyjxiJrIkhasF1YdHefWAee8Ze9QsIN+ckOcY50JB1Ej04Zu0BBrKK9TGLoqQy6hArY374zbLqkP2fODJY8r4IUt7uBVPsIhRYmcQuVyR0ZGTTGdPnVzUldKsQ3AZpg2k3QWiMz/MMCAwEAAaOCAZcwggGTMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUwBDENNmzE75/TOlQusL8dOsHNfEwgZUGCCsGAQUFBwEBBIGIMIGFME0GCCsGAQUFBzAChkFodHRwOi8vd3d3LmRnbnNlcnZpY2UuZGUvdHJ1c3RjZW50ZXIvcHVibGljL2RnbnNlcnZpY2UvaW5kZXguaHRtbDA0BggrBgEFBQcwAYYoaHR0cDovL3FvY3NwLWRnbi5kZ25zZXJ2aWNlLmRlOjgwODAvb2NzcDBpBgNVHSAEYjBgMF4GCysGAQQB+ysCAQcBME8wTQYIKwYBBQUHAgEWQWh0dHA6Ly93d3cuZGduc2VydmljZS5kZS90cnVzdGNlbnRlci9wdWJsaWMvZGduc2VydmljZS9pbmRleC5odG1sMBMGA1UdJQQMMAoGCCsGAQUFBwMJMB0GA1UdDgQWBBQV7VmLkZV2IZohtmml/qSLNN1KOTAOBgNVHQ8BAf8EBAMCBkAwGwYJKwYBBAHAbQMFBA4wDAYKKwYBBAHAbQMFATBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAQUAoRwwGgYJKoZIhvcNAQEIMA0GCWCGSAFlAwQCAQUAogMCASADggEBAJux0lMg2G829iclAe46lAGExQWL8XdiJ01J75Vz4YfA6WWs+nhS1eCi2iVCuRshEPg6Ggq3CKqAfUp+cyjT8iVZrfmgQrMsGOTbiCb2oh84TVLveUkD0Xz3Z0PHO+sEKgNu2t9Aw+lFCD0l86qLqdk8AvzllYH6aVHxoQo+OQyhFeUJRghv1n/v/kohQvdZ5vB0VaWQKSuvqlYKJ6IstV6pPw5jS2r/wji3SRsutePStagJLdltq3dFLWMJzN+Ji91ZP2KV1hd8XDC+jd7f1fGlb+Tgo8oS8+oraVdlUQ+3xANX6RbZmnmHgrxKc7jUyIWuUIOkYAopZLXl3AcE9hs=
+                                                                </CertificateValue>
+                                                                <CertificateContent>
+                                                                    <Version>3</Version>
+                                                                    <SerialNumber>2050427384605209863</SerialNumber>
+                                                                    <SignatureAlgorithm>
+                                                                        http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1
+                                                                    </SignatureAlgorithm>
+                                                                    <Issuer>CN=dgnservice qCA 12:PN,O=DGN Deutsches
+                                                                        Gesundheitsnetz Service GmbH,C=DE
+                                                                    </Issuer>
+                                                                    <ValidityPeriod>
+                                                                        <NotBefore>2019-06-14T13:37:35.000+02:00
+                                                                        </NotBefore>
+                                                                        <NotAfter>2037-03-31T13:00:00.000+02:00
+                                                                        </NotAfter>
+                                                                    </ValidityPeriod>
+                                                                    <Subject>CN=dgnservice qOCSP 23:PN,O=DGN Deutsches
+                                                                        Gesundheitsnetz Service GmbH,C=DE
+                                                                    </Subject>
+                                                                </CertificateContent>
+                                                                <SignatureOK>
+                                                                    <SigMathOK>
+                                                                        <ResultMajor>
+                                                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                        </ResultMajor>
+                                                                    </SigMathOK>
+                                                                    <SignatureAlgorithm>
+                                                                        <Algorithm>
+                                                                            http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1
+                                                                        </Algorithm>
+                                                                        <Suitability>
+                                                                            <ResultMajor>
+                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                            </ResultMajor>
+                                                                        </Suitability>
+                                                                    </SignatureAlgorithm>
+                                                                </SignatureOK>
+                                                                <CertificateStatus>
+                                                                    <CertStatusOK>
+                                                                        <ResultMajor>
+                                                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                        </ResultMajor>
+                                                                    </CertStatusOK>
+                                                                    <RevocationEvidence>
+                                                                        <OCSPValidity>
+                                                                            <OCSPIdentifier>
+                                                                                <ns4:ResponderID>
+                                                                                    <ns4:ByKey>
+                                                                                        Fe1Zi5GVdiGaIbZppf6kizTdSjk=
+                                                                                    </ns4:ByKey>
+                                                                                </ns4:ResponderID>
+                                                                                <ns4:ProducedAt>
+                                                                                    2021-01-07T16:15:44.000+01:00
+                                                                                </ns4:ProducedAt>
+                                                                            </OCSPIdentifier>
+                                                                            <OCSPValue>
+                                                                                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
+                                                                            </OCSPValue>
+                                                                            <OCSPContent>
+                                                                                <Version>1</Version>
+                                                                                <ResponderID>
+                                                                                    15ED598B919576219A21B669A5FEA48B34DD4A39
+                                                                                </ResponderID>
+                                                                                <producedAt>
+                                                                                    2021-01-07T16:15:44.000+01:00
+                                                                                </producedAt>
+                                                                                <Responses>
+                                                                                    <SingleResponse>
+                                                                                        <CertID>
+                                                                                            <HashAlgorithm>
+                                                                                                1.3.14.3.2.26
+                                                                                            </HashAlgorithm>
+                                                                                            <IssuerNameHash>
+                                                                                                FACFA6E4B6ABFE7080913D31DE78F17C843F4D00
+                                                                                            </IssuerNameHash>
+                                                                                            <IssuerKeyHash>
+                                                                                                C010C434D9B313BE7F4CE950BAC2FC74EB0735F1
+                                                                                            </IssuerKeyHash>
+                                                                                            <SerialNumber>
+                                                                                                2050427384605209863
+                                                                                            </SerialNumber>
+                                                                                        </CertID>
+                                                                                        <CertStatus>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:certstatus:good
+                                                                                            </ResultMajor>
+                                                                                        </CertStatus>
+                                                                                        <ThisUpdate>
+                                                                                            2021-01-07T16:15:44.000+01:00
+                                                                                        </ThisUpdate>
+                                                                                    </SingleResponse>
+                                                                                </Responses>
+                                                                            </OCSPContent>
+                                                                            <SignatureOK>
+                                                                                <SigMathOK>
+                                                                                    <ResultMajor>
+                                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                    </ResultMajor>
+                                                                                </SigMathOK>
+                                                                                <SignatureAlgorithm>
+                                                                                    <Algorithm>
+                                                                                        http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1
+                                                                                    </Algorithm>
+                                                                                    <Suitability>
+                                                                                        <ResultMajor>
+                                                                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                        </ResultMajor>
+                                                                                    </Suitability>
+                                                                                </SignatureAlgorithm>
+                                                                            </SignatureOK>
+                                                                            <CertificatePathValidity>
+                                                                                <PathValiditySummary>
+                                                                                    <ResultMajor>
+                                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                    </ResultMajor>
+                                                                                    <ResultMessage xml:lang="EN">
+                                                                                        cert_as_trusted_anchor_by_tsl
+                                                                                    </ResultMessage>
+                                                                                </PathValiditySummary>
+                                                                                <CertificateIdentifier>
+                                                                                    <ns3:X509IssuerName>CN=dgnservice
+                                                                                        qCA 12:PN,O=DGN Deutsches
+                                                                                        Gesundheitsnetz Service
+                                                                                        GmbH,C=DE
+                                                                                    </ns3:X509IssuerName>
+                                                                                    <ns3:X509SerialNumber>
+                                                                                        2050427384605209863
+                                                                                    </ns3:X509SerialNumber>
+                                                                                </CertificateIdentifier>
+                                                                                <PathValidityDetail>
+                                                                                    <CertificateValidity>
+                                                                                        <CertificateIdentifier>
+                                                                                            <ns3:X509IssuerName>
+                                                                                                CN=dgnservice qCA
+                                                                                                12:PN,O=DGN Deutsches
+                                                                                                Gesundheitsnetz Service
+                                                                                                GmbH,C=DE
+                                                                                            </ns3:X509IssuerName>
+                                                                                            <ns3:X509SerialNumber>
+                                                                                                2050427384605209863
+                                                                                            </ns3:X509SerialNumber>
+                                                                                        </CertificateIdentifier>
+                                                                                        <Subject>CN=dgnservice qOCSP
+                                                                                            23:PN,O=DGN Deutsches
+                                                                                            Gesundheitsnetz Service
+                                                                                            GmbH,C=DE
+                                                                                        </Subject>
+                                                                                        <ChainingOK>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                            </ResultMajor>
+                                                                                        </ChainingOK>
+                                                                                        <ValidityPeriodOK>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                            </ResultMajor>
+                                                                                        </ValidityPeriodOK>
+                                                                                        <ExtensionsOK>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                            </ResultMajor>
+                                                                                        </ExtensionsOK>
+                                                                                        <CertificateValue>
+                                                                                            MIIFRzCCA/ugAwIBAgIIHHSU17kgdQcwQQYJKoZIhvcNAQEKMDSgDzANBglghkgBZQMEAgEFAKEcMBoGCSqGSIb3DQEBCDANBglghkgBZQMEAgEFAKIDAgEgMGExCzAJBgNVBAYTAkRFMTMwMQYDVQQKDCpER04gRGV1dHNjaGVzIEdlc3VuZGhlaXRzbmV0eiBTZXJ2aWNlIEdtYkgxHTAbBgNVBAMMFGRnbnNlcnZpY2UgcUNBIDEyOlBOMB4XDTE5MDYxNDExMzczNVoXDTM3MDMzMTExMDAwMFowYzELMAkGA1UEBhMCREUxMzAxBgNVBAoMKkRHTiBEZXV0c2NoZXMgR2VzdW5kaGVpdHNuZXR6IFNlcnZpY2UgR21iSDEfMB0GA1UEAwwWZGduc2VydmljZSBxT0NTUCAyMzpQTjCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAKzoBHqfX+0C+jJuxAkuLNJZbiiaNNxprxL15m4H0A2/dySID4NMVGdUB+ccaIte5AxZKLY+0WzFkmqPvOOu1ru4d88EQeK8c4XzBlhtMWTiyjVWjSssdh4Ab4cE0TYLJEiQD7klH77drh0mruz1McTNPRRBBPnYOWbY+iiZdS5e0peNNCJq4vrtZeYUZJCOPcw29Z/AwYep/RyjxiJrIkhasF1YdHefWAee8Ze9QsIN+ckOcY50JB1Ej04Zu0BBrKK9TGLoqQy6hArY374zbLqkP2fODJY8r4IUt7uBVPsIhRYmcQuVyR0ZGTTGdPnVzUldKsQ3AZpg2k3QWiMz/MMCAwEAAaOCAZcwggGTMAwGA1UdEwEB/wQCMAAwHwYDVR0jBBgwFoAUwBDENNmzE75/TOlQusL8dOsHNfEwgZUGCCsGAQUFBwEBBIGIMIGFME0GCCsGAQUFBzAChkFodHRwOi8vd3d3LmRnbnNlcnZpY2UuZGUvdHJ1c3RjZW50ZXIvcHVibGljL2RnbnNlcnZpY2UvaW5kZXguaHRtbDA0BggrBgEFBQcwAYYoaHR0cDovL3FvY3NwLWRnbi5kZ25zZXJ2aWNlLmRlOjgwODAvb2NzcDBpBgNVHSAEYjBgMF4GCysGAQQB+ysCAQcBME8wTQYIKwYBBQUHAgEWQWh0dHA6Ly93d3cuZGduc2VydmljZS5kZS90cnVzdGNlbnRlci9wdWJsaWMvZGduc2VydmljZS9pbmRleC5odG1sMBMGA1UdJQQMMAoGCCsGAQUFBwMJMB0GA1UdDgQWBBQV7VmLkZV2IZohtmml/qSLNN1KOTAOBgNVHQ8BAf8EBAMCBkAwGwYJKwYBBAHAbQMFBA4wDAYKKwYBBAHAbQMFATBBBgkqhkiG9w0BAQowNKAPMA0GCWCGSAFlAwQCAQUAoRwwGgYJKoZIhvcNAQEIMA0GCWCGSAFlAwQCAQUAogMCASADggEBAJux0lMg2G829iclAe46lAGExQWL8XdiJ01J75Vz4YfA6WWs+nhS1eCi2iVCuRshEPg6Ggq3CKqAfUp+cyjT8iVZrfmgQrMsGOTbiCb2oh84TVLveUkD0Xz3Z0PHO+sEKgNu2t9Aw+lFCD0l86qLqdk8AvzllYH6aVHxoQo+OQyhFeUJRghv1n/v/kohQvdZ5vB0VaWQKSuvqlYKJ6IstV6pPw5jS2r/wji3SRsutePStagJLdltq3dFLWMJzN+Ji91ZP2KV1hd8XDC+jd7f1fGlb+Tgo8oS8+oraVdlUQ+3xANX6RbZmnmHgrxKc7jUyIWuUIOkYAopZLXl3AcE9hs=
+                                                                                        </CertificateValue>
+                                                                                        <CertificateContent>
+                                                                                            <Version>3</Version>
+                                                                                            <SerialNumber>
+                                                                                                2050427384605209863
+                                                                                            </SerialNumber>
+                                                                                            <SignatureAlgorithm>
+                                                                                                http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1
+                                                                                            </SignatureAlgorithm>
+                                                                                            <Issuer>CN=dgnservice qCA
+                                                                                                12:PN,O=DGN Deutsches
+                                                                                                Gesundheitsnetz Service
+                                                                                                GmbH,C=DE
+                                                                                            </Issuer>
+                                                                                            <ValidityPeriod>
+                                                                                                <NotBefore>
+                                                                                                    2019-06-14T13:37:35.000+02:00
+                                                                                                </NotBefore>
+                                                                                                <NotAfter>
+                                                                                                    2037-03-31T13:00:00.000+02:00
+                                                                                                </NotAfter>
+                                                                                            </ValidityPeriod>
+                                                                                            <Subject>CN=dgnservice qOCSP
+                                                                                                23:PN,O=DGN Deutsches
+                                                                                                Gesundheitsnetz Service
+                                                                                                GmbH,C=DE
+                                                                                            </Subject>
+                                                                                        </CertificateContent>
+                                                                                        <SignatureOK>
+                                                                                            <SigMathOK>
+                                                                                                <ResultMajor>
+                                                                                                    urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                                </ResultMajor>
+                                                                                            </SigMathOK>
+                                                                                            <SignatureAlgorithm>
+                                                                                                <Algorithm>
+                                                                                                    http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1
+                                                                                                </Algorithm>
+                                                                                                <Suitability>
+                                                                                                    <ResultMajor>
+                                                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                                    </ResultMajor>
+                                                                                                </Suitability>
+                                                                                            </SignatureAlgorithm>
+                                                                                        </SignatureOK>
+                                                                                        <CertificateStatus>
+                                                                                            <CertStatusOK>
+                                                                                                <ResultMajor>
+                                                                                                    urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                                </ResultMajor>
+                                                                                                <ResultMessage
+                                                                                                        xml:lang="EN">
+                                                                                                    not_validated_because_of_policy
+                                                                                                </ResultMessage>
+                                                                                            </CertStatusOK>
+                                                                                        </CertificateStatus>
+                                                                                    </CertificateValidity>
+                                                                                    <CertificateValidity>
+                                                                                        <CertificateIdentifier>
+                                                                                            <ns3:X509IssuerName>
+                                                                                                CN=dgnservice Root
+                                                                                                11:PN,O=DGN Deutsches
+                                                                                                Gesundheitsnetz Service
+                                                                                                GmbH,C=DE
+                                                                                            </ns3:X509IssuerName>
+                                                                                            <ns3:X509SerialNumber>
+                                                                                                7157130995909244096
+                                                                                            </ns3:X509SerialNumber>
+                                                                                        </CertificateIdentifier>
+                                                                                        <Subject>CN=dgnservice qCA
+                                                                                            12:PN,O=DGN Deutsches
+                                                                                            Gesundheitsnetz Service
+                                                                                            GmbH,C=DE
+                                                                                        </Subject>
+                                                                                        <ChainingOK>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                            </ResultMajor>
+                                                                                            <ResultMessage
+                                                                                                    xml:lang="EN">
+                                                                                                cert_as_trusted_anchor_by_tsl
+                                                                                            </ResultMessage>
+                                                                                        </ChainingOK>
+                                                                                        <ValidityPeriodOK>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                            </ResultMajor>
+                                                                                        </ValidityPeriodOK>
+                                                                                        <ExtensionsOK>
+                                                                                            <ResultMajor>
+                                                                                                urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                            </ResultMajor>
+                                                                                        </ExtensionsOK>
+                                                                                        <CertificateValue>
+                                                                                            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
+                                                                                        </CertificateValue>
+                                                                                        <CertificateContent>
+                                                                                            <Version>3</Version>
+                                                                                            <SerialNumber>
+                                                                                                7157130995909244096
+                                                                                            </SerialNumber>
+                                                                                            <SignatureAlgorithm>
+                                                                                                http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1
+                                                                                            </SignatureAlgorithm>
+                                                                                            <Issuer>CN=dgnservice Root
+                                                                                                11:PN,O=DGN Deutsches
+                                                                                                Gesundheitsnetz Service
+                                                                                                GmbH,C=DE
+                                                                                            </Issuer>
+                                                                                            <ValidityPeriod>
+                                                                                                <NotBefore>
+                                                                                                    2019-06-14T13:30:16.000+02:00
+                                                                                                </NotBefore>
+                                                                                                <NotAfter>
+                                                                                                    2037-03-31T13:00:00.000+02:00
+                                                                                                </NotAfter>
+                                                                                            </ValidityPeriod>
+                                                                                            <Subject>CN=dgnservice qCA
+                                                                                                12:PN,O=DGN Deutsches
+                                                                                                Gesundheitsnetz Service
+                                                                                                GmbH,C=DE
+                                                                                            </Subject>
+                                                                                        </CertificateContent>
+                                                                                        <SignatureOK>
+                                                                                            <SigMathOK>
+                                                                                                <ResultMajor>
+                                                                                                    urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                                </ResultMajor>
+                                                                                            </SigMathOK>
+                                                                                        </SignatureOK>
+                                                                                        <CertificateStatus>
+                                                                                            <CertStatusOK>
+                                                                                                <ResultMajor>
+                                                                                                    urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                                </ResultMajor>
+                                                                                            </CertStatusOK>
+                                                                                        </CertificateStatus>
+                                                                                    </CertificateValidity>
+                                                                                    <TSLValidity>
+                                                                                        <TLReferences
+                                                                                                xmlns="http://www.governikus.de/ecard/ext"
+                                                                                                xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                                                                                xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+                                                                                                xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+                                                                                                xmlns:svr="http://uri.etsi.org/19102/v1.2.1#"
+                                                                                        >
+                                                                                            <URL>
+                                                                                                https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_709a21e602f54b156bf987b4c0f3382922750c22140338a4c37112374b916dfd
+                                                                                            </URL>
+                                                                                            <ExtensionURL>
+                                                                                                https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_2de45461ca0eb013b14c54a7dcfab18ac46a214ede44bc81cda56c1504dc011f
+                                                                                            </ExtensionURL>
+                                                                                        </TLReferences>
+                                                                                    </TSLValidity>
+                                                                                    <TrustAnchor>
+                                                                                        <ResultMajor>
+                                                                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                                        </ResultMajor>
+                                                                                        <ResultMinor>
+                                                                                            urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other
+                                                                                        </ResultMinor>
+                                                                                        <ResultMessage xml:lang="EN">
+                                                                                            cert_as_trusted_anchor_by_tsl
+                                                                                        </ResultMessage>
+                                                                                    </TrustAnchor>
+                                                                                </PathValidityDetail>
+                                                                            </CertificatePathValidity>
+                                                                        </OCSPValidity>
+                                                                    </RevocationEvidence>
+                                                                </CertificateStatus>
+                                                            </CertificateValidity>
+                                                            <CertificateValidity>
+                                                                <CertificateIdentifier>
+                                                                    <ns3:X509IssuerName>CN=dgnservice Root 11:PN,O=DGN
+                                                                        Deutsches Gesundheitsnetz Service GmbH,C=DE
+                                                                    </ns3:X509IssuerName>
+                                                                    <ns3:X509SerialNumber>7157130995909244096
+                                                                    </ns3:X509SerialNumber>
+                                                                </CertificateIdentifier>
+                                                                <Subject>CN=dgnservice qCA 12:PN,O=DGN Deutsches
+                                                                    Gesundheitsnetz Service GmbH,C=DE
+                                                                </Subject>
+                                                                <ChainingOK>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                    </ResultMajor>
+                                                                    <ResultMessage xml:lang="EN">
+                                                                        cert_as_trusted_anchor_by_tsl
+                                                                    </ResultMessage>
+                                                                </ChainingOK>
+                                                                <ValidityPeriodOK>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                    </ResultMajor>
+                                                                </ValidityPeriodOK>
+                                                                <ExtensionsOK>
+                                                                    <ResultMajor>
+                                                                        urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                    </ResultMajor>
+                                                                </ExtensionsOK>
+                                                                <CertificateValue>
+                                                                    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
+                                                                </CertificateValue>
+                                                                <CertificateContent>
+                                                                    <Version>3</Version>
+                                                                    <SerialNumber>7157130995909244096</SerialNumber>
+                                                                    <SignatureAlgorithm>
+                                                                        http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1
+                                                                    </SignatureAlgorithm>
+                                                                    <Issuer>CN=dgnservice Root 11:PN,O=DGN Deutsches
+                                                                        Gesundheitsnetz Service GmbH,C=DE
+                                                                    </Issuer>
+                                                                    <ValidityPeriod>
+                                                                        <NotBefore>2019-06-14T13:30:16.000+02:00
+                                                                        </NotBefore>
+                                                                        <NotAfter>2037-03-31T13:00:00.000+02:00
+                                                                        </NotAfter>
+                                                                    </ValidityPeriod>
+                                                                    <Subject>CN=dgnservice qCA 12:PN,O=DGN Deutsches
+                                                                        Gesundheitsnetz Service GmbH,C=DE
+                                                                    </Subject>
+                                                                </CertificateContent>
+                                                                <SignatureOK>
+                                                                    <SigMathOK>
+                                                                        <ResultMajor>
+                                                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                        </ResultMajor>
+                                                                    </SigMathOK>
+                                                                </SignatureOK>
+                                                                <CertificateStatus>
+                                                                    <CertStatusOK>
+                                                                        <ResultMajor>
+                                                                            urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                        </ResultMajor>
+                                                                    </CertStatusOK>
+                                                                </CertificateStatus>
+                                                            </CertificateValidity>
+                                                            <TSLValidity>
+                                                                <TLReferences xmlns="http://www.governikus.de/ecard/ext"
+                                                                              xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                                                              xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+                                                                              xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+                                                                              xmlns:svr="http://uri.etsi.org/19102/v1.2.1#">
+                                                                    <URL>
+                                                                        https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_709a21e602f54b156bf987b4c0f3382922750c22140338a4c37112374b916dfd
+                                                                    </URL>
+                                                                    <ExtensionURL>
+                                                                        https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_2de45461ca0eb013b14c54a7dcfab18ac46a214ede44bc81cda56c1504dc011f
+                                                                    </ExtensionURL>
+                                                                </TLReferences>
+                                                            </TSLValidity>
+                                                            <TrustAnchor>
+                                                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid
+                                                                </ResultMajor>
+                                                                <ResultMinor>
+                                                                    urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other
+                                                                </ResultMinor>
+                                                                <ResultMessage xml:lang="EN">
+                                                                    cert_as_trusted_anchor_by_tsl
+                                                                </ResultMessage>
+                                                            </TrustAnchor>
+                                                        </PathValidityDetail>
+                                                    </CertificatePathValidity>
+                                                </OCSPValidity>
+                                            </RevocationEvidence>
+                                        </CertificateStatus>
+                                    </CertificateValidity>
+                                    <CertificateValidity>
+                                        <CertificateIdentifier>
+                                            <ns3:X509IssuerName>CN=dgnservice Root 7:PN,O=DGN Deutsches Gesundheitsnetz
+                                                Service GmbH,C=DE
+                                            </ns3:X509IssuerName>
+                                            <ns3:X509SerialNumber>1133486783178384271</ns3:X509SerialNumber>
+                                        </CertificateIdentifier>
+                                        <Subject>CN=dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz Service
+                                            GmbH,C=DE
+                                        </Subject>
+                                        <ChainingOK>
+                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                            <ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+                                        </ChainingOK>
+                                        <ValidityPeriodOK>
+                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                        </ValidityPeriodOK>
+                                        <ExtensionsOK>
+                                            <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                        </ExtensionsOK>
+                                        <CertificateValue>
+                                            MIIEzDCCA7SgAwIBAgIID7r0OUzyo48wDQYJKoZIhvcNAQENBQAwYTELMAkGA1UEBhMCREUxMzAxBgNVBAoMKkRHTiBEZXV0c2NoZXMgR2VzdW5kaGVpdHNuZXR6IFNlcnZpY2UgR21iSDEdMBsGA1UEAwwUZGduc2VydmljZSBSb290IDc6UE4wHhcNMTcwNTIyMTEwNDQyWhcNMzcwMzMxMTEwMDAwWjBfMQswCQYDVQQGEwJERTEzMDEGA1UECgwqREdOIERldXRzY2hlcyBHZXN1bmRoZWl0c25ldHogU2VydmljZSBHbWJIMRswGQYDVQQDDBJkZ25zZXJ2aWNlIENBIDk6UE4wggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQCiwgoUijA1Bu5qp8EU1mNt/NovSlRm+SQwqbjTaEb5T+KKX+SZTs5yu9Bl6Jb44rsweHkd0QaPapGvRpGgC6g6Aoy+kyub5ZWBciKopf5rva/zwAxM3hGbGN83llTVxPUXsbXmwGU0DFWwERCuIXpn7Qu+E+TJ9nL0qe8HwICYgDRpe9Xg86820tkv8xN+PUecUXv9kk2yCuNZC3Wqhidr3ezMBZl3YKwZeXr1BxfW6aUGYl4HPAWhfmjq5iG9WThhpYgkiWw0w6GwRbP7zMYR0wPCzCSxrbjHgfkNlBgHRRoiJIAx+2/7HIUGo2i3yBt5LI1M9J98+BhfUKO3XDMpAgMBAAGjggGIMIIBhDASBgNVHRMBAf8ECDAGAQH/AgEAMB8GA1UdIwQYMBaAFAEMFht0ctM8FO4md7dJFFPY+4sbMIGVBggrBgEFBQcBAQSBiDCBhTBNBggrBgEFBQcwAoZBaHR0cDovL3d3dy5kZ25zZXJ2aWNlLmRlL3RydXN0Y2VudGVyL3B1YmxpYy9kZ25zZXJ2aWNlL2luZGV4Lmh0bWwwNAYIKwYBBQUHMAGGKGh0dHA6Ly9yb2NzcC1kZ24uZGduc2VydmljZS5kZTo4MDgwL29jc3AwaQYDVR0gBGIwYDBeBgsrBgEEAfsrAgEHATBPME0GCCsGAQUFBwIBFkFodHRwOi8vd3d3LmRnbnNlcnZpY2UuZGUvdHJ1c3RjZW50ZXIvcHVibGljL2RnbnNlcnZpY2UvaW5kZXguaHRtbDAdBgNVHQ4EFgQUA8YP5q7UxqFV6L+1XOw3SC6jZHMwDgYDVR0PAQH/BAQDAgKEMBsGCSsGAQQBwG0DBQQOMAwGCisGAQQBwG0DBQEwDQYJKoZIhvcNAQENBQADggEBAACdwy5JO5dSsMlKJJgjOH6DJJyTEKt9cOuu9sFB3njeqr8fQgrYV/aHeaTRFCrrymcg40CV3r4EFW8K3ZqTX8JBmg35bD50+W4gQsj0UfX7E0k5xxaFPHeP/6a1L3JsHwVg0Ni7zPB4DQFl1cWOhcEVlJarP9J4EcL3DUEGcHp4qynpj6+CHBvqSiYinmxIEyqIh5yzFNWfw9pv1P9DAhmwuKLxr9VwVPNXkPr4hJgv/8u6Ll2fbZjPAWZpj0n/Vm4pGm4bCuKdLqG5hjDXmkKyotOoJZBZ5QJ4ofPMoxtOgVV70ywqY6kObpVfAPdEczwiaUAmfddOtSZsF0NZmqk=
+                                        </CertificateValue>
+                                        <CertificateContent>
+                                            <Version>3</Version>
+                                            <SerialNumber>1133486783178384271</SerialNumber>
+                                            <SignatureAlgorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha512
+                                            </SignatureAlgorithm>
+                                            <Issuer>CN=dgnservice Root 7:PN,O=DGN Deutsches Gesundheitsnetz Service
+                                                GmbH,C=DE
+                                            </Issuer>
+                                            <ValidityPeriod>
+                                                <NotBefore>2017-05-22T13:04:42.000+02:00</NotBefore>
+                                                <NotAfter>2037-03-31T13:00:00.000+02:00</NotAfter>
+                                            </ValidityPeriod>
+                                            <Subject>CN=dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz Service
+                                                GmbH,C=DE
+                                            </Subject>
+                                        </CertificateContent>
+                                        <SignatureOK>
+                                            <SigMathOK>
+                                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                            </SigMathOK>
+                                        </SignatureOK>
+                                        <CertificateStatus>
+                                            <CertStatusOK>
+                                                <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                            </CertStatusOK>
+                                        </CertificateStatus>
+                                    </CertificateValidity>
+                                    <TSLValidity>
+                                        <TLReferences xmlns="http://www.governikus.de/ecard/ext"
+                                                      xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                                      xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+                                                      xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+                                                      xmlns:svr="http://uri.etsi.org/19102/v1.2.1#"
+                                        >
+                                            <URL>
+                                                https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_709a21e602f54b156bf987b4c0f3382922750c22140338a4c37112374b916dfd
+                                            </URL>
+                                            <ExtensionURL>
+                                                https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_2de45461ca0eb013b14c54a7dcfab18ac46a214ede44bc81cda56c1504dc011f
+                                            </ExtensionURL>
+                                        </TLReferences>
+                                    </TSLValidity>
+                                    <TrustAnchor>
+                                        <ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+                                        <ResultMinor>
+                                            urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other
+                                        </ResultMinor>
+                                        <ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+                                    </TrustAnchor>
+                                </PathValidityDetail>
+                            </CertificatePathValidity>
+                        </DetailedSignatureReport>
+                        <svr:SignatureQuality xmlns="http://www.governikus.de/ecard/ext"
+                                              xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                              xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+                                              xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+                                              xmlns:svr="http://uri.etsi.org/19102/v1.2.1#"
+                        >
+                            <svr:SignatureQualityInformation>http://www.governikus.de/signature/quality/QES_EUMS_TL
+                            </svr:SignatureQualityInformation>
+                        </svr:SignatureQuality>
+                        <ValidationDataReferences xmlns="http://www.governikus.de/ecard/ext"
+                                                  xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+                                                  xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+                                                  xmlns:iso="urn:iso:std:iso-iec:24727:tech:schema"
+                                                  xmlns:svr="http://uri.etsi.org/19102/v1.2.1#"
+                        >
+                            <Lotl>
+                                https://localhost:8443/Filemanager/rest/resources/LOTL/SHA-256_f5f51598de096cd1f3a6418bc55ca90488f3a9b75aeefd453c3fb43d842853cb
+                            </Lotl>
+                            <TrustedLists>
+                                <URL>
+                                    https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_709a21e602f54b156bf987b4c0f3382922750c22140338a4c37112374b916dfd
+                                </URL>
+                                <ExtensionURL>
+                                    https://localhost:8443/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_2de45461ca0eb013b14c54a7dcfab18ac46a214ede44bc81cda56c1504dc011f
+                                </ExtensionURL>
+                            </TrustedLists>
+                            <AlgorithmCatalogs>
+                                https://localhost:8443/Filemanager/rest/resources/ALGORITHM_CATALOG_SOGIS_PLUS/SHA-256_ad985cd7dcc689967ddf455efbaabbfedd647088d9a366f21db774d9af62959b
+                            </AlgorithmCatalogs>
+                        </ValidationDataReferences>
+                    </Details>
+                </IndividualReport>
+            </VerificationReport>
+        </esor:credential>
+    </esor:credentialsSection>
+</esor:XAIP>

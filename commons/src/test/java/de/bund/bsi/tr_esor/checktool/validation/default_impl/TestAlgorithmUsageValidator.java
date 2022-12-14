@@ -33,7 +33,6 @@ import org.junit.Test;
 
 import de.bund.bsi.tr_esor.checktool.data.AlgorithmUsage;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
-import de.bund.bsi.tr_esor.checktool.validation.report.AlgorithmValidityReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 
 
@@ -93,8 +92,8 @@ public class TestAlgorithmUsageValidator
                                 String minorEnding)
   {
     Matcher<? super String> minorMatcher = minorEnding == null ? nullValue() : endsWith(minorEnding);
-    AlgorithmUsage toCheck = AlgorithmUsage.createHashed(oid, new Date());
-    AlgorithmValidityReport report = validator.validate(new Reference("foo"), toCheck);
+    var toCheck = AlgorithmUsage.createHashed(oid, new Date());
+    var report = validator.validate(new Reference("foo"), toCheck);
     assertThat(report.getOverallResult().getResultMajor(), is(major.toString()));
     assertThat(report.getOverallResult().getResultMinor(), minorMatcher);
     assertThat(report.getFormatted().getSuitability().getResultMajor(), is(major.toString()));

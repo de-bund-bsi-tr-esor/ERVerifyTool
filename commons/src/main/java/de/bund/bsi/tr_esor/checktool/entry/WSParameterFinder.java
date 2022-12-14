@@ -24,26 +24,35 @@ package de.bund.bsi.tr_esor.checktool.entry;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.dom.DOMSource;
 
-import org.bouncycastle.cms.CMSSignedData;
-import org.w3c.dom.Element;
-
-import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
-import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
-import de.bund.bsi.tr_esor.checktool.validation.ParserFactory;
-import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import de.bund.bsi.tr_esor.xaip._1.EvidenceRecordType;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
 import oasis.names.tc.dss._1_0.core.schema.AnyType;
 import oasis.names.tc.dss._1_0.core.schema.Base64Signature;
 import oasis.names.tc.dss._1_0.core.schema.DocumentType;
 import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+
+import org.bouncycastle.cms.CMSSignedData;
+import org.w3._2000._09.xmldsig_.CanonicalizationMethodType;
+import org.w3c.dom.Element;
+
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
+import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
+import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
+import de.bund.bsi.tr_esor.checktool.parser.XaipParser;
+import de.bund.bsi.tr_esor.checktool.validation.ParserFactory;
+import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
+import de.bund.bsi.tr_esor.checktool.xml.BasicXaipSerializer;
+import de.bund.bsi.tr_esor.checktool.xml.ComprehensiveXaipSerializer;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -65,6 +74,7 @@ public class WSParameterFinder extends ParameterFinder
 {
 
   private static final String DETACHED_ER_ID = "detachedER";
+
   private static final String VR_NAMESPACE = "urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#";
 
   /**
@@ -72,11 +82,11 @@ public class WSParameterFinder extends ParameterFinder
    *
    * @param request object as parsed by the web service, i.e. contents of xs:any elements are still generic
    *          elements
-   * @throws JAXBException
    */
   public WSParameterFinder(VerifyRequest request) throws JAXBException
   {
-    setProfileName(request.getProfile());
+    super();
+    handleProfileName(request.getProfile());
     handleReturnVr(request);
     if (request.getInputDocuments() != null)
     {
@@ -97,10 +107,10 @@ public class WSParameterFinder extends ParameterFinder
 
   private void handleReturnVr(VerifyRequest request) throws JAXBException
   {
-    String contextPath = XmlHelper.FACTORY_ESOR_VR.getClass().getPackage().getName();
+    var contextPath = XmlHelper.FACTORY_ESOR_VR.getClass().getPackage().getName();
     if (request.getOptionalInputs() != null)
     {
-      for ( Object any : request.getOptionalInputs().getAny() )
+      for ( var any : request.getOptionalInputs().getAny() )
       {
         if (any instanceof ReturnVerificationReport)
         {
@@ -108,7 +118,7 @@ public class WSParameterFinder extends ParameterFinder
         }
         if (any instanceof Element)
         {
-          Element element = (Element)any;
+          var element = (Element)any;
           if (VR_NAMESPACE.equals(element.getNamespaceURI())
               && "ReturnVerificationReport".equals(element.getLocalName()))
           {
@@ -125,7 +135,7 @@ public class WSParameterFinder extends ParameterFinder
   {
     if (other != null && !other.getAny().isEmpty())
     {
-      EvidenceRecordType erXml = getErXML(other.getAny().get(0));
+      var erXml = getErXML(other.getAny().get(0));
       try
       {
         er = new ASN1EvidenceRecordParser().parse(erXml.getAsn1EvidenceRecord());
@@ -147,9 +157,9 @@ public class WSParameterFinder extends ParameterFinder
   {
     if (element instanceof Element)
     {
-      Element elem = (Element)element;
+      var elem = (Element)element;
       if ("evidenceRecord".equals(elem.getLocalName())
-          && "http://www.bsi.bund.de/tr-esor/xaip/1.2".equals(elem.getNamespaceURI()))
+          && "http://www.bsi.bund.de/tr-esor/xaip".equals(elem.getNamespaceURI()))
       {
         try
         {
@@ -176,8 +186,8 @@ public class WSParameterFinder extends ParameterFinder
     // Maybe using that field as well: request.getSignatureObject().getBase64Signature().getType()
     try (InputStream ins = new ByteArrayInputStream(base64Signature.getValue()))
     {
-      Object parsed = ParserFactory.parse(ins, getProfileName());
-      String xPath = "SignatureObject/Base64Signature/Value";
+      var parsed = ParserFactory.parse(ins, getProfileName());
+      var xPath = "SignatureObject/Base64Signature/Value";
       if (parsed instanceof CMSSignedData)
       {
         cmsDocument = (CMSSignedData)parsed;
@@ -186,7 +196,7 @@ public class WSParameterFinder extends ParameterFinder
       }
       else if (parsed instanceof XAIPType)
       {
-        Reference xr = new Reference("XAIP");
+        var xr = new Reference("XAIP");
         xr.setxPath(xPath);
         setXaipAttributes((XAIPType)parsed, xr);
       }
@@ -217,47 +227,78 @@ public class WSParameterFinder extends ParameterFinder
 
   private void handleInputDocuments(VerifyRequest request) throws JAXBException
   {
-    int numberDoc = 0;
-    for ( Object doc : request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash() )
+    var numberDoc = 0;
+    for ( var doc : request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash() )
     {
       numberDoc++;
       if (!(doc instanceof DocumentType))
       {
         throw new IllegalArgumentException("only Documents supported as input");
       }
-      DocumentType document = (DocumentType)doc;
+      var document = (DocumentType)doc;
       if (document.getInlineXML() != null) // NOPMD: searching for the one non-null element
       {
         setXaipAttributes(getXAIPXML(document.getInlineXML().getAny()),
                           createRefForDocument("XAIP", document.getID(), numberDoc, "/InlineXML"));
       }
+      else if (document.getBase64XML() != null) // NOPMD: searching for the one non-null element
+      {
+        var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(getProfileName()));
+        var parser = new XaipParser(lXaipReader);
+        parser.setInput(new ByteArrayInputStream(document.getBase64XML()));
+        try
+        {
+          var xas = parser.parse();
+          setXaipAttributes(xas.getXaip(),
+                            createRefForDocument("XAIP", document.getID(), numberDoc, "/Base64XML"));
+          serializer = xas.getSerializer();
+        }
+        catch (IOException e)
+        {
+          throw new IllegalArgumentException("cannot parse Base64XML as XAIP");
+        }
+      }
       else if (document.getBase64Data() != null) // NOPMD: searching for the one non-null element
       {
-        Reference ref = createRefForDocument("Bin" + numberDoc,
-                                             document.getID(),
-                                             numberDoc,
-                                             "/Base64Data/Value");
+        var ref = createRefForDocument("Bin" + numberDoc, document.getID(), numberDoc, "/Base64Data/Value");
         binaryDocuments.put(ref, document.getBase64Data().getValue());
       }
       else
       {
-        throw new IllegalArgumentException("only Base64Data or InlineXML is supported in a Document");
+        throw new IllegalArgumentException("only Base64Data, Base64XML or InlineXML is supported in a Document");
       }
     }
   }
 
   private XAIPType getXAIPXML(Object element) throws JAXBException
   {
-    if (element instanceof Element)
-    {
-      Element elem = (Element)element;
-      return XmlHelper.parseXaip(elem);
-    }
+    var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(getProfileName()));
+    // Usually the inlineXML object is already correctly deserialized...
     if (element instanceof JAXBElement && ((JAXBElement<?>)element).getValue() instanceof XAIPType)
     {
-      return (XAIPType)((JAXBElement<?>)element).getValue();
+      var xaip = (XAIPType)((JAXBElement<?>)element).getValue();
+      serializer = new BasicXaipSerializer(determineCanonicalizationAlgorithm(xaip), lXaipReader);
+      return xaip;
+    }
+    // If not, deserialize it now. This happens only if the VerifyRequest is directly passed to
+    // S4VerifyOnly.verify.
+    if (element instanceof Element)
+    {
+      var elem = (Element)element;
+      var xaip = XmlHelper.parseXaip(elem);
+      serializer = new ComprehensiveXaipSerializer(((Element)element).getOwnerDocument(),
+                                                   determineCanonicalizationAlgorithm(xaip), lXaipReader,
+                                                   true);
+      return xaip;
     }
     throw new IllegalArgumentException("InlineXML could not be parsed as XAIP");
+  }
+
+  private static String determineCanonicalizationAlgorithm(XAIPType xaip)
+  {
+    return Optional.ofNullable(xaip.getPackageHeader().getCanonicalizationMethod())
+                   .map(CanonicalizationMethodType::getAlgorithm)
+                   .orElse("http://www.w3.org/2001/10/xml-exc-c14n#");
   }
 
   private void setXaipAttributes(XAIPType parsed, Reference ref)
@@ -273,8 +314,8 @@ public class WSParameterFinder extends ParameterFinder
 
   private Reference createRefForDocument(String name, String docId, int numberDoc, String subPath)
   {
-    Reference result = new Reference(name);
-    String docPart = docId == null ? "Document[" + numberDoc + "]" : "Document[@id='" + docId + "']";
+    var result = new Reference(name);
+    var docPart = docId == null ? "Document[" + numberDoc + "]" : "Document[@id='" + docId + "']";
     result.setxPath("VerifyRequest/InputDocuments/" + docPart + subPath);
     return result;
   }

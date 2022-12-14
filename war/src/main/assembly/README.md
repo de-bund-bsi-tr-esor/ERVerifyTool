@@ -12,15 +12,14 @@ detailed information.
 
 In short:
 
-- Install Apache Tomcat 7, make sure  variables `\$JAVA_HOME`, `\$CATALINA_HOME`
-  and `\$CATALINA_BASE` have been set correctly.
+- Install Apache Tomcat 10 following the official installation instructions.
 - To use multiple instances with different configurations of the ER-Verify tool within the same server, a valid configuration inside the war under `WEB-Inf/classes` may be provided.
   If no configuration is packed within the .war file, the application searches in the `conf` folder of the Tomcat for a configuration named `ErVerifyTool.xml`.
 - Create a valid Log4J2 configuration XML file named `log4j2.xml` in the `conf`
   folder of Tomcat.
-- Copy the file `ErVerifyTool.war` to the `webapps`folder of Tomcat.
-- Restart Tomcat and find the application under the URL
-  `http://<host>:<port>/ErVerifyTool/`.
+- Copy the file `ErVerifyTool.war` to the `webapps` folder of your Tomcat installation. This will deploy the application.
+  Make sure it is renamed to `ErVerifyTool.war` beforehand.
+- The application is reachable at `http://<host>:<port>/ErVerifyTool/`.
 
 
 Files

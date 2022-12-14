@@ -51,7 +51,7 @@ public class BasisErsAlgorithmUsageValidator extends AlgorithmUsageValidator
   @Override
   protected ValidationResultMinor check(AlgorithmUsage algo)
   {
-    ValidationResultMinor result = super.check(algo);
+    var result = super.check(algo);
     if (result == ValidationResultMinor.NULL && algo.getUsage() == UsageType.DATA_HASHING
         && !ALLOWED_DIGESTS.contains(algo.getOid()))
     {

@@ -26,22 +26,22 @@ import static org.junit.Assert.fail;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Marshaller;
 import javax.xml.namespace.QName;
+
+import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.EvidenceRecordValidityType.ArchiveTimeStampSequence;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.EvidenceRecordValidityType.ArchiveTimeStampSequence;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
 
 
 /**
@@ -73,7 +73,7 @@ public final class TestUtils
    */
   public static ReturnVerificationReport createReturnVerificationReport(ReportDetailLevel reportDetailLevel)
   {
-    ReturnVerificationReport result = FACTORY_OASIS_VR.createReturnVerificationReport();
+    var result = FACTORY_OASIS_VR.createReturnVerificationReport();
     result.setReportDetailLevel(reportDetailLevel == null ? ReportDetailLevel.ALL_DETAILS.toString()
       : reportDetailLevel.toString());
     return result;
@@ -87,17 +87,10 @@ public final class TestUtils
    */
   public static byte[] decodeTestResource(String testResource)
   {
-    try (ByteArrayOutputStream baos = new ByteArrayOutputStream();
-      InputStream erStream = TestUtils.class.getResourceAsStream(testResource))
+    try (var erStream = TestUtils.class.getResourceAsStream(testResource))
     {
-      byte[] buf = new byte[1024];
-      int readbytes;
-      while ((readbytes = erStream.read(buf)) != -1)
-      {
-        baos.write(buf, 0, readbytes);
-      }
       return Base64.getDecoder()
-                   .decode(new String(baos.toByteArray(), StandardCharsets.UTF_8).replace("\n", ""));
+                   .decode(new String(erStream.readAllBytes(), StandardCharsets.UTF_8).replace("\n", ""));
     }
     catch (IOException e)
     {
@@ -116,9 +109,9 @@ public final class TestUtils
    */
   public static String toString(Object data, String contextPath) throws JAXBException, IOException
   {
-    JAXBContext ctx = JAXBContext.newInstance(contextPath);
-    Marshaller m = ctx.createMarshaller();
-    try (ByteArrayOutputStream outs = new ByteArrayOutputStream())
+    var ctx = JAXBContext.newInstance(contextPath);
+    var m = ctx.createMarshaller();
+    try (var outs = new ByteArrayOutputStream())
     {
       m.marshal(data, outs);
       return new String(outs.toByteArray(), StandardCharsets.UTF_8);
@@ -159,7 +152,7 @@ public final class TestUtils
    */
   public static void loadConfig(String resourcePath) throws Exception
   {
-    try (InputStream ins = TestUtils.class.getResourceAsStream(resourcePath))
+    try (var ins = TestUtils.class.getResourceAsStream(resourcePath))
     {
       Configurator.getInstance().load(ins);
     }

@@ -49,10 +49,12 @@ public class ArchiveTimeStampChain extends ArrayList<ArchiveTimeStamp> implement
    */
   public ArchiveTimeStampChain(ASN1Encodable element) throws IOException
   {
+    super();
+
     if (element instanceof ASN1Sequence)
     {
-      ASN1Sequence chain = (ASN1Sequence)element;
-      for ( ASN1Encodable ats : chain )
+      var chain = (ASN1Sequence)element;
+      for ( var ats : chain )
       {
         add(new ArchiveTimeStamp(ats));
       }
@@ -76,7 +78,7 @@ public class ArchiveTimeStampChain extends ArrayList<ArchiveTimeStamp> implement
   @Override
   public ASN1Primitive toASN1Primitive()
   {
-    ASN1EncodableVector atsc = new ASN1EncodableVector();
+    var atsc = new ASN1EncodableVector();
     forEach(atsc::add);
     return new DERSequence(atsc);
   }

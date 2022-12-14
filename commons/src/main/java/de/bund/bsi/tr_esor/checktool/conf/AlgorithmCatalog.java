@@ -31,15 +31,14 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -70,21 +69,21 @@ public final class AlgorithmCatalog
   @SuppressWarnings("unchecked")
   private AlgorithmCatalog()
   {
-    SimpleDateFormat dateParser = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT);
+    var dateParser = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT, Locale.GERMANY);
     dateParser.setTimeZone(TimeZone.getDefault());
     try
     {
-      for ( Entry<String, Object> catalogEntry : jsonToMap().entrySet() )
+      for ( var catalogEntry : jsonToMap().entrySet() )
       {
-        Map<String, Object> values = (Map<String, Object>)catalogEntry.getValue();
+        var values = (Map<String, Object>)catalogEntry.getValue();
         Map<String, String> parameters = null;
-        Date validity = dateParser.parse(values.get("validity").toString());
+        var validity = dateParser.parse(values.get("validity").toString());
         if (values.containsKey("parameter"))
         {
           parameters = (Map<String, String>)values.get("parameter");
         }
-        List<Map<String, String>> oids = (List<Map<String, String>>)values.get("oids");
-        List<String> usedOids = oids.stream().map(om -> om.get("oid")).collect(Collectors.toList());
+        var oids = (List<Map<String, String>>)values.get("oids");
+        var usedOids = oids.stream().map(om -> om.get("oid")).collect(Collectors.toList());
         supportedAlgorithms.put(catalogEntry.getKey(),
                                 new SupportedHashAlgorithm(validity, parameters, usedOids));
       }
@@ -107,15 +106,14 @@ public final class AlgorithmCatalog
   @SuppressWarnings("unchecked")
   private Map<String, Object> jsonToMap() throws ScriptException, IOException
   {
-    ScriptEngine engine = new ScriptEngineManager().getEngineByName("javascript");
-    try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-                                                                          this.getClass()
-                                                                              .getResourceAsStream("/algorithms.json"),
-                                                                          StandardCharsets.UTF_8)))
+    try (var reader = new BufferedReader(new InputStreamReader(
+                                                               this.getClass()
+                                                                   .getResourceAsStream("/algorithms.json"),
+                                                               StandardCharsets.UTF_8)))
     {
-      String fileContent = reader.lines().collect(Collectors.joining("\n"));
-      String script = "Java.asJSONCompatible(" + fileContent + ")";
-      return (Map<String, Object>)engine.eval(script);
+      var fileContent = reader.lines().collect(Collectors.joining("\n"));
+      var jsonObject = new JSONObject(fileContent);
+      return jsonObject.toMap();
     }
   }
 

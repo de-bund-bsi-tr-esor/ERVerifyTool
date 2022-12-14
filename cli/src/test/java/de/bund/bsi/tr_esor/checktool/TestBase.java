@@ -21,10 +21,7 @@
  */
 package de.bund.bsi.tr_esor.checktool;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -33,7 +30,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
@@ -42,7 +38,7 @@ import java.util.regex.Pattern;
  *
  * @author TT
  */
-public class TestBase
+public class TestBase extends FileOutputChecker
 {
 
   /**
@@ -54,64 +50,56 @@ public class TestBase
   /**
    * Calls the command line interface and returns output.
    *
-   * @param args
    * @return output from application
-   * @throws IOException
    */
   protected static String callMain(String... args) throws IOException
   {
-    try (ByteArrayOutputStream out = new ByteArrayOutputStream();
-      PrintStream pout = new PrintStream(out, true, "UTF-8"))
+    try (var out = new ByteArrayOutputStream(); var pout = new PrintStream(out, true, "UTF-8"))
     {
       Main.out = pout;
       Main.err = pout;
       Main.main(args);
-      return new String(out.toByteArray(), StandardCharsets.UTF_8);
+      return out.toString(StandardCharsets.UTF_8);
     }
   }
 
   /**
    * Fails test if first major code in report is not as expected.
-   *
-   * @param report
-   * @param expectedCode
    */
   protected void assertFirstMajor(String report, String expectedCode)
   {
-    Pattern p = Pattern.compile("<([a-zA-Z]\\w*:)?ResultMajor( [^>]*)?>([^>]*)<");
-    Matcher m = p.matcher(report);
-    assertTrue(m.find());
-    assertThat("first major code", m.group(3), containsString(expectedCode));
+    var p = Pattern.compile("<([a-zA-Z]\\w*:)?ResultMajor( [^>]*)?>([^>]*)<");
+    var m = p.matcher(report);
+    assertThat(m.find()).isTrue();
+    assertThat(m.group(3)).endsWith(expectedCode);
   }
 
   /**
    * Just makes sure that a certain element occurs n times in the report.
    *
-   * @param report
    * @param name name of element
    * @param expected number of element of that name
    */
   protected void assertNumberElements(String report, String name, int expected)
   {
-    Pattern p = Pattern.compile("<([a-zA-Z]\\w*:)?" + name + "( [^>]*)?>(.+?)</([a-zA-Z]\\w*:)?" + name + ">",
-                                Pattern.DOTALL);
-    Matcher m = p.matcher(report);
-    for ( int i = 0 ; i < expected ; i++ )
+    var p = Pattern.compile("<([a-zA-Z]\\w*:)?" + name + "( [^>]*)?>(.+?)</([a-zA-Z]\\w*:)?" + name + ">",
+                            Pattern.DOTALL);
+    var m = p.matcher(report);
+    for ( var i = 0 ; i < expected ; i++ )
     {
-      assertTrue(i + "th occurrence of tag " + name, m.find());
+      assertThat(m.find()).isTrue();
     }
-    assertFalse("too many occurrences of tag " + name, m.find());
+    assertThat(m.find()).isFalse();
   }
 
   /**
    * Provides a temporary file with test data.
    *
    * @param path resource with base64 encoded data
-   * @throws IOException
    */
   protected File createDecodedTempFile(String path) throws IOException
   {
-    File result = File.createTempFile("testOutput", ".bin");
+    var result = File.createTempFile("testOutput", ".bin");
     result.deleteOnExit();
     try (OutputStream outs = new FileOutputStream(result))
     {

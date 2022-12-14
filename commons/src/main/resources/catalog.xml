@@ -2,8 +2,8 @@
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
 	<system systemId="http://ws.openecard.org/schema/xmldsig-core-schema.xsd"
 		uri="xmldsig-core-schema.xsd" />
-	<system systemId="http://ws.openecard.org/schema/XAdES-1-3-2.xsd"
-		uri="XAdES-1-3-2.xsd" />
+	<system systemId="http://uri.etsi.org/01903/v1.3.2"
+		uri="XAdES01903v132-201601.xsd" />
 	<system systemId="http://ws.openecard.org/schema/xml-ers-rfc6283.xsd"
 		uri="xml-ers-rfc6283.xsd" />
 	<system systemId="http://ws.openecard.org/schema/oasis-dss-core-schema-v1.0-os.xsd"
@@ -14,8 +14,8 @@
 		uri="oasis-dssx-1.0-profiles-verification-report-cs1.xsd" />
 	<system systemId="http://ws.openecard.org/schema/saml-schema-assertion-2.0.xsd"
 		uri="saml-schema-assertion-2.0.xsd" />
-	<system systemId="http://www.bsi.bund.de/SharedDocs/Download/tr-esor/xaip/1_2/tr-esor-xaip-v1_2_xsd"
-		uri="tr-esor-xaip-v1_2.xsd" />
+	<system systemId="http://www.bsi.bund.de/SharedDocs/Download/tr-esor/xaip/1_2/tr-esor-xaip-v1_3_xsd"
+		uri="tr-esor-xaip-v1.3.xsd" />
 	<!-- Note that wsimport fails when using this catalog due to lots of messages of type
 	     "[ERROR] 'AttributeStatementType' is already defined" with wrong details.
 	     The catalog is correct because xjc works well with it. Problem seems to be the mix of file and

@@ -21,10 +21,11 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType;
+
 import de.bund.bsi.tr_esor.checktool.xml.VRCreator;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import de.bund.bsi.tr_esor.vr._1.EvidenceRecordValidityType.ArchiveTimeStampSequence.ArchiveTimeStampChain;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType;
+import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequence.ArchiveTimeStampChain;
 
 
 /**

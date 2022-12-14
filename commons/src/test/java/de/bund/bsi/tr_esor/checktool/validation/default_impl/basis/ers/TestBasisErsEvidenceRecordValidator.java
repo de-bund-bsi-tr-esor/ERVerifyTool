@@ -22,8 +22,7 @@
 package de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +41,7 @@ import de.bund.bsi.tr_esor.checktool.data.EncryptionInfo;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.EvidenceRecordValidator;
+import de.bund.bsi.tr_esor.checktool.validation.default_impl.TestEvidenceRecordValidator;
 import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 
@@ -51,7 +51,7 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
  *
  * @author HMA
  */
-public class TestBasisErsEvidenceRecordValidator
+public class TestBasisErsEvidenceRecordValidator extends TestEvidenceRecordValidator
 {
 
   private final Reference reference = new Reference(this.getClass().getSimpleName());
@@ -71,6 +71,11 @@ public class TestBasisErsEvidenceRecordValidator
     TestUtils.loadDefaultConfig();
   }
 
+  protected EvidenceRecordValidator createValidator()
+  {
+    return new BasisErsEvidenceRecordValidator();
+  }
+
   /**
    * Asserts that an evidence record which conforms to Basis-ERS-Profile is validated and reported as valid.
    *
@@ -79,7 +84,7 @@ public class TestBasisErsEvidenceRecordValidator
   @Test
   public void validBasisErs() throws Exception
   {
-    EvidenceRecord er = createEvidenceRecord(1, null, null);
+    var er = createEvidenceRecord(1, null, null);
 
     assertThat("BASIS-ERS validation",
                validateAgainstBasisErs(er).getOverallResult().getResultMajor(),
@@ -98,13 +103,11 @@ public class TestBasisErsEvidenceRecordValidator
   @Test
   public void invalidBasisErsButValidRfc4998() throws Exception
   {
-    EvidenceRecord er = createEvidenceRecord(1,
-                                             Mockito.mock(CryptoInfo.class),
-                                             Mockito.mock(EncryptionInfo.class));
+    var er = createEvidenceRecord(1, Mockito.mock(CryptoInfo.class), Mockito.mock(EncryptionInfo.class));
 
-    EvidenceRecordReport report = validateAgainstBasisErs(er);
+    var report = validateAgainstBasisErs(er);
     assertThat("BASIS-ERS validation", report.getOverallResult().getResultMajor(), endsWith(":invalid"));
-    String msg = report.getSummarizedMessage();
+    var msg = report.getSummarizedMessage();
     assertThat(msg, containsString("cryptoInfo: must be omitted"));
     assertThat(msg, containsString("encryptionInfo: must be omitted"));
 
@@ -121,11 +124,9 @@ public class TestBasisErsEvidenceRecordValidator
   @Test
   public void invalidRfc4998() throws Exception
   {
-    EvidenceRecord er = createEvidenceRecord(0,
-                                             Mockito.mock(CryptoInfo.class),
-                                             Mockito.mock(EncryptionInfo.class));
+    var er = createEvidenceRecord(0, Mockito.mock(CryptoInfo.class), Mockito.mock(EncryptionInfo.class));
 
-    EvidenceRecordReport report = validateAgainstBasisErs(er);
+    var report = validateAgainstBasisErs(er);
     assertThat("BASIS-ERS validation", report.getOverallResult().getResultMajor(), endsWith(":invalid"));
 
     assertThat("RFC4998 validation",
@@ -135,10 +136,10 @@ public class TestBasisErsEvidenceRecordValidator
 
   private EvidenceRecord createEvidenceRecord(int version, CryptoInfo ci, EncryptionInfo ei) throws Exception
   {
-    ArchiveTimeStamp ats = Mockito.mock(ArchiveTimeStamp.class);
-    ArchiveTimeStampChain atsc = Mockito.mock(ArchiveTimeStampChain.class);
+    var ats = Mockito.mock(ArchiveTimeStamp.class);
+    var atsc = Mockito.mock(ArchiveTimeStampChain.class);
     Mockito.when(atsc.iterator()).thenReturn(Collections.singletonList(ats).iterator());
-    ArchiveTimeStampSequence atss = Mockito.mock(ArchiveTimeStampSequence.class);
+    var atss = Mockito.mock(ArchiveTimeStampSequence.class);
     Mockito.when(atss.iterator()).thenReturn(Collections.singletonList(atsc).iterator());
     return new EvidenceRecord(version, new ArrayList<>(), atss, ci, ei);
   }
@@ -146,14 +147,16 @@ public class TestBasisErsEvidenceRecordValidator
   private EvidenceRecordReport validateAgainstBasisErs(EvidenceRecord er) throws ReflectiveOperationException
   {
     basisErsValidator.setContext(new ErValidationContext(reference, er, ProfileNames.BASIS_ERS,
-                                                         TestUtils.createReturnVerificationReport()));
-    return basisErsValidator.validate(reference, er);
+                                                         TestUtils.createReturnVerificationReport(), true));
+    var result = basisErsValidator.validate(reference, er);
+    assertThat(result.getFormatted().getReportVersion(), is("1.3.0"));
+    return result;
   }
 
   private EvidenceRecordReport validateAgainstRfc4998(EvidenceRecord er) throws ReflectiveOperationException
   {
     rfc4998Validator.setContext(new ErValidationContext(reference, er, ProfileNames.RFC4998,
-                                                        TestUtils.createReturnVerificationReport()));
+                                                        TestUtils.createReturnVerificationReport(), true));
     return rfc4998Validator.validate(reference, er);
   }
 

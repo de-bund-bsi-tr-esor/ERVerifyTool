@@ -107,7 +107,7 @@ public class Reference
    */
   public boolean isAncestorOf(Reference other)
   {
-    Reference intermediate = other;
+    var intermediate = other;
     while (true)
     {
       if (intermediate == null)
@@ -129,10 +129,10 @@ public class Reference
    */
   public String relativize(Reference anchestor)
   {
-    String result = toString();
+    var result = toString();
     if (anchestor.isAncestorOf(this))
     {
-      String other = anchestor.toString();
+      var other = anchestor.toString();
       return other.equals(result) ? "" : result.substring(other.length() + 1);
     }
     return result;
@@ -168,7 +168,7 @@ public class Reference
     {
       return false;
     }
-    Reference other = (Reference)obj;
+    var other = (Reference)obj;
     return Objects.equals(name, other.name) && Objects.equals(parent, other.parent);
   }
 

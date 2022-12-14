@@ -1,45 +1,56 @@
 apply plugin: 'application'
 
-distributions.main.baseName = project.baseName
 mainClassName = 'de.bund.bsi.tr_esor.checktool.Main'
 
 dependencies {
-  compile project(':commons')
-  compile 'commons-cli:commons-cli:1.3.1'
-  testCompile project(path: ':commons', configuration: 'testing')
+    implementation project(':commons')
+    implementation 'commons-cli:commons-cli:1.3.1'
+    implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
+    implementation 'com.sun.xml.bind:jaxb-impl:3.0.2'
+    implementation 'com.sun.xml.ws:jaxws-rt:3.0.2'
+    implementation ('org.apache.santuario:xmlsec:2.3.0') {
+        exclude group: 'org.codehaus.woodstox'
+        exclude group: 'org.slf4j'
+    }
+    testImplementation project(path: ':commons', configuration: 'testing')
 }
 
 distributions {
-  main {
-    baseName = project.baseName
-    contents {
-      from ('src/main/assembly') {
-        expand('version': project.version)
-      }
+    main {
+        distributionBaseName = project.baseName
+        contents {
+            from ('src/main/assembly') {
+                expand('version': project.version)
+            }
+        }
     }
-  }
 }
 
 tasks.withType(CreateStartScripts) {
-  afterEvaluate {
-    applicationName = 'checktool'
-  }
+    afterEvaluate {
+        applicationName = 'checktool'
+    }
 }
 
 assemble.dependsOn installDist
 
-artifacts {
-  archives distZip
+artifacts { archives distZip }
+
+
+// Create additional jar with sources
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
 }
 
+
 publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      from components.java
-      artifactId project.baseName
-      artifact distZip {
-        classifier = 'bin'
-      }
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId project.baseName
+            artifact sourcesJar
+            artifact distZip { classifier = 'bin' }
+        }
     }
-  }
 }

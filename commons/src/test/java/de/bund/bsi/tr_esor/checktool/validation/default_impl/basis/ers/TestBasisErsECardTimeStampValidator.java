@@ -21,34 +21,34 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers;
 
-import java.util.Collections;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import org.junit.Before;
-
+import de.bund.bsi.ecard.api._1.ECard;
+import de.bund.bsi.ecard.api._1.ECard_Service;
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.TestECardTimeStampValidator;
 
 
 /**
  * Offline checks for BasisErsECardTimeStampValidator.
- *
- * @author HMA
  */
 public class TestBasisErsECardTimeStampValidator extends TestECardTimeStampValidator
 {
 
-  /**
-   * Expects that format of used time stamp token is not valid as defined by Basis-ERS-Profil.
-   */
-  @Before
-  public void setUp()
+  @Override
+  protected BasisErsECardTimeStampValidator sut(String url)
   {
-    expectInvalidFormat = true;
+    var profile = Configurator.getInstance().getProfile(Configurator.getInstance().getDefaultProfileName());
+    profile.setValidationService(url);
+    return new BasisErsECardTimeStampValidator();
   }
 
   @Override
-  protected BasisErsECardTimeStampValidator createSystemUnderTest(String url)
+  protected BasisErsECardTimeStampValidator sut(ECard ecard)
   {
-    return new BasisErsECardTimeStampValidator(Collections.singletonMap("eCardURL", url));
+    ECard_Service eCardWebservice = when(mock(ECard_Service.class).getECard()).thenReturn(ecard).getMock();
+    return new BasisErsECardTimeStampValidator(eCardWebservice);
   }
 
 }

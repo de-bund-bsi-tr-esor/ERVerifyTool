@@ -13,7 +13,7 @@
   </servlet>
   <servlet-mapping>
     <servlet-name>ErVerifier</servlet-name>
-    <url-pattern>/esor12/exec/*</url-pattern>
+    <url-pattern>/esor13/exec/*</url-pattern>
   </servlet-mapping>
 
   <servlet>

@@ -3,6 +3,7 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 import de.bund.bsi.tr_esor.checktool.validation.NoVerificationContext;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipDigestMismatchException;
 
 
 /**
@@ -23,6 +24,10 @@ public class NoVerificationValidator extends BaseValidator<Object, NoVerificatio
   @Override
   protected ReportPart validateInternal(Reference ref, Object toCheck)
   {
+    if (ctx.getException() instanceof LXaipDigestMismatchException)
+    {
+      return ReportPart.forLXaipDigestMismatch(ref, ctx.getException());
+    }
     return ReportPart.forNoVerification(ref, ctx.getReason());
   }
 }

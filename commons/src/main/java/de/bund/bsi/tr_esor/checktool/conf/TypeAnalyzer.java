@@ -57,7 +57,7 @@ public class TypeAnalyzer
    */
   public <T> Class<? extends T> getFirstMatchingTypeArgument(Class<T> scope)
   {
-    Class<?> intermediate = clazz;
+    var intermediate = clazz;
     Class<? extends T> result = null;
     while (result == null && intermediate != null)
     {
@@ -66,7 +66,7 @@ public class TypeAnalyzer
       {
         break;
       }
-      for ( Type interf : intermediate.getGenericInterfaces() )
+      for ( var interf : intermediate.getGenericInterfaces() )
       {
         result = getParameterTypeExtending(interf, scope);
         if (result != null)

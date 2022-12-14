@@ -48,13 +48,13 @@ public class TestCAdESReader
   @Test
   public void encapsulatedWithEr() throws Exception
   {
-    byte[] bytes = TestUtils.decodeTestResource("/cms/encapsulated_with_er.p7s.b64");
-    CMSSignedData signature = new CMSSignedData(bytes);
-    CAdESReader reader = new CAdESReader(signature);
+    var bytes = TestUtils.decodeTestResource("/cms/encapsulated_with_er.p7s.b64");
+    var signature = new CMSSignedData(bytes);
+    var reader = new CAdESReader(signature);
     assertFalse(reader.hasCertificateValues());
     assertFalse(reader.hasRevocationValues());
     assertTrue(reader.hasUnsignedAttributes());
-    byte[] erBytes = reader.getEmbeddedEvidenceRecord();
+    var erBytes = reader.getEmbeddedEvidenceRecord();
     assertThat(erBytes, notNullValue());
     assertThat(new ASN1EvidenceRecordParser().parse(erBytes), notNullValue());
   }
@@ -65,9 +65,9 @@ public class TestCAdESReader
   @Test
   public void detached() throws Exception
   {
-    byte[] bytes = TestUtils.decodeTestResource("/cms/TestDataLogo.png_er.p7s.b64");
-    CMSSignedData signature = new CMSSignedData(bytes);
-    CAdESReader reader = new CAdESReader(signature);
+    var bytes = TestUtils.decodeTestResource("/cms/TestDataLogo.png_er.p7s.b64");
+    var signature = new CMSSignedData(bytes);
+    var reader = new CAdESReader(signature);
     assertFalse(reader.hasCertificateValues());
     assertFalse(reader.hasRevocationValues());
     assertTrue(reader.hasUnsignedAttributes());

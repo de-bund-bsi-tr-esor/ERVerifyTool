@@ -21,10 +21,10 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.nio.charset.StandardCharsets;
@@ -44,6 +44,7 @@ import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
+import de.bund.bsi.tr_esor.checktool.xml.XaipReader;
 
 
 /**
@@ -63,26 +64,30 @@ public class TestEvidenceRecordValidator
     TestUtils.loadDefaultConfig();
   }
 
+  protected EvidenceRecordValidator createValidator()
+  {
+    return new EvidenceRecordValidator();
+  }
+
   /**
    * Tests three valid evidence records to be checked as valid. No assertions regarding the protected elements
    * are made. Result can be at most INDETERMINED because no only check of the time stamps is done. Note that
    * the context is not filled with protected documents, so presence of document hashes is not checked here.
-   *
-   * @throws Exception
    */
   @Test
   public void testValidER() throws Exception
   {
-    String[] erToTest = {"/bin/example.ers.b64", "/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
+    var erToTest = new String[]{"/bin/example.ers.b64", "/xaip/xaip_ok.ers.b64",
+                                "/xaip/xaip_ok_sig_ok.ers.b64"};
 
-    for ( String erName : erToTest )
+    for ( var erName : erToTest )
     {
-      byte[] erBytes = TestUtils.decodeTestResource(erName);
-      EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-      EvidenceRecordValidator validator = new EvidenceRecordValidator();
+      var erBytes = TestUtils.decodeTestResource(erName);
+      var er = new ASN1EvidenceRecordParser().parse(erBytes);
+      var validator = createValidator();
       validator.setContext(new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                   TestUtils.createReturnVerificationReport()));
-      EvidenceRecordReport report = validator.validate(new Reference("dummy"), er);
+                                                   TestUtils.createReturnVerificationReport(), false));
+      var report = validator.validate(new Reference("dummy"), er);
       assertThat("validation result for " + erName,
                  report.getOverallResult().getResultMajor(),
                  is(ValidationResultMajor.INDETERMINED.toString()));
@@ -96,18 +101,16 @@ public class TestEvidenceRecordValidator
    * Tests that a valid additional redundant hash can lead to a positive verification result. The additional
    * hash has been calculated from the first partial hash tree and manually inserted into the second partial
    * hash tree which therefore should contain two hashes.
-   *
-   * @throws Exception
    */
   @Test
   public void testIntermediateHashInEr() throws Exception
   {
-    EvidenceRecordReport report = getErReportForXaip("src/test/resources/xaip/xaip_ok_ers_intermediate_hash.xml");
+    var report = getErReportForXaip("src/test/resources/xaip/xaip_ok_ers_intermediate_hash.xml");
     assertSecondHashInSecondHashTree(report);
     assertThat("A XAIP containing a valid intermediate hash gets a positive validation result.",
                report.getOverallResult().getResultMajor(),
                is(ValidationResultMajor.INDETERMINED.toString()));
-    assertThat("The format of the ER containg an intermediate hash is validated as valid.",
+    assertThat("The format of the ER containing an intermediate hash is validated as valid.",
                report.getFormatted().getFormatOK().getResultMajor(),
                is(ValidationResultMajor.VALID.toString()));
   }
@@ -115,20 +118,18 @@ public class TestEvidenceRecordValidator
   /**
    * Tests that a wrong additional hash leads to a negative verification result. The additional hash has been
    * manually inserted into the second partial hash tree which therefore should contain two hashes.
-   *
-   * @throws Exception
    */
   @Test
   public void testInvalidIntermediateHashInEr() throws Exception
   {
-    EvidenceRecordReport report = getErReportForXaip("src/test/resources/xaip/xaip_nok_ers_wrong_intermediate_hash.xml");
+    var report = getErReportForXaip("src/test/resources/xaip/xaip_nok_ers_wrong_intermediate_hash.xml");
     assertSecondHashInSecondHashTree(report);
     assertThat("A XAIP containg a wrong additional hash in the hash tree is invalid.",
                report.getOverallResult().getResultMajor(),
                is(ValidationResultMajor.INVALID.toString()));
     assertThat("The wrong additional hash leads to a hashValueMismatch result.",
                report.getOverallResult().getResultMinor(),
-               is("http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/hashValueMismatch"));
+               is("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
   }
 
   /**
@@ -139,15 +140,15 @@ public class TestEvidenceRecordValidator
   @Test
   public void testMissingDigestInER() throws Exception
   {
-    byte[] erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-    EvidenceRecordValidator validator = new EvidenceRecordValidator();
-    ErValidationContext ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                      TestUtils.createReturnVerificationReport());
+    var erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
+    var er = new ASN1EvidenceRecordParser().parse(erBytes);
+    var validator = createValidator();
+    var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
+                                      TestUtils.createReturnVerificationReport(), true);
     ctx.addProtectedData(new Reference("notInER"),
                          "this is not protected by ER".getBytes(StandardCharsets.UTF_8));
     validator.setContext(ctx);
-    EvidenceRecordReport report = validator.validate(new Reference("dummy"), er);
+    var report = validator.validate(new Reference("dummy"), er);
     assertThat("validation result with missing digests",
                report.getOverallResult().getResultMajor(),
                is(ValidationResultMajor.INVALID.toString()));
@@ -158,18 +159,16 @@ public class TestEvidenceRecordValidator
 
   /**
    * Tests that wrong hash values in the hash tree lead to invalid result.
-   *
-   * @throws Exception
    */
   @Test
   public void testBrokenHashTree() throws Exception
   {
-    byte[] erBytes = TestUtils.decodeTestResource("/xaip/xaip_nok.ers.b64");
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-    EvidenceRecordValidator validator = new EvidenceRecordValidator();
+    var erBytes = TestUtils.decodeTestResource("/xaip/xaip_nok.ers.b64");
+    var er = new ASN1EvidenceRecordParser().parse(erBytes);
+    var validator = createValidator();
     validator.setContext(new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                 TestUtils.createReturnVerificationReport()));
-    EvidenceRecordReport report = validator.validate(new Reference("dummy"), er);
+                                                 TestUtils.createReturnVerificationReport(), true));
+    var report = validator.validate(new Reference("dummy"), er);
     assertThat("validation result with missing digests",
                report.getOverallResult().getResultMajor(),
                is(ValidationResultMajor.INVALID.toString()));
@@ -185,25 +184,30 @@ public class TestEvidenceRecordValidator
   @Test
   public void delegationFailure() throws Exception
   {
-    EvidenceRecordValidator validator = new EvidenceRecordValidator();
-    Reference ref = new Reference("fake");
-    validator.setContext(new ErValidationContext(ref, (EvidenceRecord)null, ProfileNames.RFC4998, null));
-    TimeStampReport report = validator.callValidator("unsuported Object", ref, TimeStampReport.class);
+    var validator = createValidator();
+    var ref = new Reference("fake");
+    validator.setContext(new ErValidationContext(ref, (EvidenceRecord)null, ProfileNames.RFC4998, null,
+                                                 true));
+    var report = validator.callValidator("unsuported Object", ref, TimeStampReport.class);
     assertThat(report.getSummarizedMessage(), containsString("no validator found for java.lang.String"));
   }
 
   private EvidenceRecordReport getErReportForXaip(String testXaipPath) throws Exception
   {
     ParameterFinder params = new FileParameterFinder(Paths.get(testXaipPath), null, ProfileNames.RFC4998);
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(params.getXaip()
-                                                                   .getCredentialsSection()
-                                                                   .getCredential()
-                                                                   .get(0)
-                                                                   .getEvidenceRecord()
-                                                                   .getAsn1EvidenceRecord());
-    EvidenceRecordValidator validator = new EvidenceRecordValidator();
-    validator.setContext(new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                 TestUtils.createReturnVerificationReport()));
+    var er = new ASN1EvidenceRecordParser().parse(params.getXaip()
+                                                        .getCredentialsSection()
+                                                        .getCredential()
+                                                        .get(2)
+                                                        .getEvidenceRecord()
+                                                        .getAsn1EvidenceRecord());
+    var validator = createValidator();
+    var validationContext = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
+                                                    TestUtils.createReturnVerificationReport(), true);
+    var reader = new XaipReader(params.getXaip(), new Reference("xaip"), ProfileNames.RFC4998);
+    reader.prepareProtectedElements("V001", params.getSerializer())
+          .forEach(validationContext::addProtectedData);
+    validator.setContext(validationContext);
     return validator.validate(new Reference("dummy"), er);
   }
 

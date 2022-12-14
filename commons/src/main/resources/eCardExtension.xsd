@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.governikus.de/ecard/ext"
+	xmlns:tns="http://www.governikus.de/ecard/ext"
+	elementFormDefault="qualified">
+
+	<complexType name="ValidationDataReferences">
+		<sequence>
+			<element name="Lotl" type="anyURI" minOccurs="0"></element>
+			<element name="TrustedLists" type="tns:TrustedListReference" minOccurs="0" maxOccurs="unbounded"></element>
+			<element name="AlgorithmCatalogs" type="anyURI" minOccurs="0" maxOccurs="unbounded"></element>
+		</sequence>
+	</complexType>
+
+	<complexType name="TrustedListReference">
+		<sequence>
+			<element name="URL" type="anyURI"></element>
+			<element name="ExtensionURL" type="anyURI" minOccurs="0"></element>
+		</sequence>
+	</complexType>
+
+	<element name="ValidationDataReferences" type="tns:ValidationDataReferences"></element>
+	<element name="TLReferences" type="tns:TrustedListReference"></element>
+</schema>

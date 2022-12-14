@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
@@ -49,7 +48,10 @@ import org.xml.sax.SAXParseException;
 public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
 {
 
-  private String schemaName;
+  @SuppressWarnings("PMD.FieldNamingConventions")
+  private static final Map<String, IsValidXML> matcherCache = new HashMap<>();
+
+  private final String schemaName;
 
   private Schema schema;
 
@@ -65,6 +67,7 @@ public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
    */
   public IsValidXML(String schemaName, URL url) throws SAXException
   {
+    super();
     if (url == null)
     {
       this.schemaName = "undefined";
@@ -72,9 +75,40 @@ public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
     else
     {
       this.schemaName = schemaName;
-      SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      var sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
       schema = sf.newSchema(url);
     }
+  }
+
+  private static IsValidXML getMatcher(String name, String url) throws SAXException
+  {
+    var result = matcherCache.get(name);
+    if (result == null)
+    {
+      result = new IsValidXML(name, IsValidXML.class.getResource(url));
+      matcherCache.put(name, result);
+    }
+    return result;
+  }
+
+  /**
+   * Returns a matcher which checks the given input against Verification Report schema.
+   *
+   * @throws SAXException
+   */
+  public static TypeSafeMatcher<String> matcherForValidVerificationReport() throws SAXException
+  {
+    return getMatcher("Verification Report", "/oasis-dssx-1.0-profiles-verification-report-cs1.xsd");
+  }
+
+  /**
+   * Returns a matcher which checks the given input against TR Verification Report detail schema.
+   *
+   * @throws SAXException
+   */
+  public static TypeSafeMatcher<String> matcherForValidVerificationReportDetail() throws SAXException
+  {
+    return getMatcher("Verification Report Detail", "/tr-esor-verification-report-V1.3.xsd");
   }
 
   /**
@@ -85,14 +119,14 @@ public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
   {
     try
     {
-      ByteArrayInputStream ins = new ByteArrayInputStream(item.getBytes(StandardCharsets.UTF_8));
-      DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+      var ins = new ByteArrayInputStream(item.getBytes(StandardCharsets.UTF_8));
+      var dbf = DocumentBuilderFactory.newInstance();
       dbf.setNamespaceAware(true);
       if (schema != null)
       {
         dbf.setSchema(schema);
       }
-      DocumentBuilder db = dbf.newDocumentBuilder();
+      var db = dbf.newDocumentBuilder();
       db.setErrorHandler(this);
       db.parse(ins);
       return true;
@@ -100,10 +134,6 @@ public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
     catch (SAXParseException e)
     {
       exForItem = e;
-      return false;
-    }
-    catch (RuntimeException e)
-    {
       return false;
     }
     catch (Exception e)
@@ -143,39 +173,6 @@ public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
   public void warning(SAXParseException exception) throws SAXException
   {
     throw exception;
-  }
-
-  private static Map<String, IsValidXML> matcherCache = new HashMap<>();
-
-  private static IsValidXML getMatcher(String name, String url) throws SAXException
-  {
-    IsValidXML result = matcherCache.get(name);
-    if (result == null)
-    {
-      result = new IsValidXML(name, IsValidXML.class.getResource(url));
-      matcherCache.put(name, result);
-    }
-    return result;
-  }
-
-  /**
-   * Returns a matcher which checks the given input against Verification Report schema.
-   *
-   * @throws SAXException
-   */
-  public static TypeSafeMatcher<String> isValidVerificationReport() throws SAXException
-  {
-    return getMatcher("Verification Report", "/oasis-dssx-1.0-profiles-verification-report-cs1.xsd");
-  }
-
-  /**
-   * Returns a matcher which checks the given input against TR Verification Report detail schema.
-   *
-   * @throws SAXException
-   */
-  public static TypeSafeMatcher<String> isValidVerificationReportDetail() throws SAXException
-  {
-    return getMatcher("Verification Report Detail", "/tr-esor-verification-report-V1_2.xsd");
   }
 
 }

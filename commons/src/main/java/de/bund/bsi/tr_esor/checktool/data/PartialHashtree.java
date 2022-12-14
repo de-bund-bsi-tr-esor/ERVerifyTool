@@ -54,19 +54,21 @@ public class PartialHashtree extends ArrayList<byte[]> implements ASN1Encodable
    */
   public PartialHashtree(ASN1Object obj) throws IOException
   {
+    super();
+
     if (!(obj instanceof ASN1Sequence))
     {
       throw new IOException("not valid (PH-1)");
     }
-    ASN1Sequence s = (ASN1Sequence)obj;
-    for ( int i = 0 ; i < s.size() ; i++ )
+    var s = (ASN1Sequence)obj;
+    for ( var i = 0 ; i < s.size() ; i++ )
     {
-      ASN1Encodable e = s.getObjectAt(i);
+      var e = s.getObjectAt(i);
       if (!(e instanceof ASN1OctetString))
       {
         throw new IOException("not valid (PH-2)");
       }
-      ASN1OctetString o = (ASN1OctetString)e;
+      var o = (ASN1OctetString)e;
       add(o.getOctets());
     }
   }
@@ -82,7 +84,7 @@ public class PartialHashtree extends ArrayList<byte[]> implements ASN1Encodable
   @Override
   public ASN1Primitive toASN1Primitive()
   {
-    ASN1EncodableVector pht = new ASN1EncodableVector();
+    var pht = new ASN1EncodableVector();
     stream().map(DEROctetString::new).forEach(pht::add);
     return new DERSequence(pht);
   }

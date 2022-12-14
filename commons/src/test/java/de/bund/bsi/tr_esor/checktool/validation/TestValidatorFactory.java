@@ -70,7 +70,7 @@ public class TestValidatorFactory
   {
     TestUtils.loadConfig("/configForTestingFactory.xml");
     context = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null,
-                                      ProfileNames.RFC4998, null);
+                                      ProfileNames.RFC4998, null, true);
   }
 
   /**
@@ -90,7 +90,7 @@ public class TestValidatorFactory
    * @throws Exception
    */
   @Test
-  public void getHashCreator() throws Exception
+  public void canGetHashCreator() throws Exception
   {
     assertThat("HashCreator instance from test config",
                systemUnderTest.getHashCreator(),
@@ -112,8 +112,8 @@ public class TestValidatorFactory
                                                                                              context);
     assertThat("for RFC4998", val.getClass().getName(), is(AlgorithmUsageValidator.class.getName()));
 
-    ErValidationContext c2 = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null,
-                                                     ProfileNames.BASIS_ERS, null);
+    var c2 = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null,
+                                     ProfileNames.BASIS_ERS, null, true);
     val = systemUnderTest.getValidator(AlgorithmUsage.class, AlgorithmValidityReport.class, c2);
     assertThat("for Basis", val.getClass().getName(), is(BasisErsAlgorithmUsageValidator.class.getName()));
   }
@@ -126,7 +126,7 @@ public class TestValidatorFactory
   {
     // in default profile that validator cannot be constructed.
     ValidationContext<?> otherContext = new ErValidationContext(new Reference("dummy"), (EvidenceRecord)null,
-                                                                "test_profile", null);
+                                                                "test_profile", null, true);
     assertThat(systemUnderTest.getValidator(EvidenceRecord.class, EvidenceRecordReport.class, otherContext),
                instanceOf(OtherErValidator.class));
   }

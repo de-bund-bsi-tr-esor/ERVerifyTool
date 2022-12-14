@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 
-	DSS-X encryption profile    
+<!--
+	DSS-X encryption profile
 	urn:oasis:names:tc:dss-x:1.0:profiles:encryption
-	
+
 	EncryptRequest: Encrypt data using one key (-set).
 	DecryptRequest: Decrypt data using any of the provided keys
-	
+
 	use cases:
 	1. encrypt (multiple) XML element(s) (content) using one key (-set) and REPLACE in provided document(s)
 	result: provided document(s)
@@ -17,32 +17,32 @@
 	result: one of: xenc:EncryptedData (root elt) / base64 encoded CMS / base64 encoded CCE container
 	5. arbitrary sequence of 1.-4. (batch processing) using one key (-set)
 	result: sequence of provided documents/xenc:EncryptedData elements
-	
+
 	processing rules:
 	0. (INSERT/REPLACE) selectors MUST be unique and MUST NOT overlap
 	1. (INSERT) selector gives empty node set -> error
 	2. (REPLACE) selector gives empty node set -> error
-	
+
 	TODO / REMARK
 	- CipherReference: URI along with transforms necessary to obtain the encrypted data as octet sequence (TODO: transforms)
 	- symmetric key enc
 	- allow referenced input content?
 	- No transformations on input document allowed (out of scope)
 	- round-trip capable: f^-1(f(x)) = x
-	
-	
+
+
 	Reference
-	
+
 	naming conventions:
 	XxxSelector - type SelectorType
 	XxxDestination - type DestinationSelectorType
-	
+
 	common attributes:
 	reference ... URI to reference content to be encrypted external to request doc
 	id ... unique identifier attributed to corresponding xenc:EncryptedData elt in response
-	cipherReference ... URI to reference the (external) cipher data from an xenc:EncryptedData elt; 
+	cipherReference ... URI to reference the (external) cipher data from an xenc:EncryptedData elt;
 	the cipher data is included in the response and identified via the same URI
-	
+
 -->
 <xs:schema
 	xmlns:dsse="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#"
@@ -275,7 +275,7 @@
 	<!--
 		|    Todo: check all dss: optional inputs for usage in dsse (additionalProfile)
 		|    SignatureType: ignored (no point in combination of XMLEnc and CMS! -> two separate requests)
-		|    AddTimestamp: TODO (also support TimeStampTheGivenSignature) must appear prior to encryption! 
+		|    AddTimestamp: TODO (also support TimeStampTheGivenSignature) must appear prior to encryption!
 		|    (check schema: type UpdateSigntureInstructionType for AddTimestamp?)
 		|    (check core: 3.5.2.2/3 does not contain AttachmentReference)
 		|    IntendedAudience: MAY be used to define encryption keys (no further committement, no MUST)
@@ -693,18 +693,18 @@
 		</xs:annotation>
 	</xs:element>
 
-	<!-- EncryptedDocumentType provided in Version 0.4: 
-		
+	<!-- EncryptedDocumentType provided in Version 0.4:
+
 		<xs:complexType name="EncryptedDocumentType">
         <xs:complexContent>
             <xs:extension base="dss:DocumentBaseType">
                 <xs:sequence>
-                    TODO SelectorNamespace (be consistent with DSS Core) 
+                    TODO SelectorNamespace (be consistent with DSS Core)
                     <xs:element name="EncryptedKeyParentSelector" type="dsse:SelectorType" minOccurs="0"
                         maxOccurs="1">
                         <xs:annotation>
                             <xs:documentation>provided for VERBOSE/ACK operation only</xs:documentation>
-                            <xs:documentation>XPath pointer to parent of all encrypted keys 
+                            <xs:documentation>XPath pointer to parent of all encrypted keys
                                 (keys with destination=content only, otherwise the encrypted keys are directly included in EncryptedData/KeyInfo)</xs:documentation>
                         </xs:annotation>
                     </xs:element>
@@ -731,7 +731,7 @@
                     </xs:choice>
                     <xs:element name="CipherValue" minOccurs="0" maxOccurs="unbounded">
                         <xs:annotation>
-                            <xs:documentation>Cipher value referenced from a xenc:EncryptedData 
+                            <xs:documentation>Cipher value referenced from a xenc:EncryptedData
                                 within the same dsse:EncryptedDocument.</xs:documentation>
                         </xs:annotation>
                         <xs:complexType>
@@ -747,7 +747,7 @@
         </xs:complexContent>
     </xs:complexType>
 
-		
+
 		### END ENC CONTENTS ### -->
 
 	<xs:complexType name="EncryptedDocumentType">

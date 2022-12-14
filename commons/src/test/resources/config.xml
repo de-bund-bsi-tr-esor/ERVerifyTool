@@ -15,31 +15,33 @@
     </ConfiguredObjects>
     -->
   </General>
-  <!-- For online verification of time stamps, activate: -->
-  <!--
-  <Profile name="https://tools.ietf.org/html/rfc4998">
+  <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="../commons/src/test/resources/lxaip">
+  </Profile>
+
+  <!-- The TR-ESOR profile requires an online validation service and qualified timestamps -->
+  <Profile name="TR-ESOR" requireQualifiedTimestamps="true" validationService="http://lza-k8s.govkg.de:31780/ECardService/eCard?wsdl">
+  </Profile>
+
+  <!-- Take away the comment from this part in order to allow online checks to be performed in the Basis-ERS profile -->
+  <!-- The Basis-ERS includes additional checks for conformity to the TR-ESOR-ERS specification -->
+  <!--<Profile name="Basis-ERS" requireQualifiedTimestamps="false" validationService="http://lza-k8s.govkg.de:31780/ECardService/eCard?wsdl">
     <Validator>
-      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
-      <parameter name="eCardURL">http://vtf-crypto2.tf.bos-test.de:8080/vi-ecard-webservice/eCard?wsdl</parameter>
+      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator</className>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
     </Validator>
-  </Profile>
-  <Profile
-    name="http://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03125/BSI_TR_03125_Anlage_ERS_V1_2.html#Basis-ERS-Profil">
-    <Validator>
-      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator
-      </className>
-      <parameter name="eCardURL">http://vtf-crypto2.tf.bos-test.de:8080/vi-ecard-webservice/eCard?wsdl</parameter>
-      <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
-    </Validator>
-  </Profile>
-  -->
+  </Profile>-->
+
   <!-- You may specify own profiles with any number of new or replaced validators: -->
-  <Profile name="online_profile">
+  <Profile name="custom" hashMode="unsorted" lxaipDataDirectory="../commons/src/test/resources/lxaip" validationService="http://lza-k8s.govkg.de:31780/ECardService/eCard?wsdl" requireQualifiedTimestamps="false">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
-      <parameter name="eCardURL">http://vtf-crypto2.tf.bos-test.de:8080/vi-ecard-webservice/eCard?wsdl</parameter>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
     </Validator>
+  </Profile>
+  <Profile name="unsorted" hashMode="unsorted">
+  </Profile>
+  <Profile name="both" hashMode="both">
+  </Profile>
+  <Profile name="sorted" hashMode="sorted">
   </Profile>
 </Configuration>

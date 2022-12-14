@@ -1,0 +1,38 @@
+<esor:XAIP xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip" XAIPVersion="1.3.0">
+    <esor:packageHeader packageID="xbe3f3852-5972-488c-a6f3-260b551536fa">
+        <esor:AOID>xaip_ok_xmlsig_asBinary</esor:AOID>
+        <esor:versionManifest VersionID="V001">
+            <esor:preservationInfo>
+                <esor:retentionPeriod>2114-01-01+01:00</esor:retentionPeriod>
+            </esor:preservationInfo>
+            <esor:packageInfoUnit packageUnitID="_idx_data_V001">
+                <esor:protectedObjectPointer>data</esor:protectedObjectPointer>
+                <esor:protectedObjectPointer>meta</esor:protectedObjectPointer>
+                <esor:unprotectedObjectPointer>detachedSignature</esor:unprotectedObjectPointer>
+            </esor:packageInfoUnit>
+        </esor:versionManifest>
+    </esor:packageHeader>
+    <esor:metaDataSection>
+        <esor:metaDataObject relatedObjects="data" metaDataID="meta">
+            <esor:xmlMetaData>
+                <descr xmlns="uri:myNamespace">XML signed as binary by an XML signature embedded as binary</descr>
+            </esor:xmlMetaData>
+        </esor:metaDataObject>
+    </esor:metaDataSection>
+    <esor:dataObjectsSection>
+        <esor:dataObject dataObjectID="data">
+            <esor:binaryData>
+                PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxTYW1wbGU+DQpMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldCwgY29uc2VjdGV0dXIgYWRpcGlzaWNpbmcgZWxpdCwgc2VkIGRvIGVpdXNtb2QgdGVtcG9yIGluY2lkaWR1bnQgdXQgbGFib3JlIGV0IGRvbG9yZSBtYWduYSBhbGlxdWEuIFV0IGVuaW0gYWQgbWluaW0gdmVuaWFtLCBxdWlzIG5vc3RydWQgZXhlcmNpdGF0aW9uIHVsbGFtY28gbGFib3JpcyBuaXNpIHV0IGFsaXF1aXAgZXggZWEgY29tbW9kbyBjb25zZXF1YXQuIER1aXMgYXV0ZSBpcnVyZSBkb2xvciBpbiByZXByZWhlbmRlcml0IGluIHZvbHVwdGF0ZSB2ZWxpdCBlc3NlIGNpbGx1bSBkb2xvcmUgZXUgZnVnaWF0IG51bGxhIHBhcmlhdHVyLiBFeGNlcHRldXIgc2ludCBvY2NhZWNhdCBjdXBpZGF0YXQgbm9uIHByb2lkZW50LCBzdW50IGluIGN1bHBhIHF1aSBvZmZpY2lhIGRlc2VydW50IG1vbGxpdCBhbmltIGlkIGVzdCBsYWJvcnVtDQo8L1NhbXBsZT4NCg==
+            </esor:binaryData>
+        </esor:dataObject>
+    </esor:dataObjectsSection>
+    <esor:credentialsSection>
+        <esor:credential credentialID="detachedSignature" relatedObjects="data">
+            <dss:SignatureObject xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
+                <dss:Base64Signature Type="urn:ietf:rfc:3275">
+                    PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz48U2lnbmF0dXJlIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwLzA5L3htbGRzaWcjIiBJZD0iX2ViY2U3NDA4LTk4NzYtNDVhNS1iMmY4LTA1OTg1OGY1YWY2OSI+PFNpZ25lZEluZm8+PENhbm9uaWNhbGl6YXRpb25NZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy14bWwtYzE0bi0yMDAxMDMxNSIvPjxTaWduYXR1cmVNZXRob2QgQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy8yMDAxLzA0L3htbGRzaWctbW9yZSNyc2Etc2hhMjU2Ii8+PFJlZmVyZW5jZSBJZD0iX2VjZjNmZjY1LWNjYzUtNDM5Ny1hMGNiLWJhMTg0YzI2MWQzNCIgVVJJPSJEOi90ZXN0L1Rlc3RkYXRlbl96dV9TaWduZXIvWEFkRVMvMy4yLjQuMV9YQWRFUy1TaWduYXR1cl91bmJla2FubnRlcl9GYWNoZGF0ZW5mb3JtYXQvc2FtcGxlLnhtbCI+PERpZ2VzdE1ldGhvZCBBbGdvcml0aG09Imh0dHA6Ly93d3cudzMub3JnLzIwMDEvMDQveG1sZW5jI3NoYTI1NiIvPjxEaWdlc3RWYWx1ZT5WbGFpUnZNQVExdzBPcUtrcW9SUVRsMTB6K3FZSVY4SDR0NzZMVUIxSk1RPTwvRGlnZXN0VmFsdWU+PC9SZWZlcmVuY2U+PFJlZmVyZW5jZSBVUkk9IiNfZWJjZTc0MDgtOTg3Ni00NWE1LWIyZjgtMDU5ODU4ZjVhZjY5X1NpZ25lZFByb3BlcnRpZXMiPjxUcmFuc2Zvcm1zPjxUcmFuc2Zvcm0gQWxnb3JpdGhtPSJodHRwOi8vd3d3LnczLm9yZy9UUi8yMDAxL1JFQy14bWwtYzE0bi0yMDAxMDMxNSIvPjwvVHJhbnNmb3Jtcz48RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+PERpZ2VzdFZhbHVlPk1Uc1A2a0ljUFE5N1dyeW9IaGljVGNNdFlTL0xyc1dlZmpVS3UxZ3FQdFU9PC9EaWdlc3RWYWx1ZT48L1JlZmVyZW5jZT48L1NpZ25lZEluZm8+PFNpZ25hdHVyZVZhbHVlPk9kMHBLTjFRN3pMSmRzRzFTTi9HUVNLczJxYitzdWpVZk00NWN6UFZJUGxUS0htNEZMa0c2L2VHbkpYMjdoMGZkRkw2bFpCUGwrUjANCjhEcHpodmdqTW5DZ0ZwRGxzaWkxMmxCY0tqdkw0aHFOU21NblFaV1FOUms5bnZzdmVjakdCTExxMnI0SG5xRFpGMWtqMVNFemxaOSsNClFrb0ZRdDBkcVRTK0hJMWhCZzFObEpjQ1Z1RUNRa0RoZm51OVNJSHllaCtEZGlMa1podUIrL244dHlvdTNYVzBIKzdrQUlNcHQzMTcNClQxMEViYXBPZ1BFK2pIOS8xWHN3OW9pbDg3ekMzdzRwazd1aGpkYXAvbjZSeTNlM24zUzJwK0o2VXZZdWwrUmFrMjIyaXNtUnNQakYNClk5ZnJPZjQ3NHEvQytMdHhBeE42cCtZYVhCN0EvcVo2ajZNZXJBPT08L1NpZ25hdHVyZVZhbHVlPjxLZXlJbmZvPjxYNTA5RGF0YT48WDUwOVN1YmplY3ROYW1lPkM9ZGUsT1U9U0FGRSBuZXUsTz1ib3MgS0csQ049RGlldHJpY2g8L1g1MDlTdWJqZWN0TmFtZT48WDUwOUNlcnRpZmljYXRlPk1JSURWekNDQWorZ0F3SUJBZ0lHQVVFSHI1aTFNQTBHQ1NxR1NJYjNEUUVCQlFVQU1FUXhFVEFQQmdOVkJBTU1DRVJwWlhSeWFXTm8NCk1ROHdEUVlEVlFRS0RBWmliM01nUzBjeEVUQVBCZ05WQkFzTUNGTkJSa1VnYm1WMU1Rc3dDUVlEVlFRR0RBSmtaVEFlRncweE16QTUNCk1UQXhNVFF4TURsYUZ3MHhOakE1TVRBeE1UUTBNRGxhTUVReEVUQVBCZ05WQkFNTUNFUnBaWFJ5YVdOb01ROHdEUVlEVlFRS0RBWmkNCmIzTWdTMGN4RVRBUEJnTlZCQXNNQ0ZOQlJrVWdibVYxTVFzd0NRWURWUVFHREFKa1pUQ0NBU0l3RFFZSktvWklodmNOQVFFQkJRQUQNCmdnRVBBRENDQVFvQ2dnRUJBS3BiNk9XWVBmcHpyRmRkbG1vbE5tekdKNlI4REpNNWIxcy8xQURGTEhWZnY4RzVORkY5OHE4RzE1V3MNCnQzeDhOZU94R2RvNmxOS2xmNmpjT1JZd0k5UkpJa1poOENBcVg1L0cvMTZyenAzYXlKSXd0dHVqVVBXeGduNFNEeExIN0lwSE0rQjANCm16TFNVdHVsWnQyMFVsRVhTMzVSTGpsUjR4WXFGVUJ6djdJU2tiM01GcHdOZHRxaFg1cnV3SFQyUDZaQnZHZU9GcVFLOUNXUlo2RnoNCmhhMWtHZFBMaXFsTzRnZnVWN1QvdVFjZzFWSFdMQS9NQ0l2ZEdzYmZxNXluUkNNelB3ZjJqL3FsZitPR0xzWnBwK2IwNWhoY2xUOUINCjRjS3NEMHA1cmpnNktCTXRvcUltejR6KzdtYUFtbThuS3BRdHFsVzk1akRuUWFnWldDL2dZRU1DQXdFQUFhTlBNRTB3SFFZRFZSME8NCkJCWUVGSWtIUjdRR2hnWDl3RlMwWVl4VXVhU2xKelF1TUI4R0ExVWRJd1FZTUJhQUZJa0hSN1FHaGdYOXdGUzBZWXhVdWFTbEp6UXUNCk1Bc0dBMVVkRHdRRUF3SUY0REFOQmdrcWhraUc5dzBCQVFVRkFBT0NBUUVBbVBNazh6d0dRVXdERzZTbmFwd0hFRU4zeG5IK1lvRHoNCndnZkIwQ21xT3VKaFoycUcrdjdnNWYvOC8xKy9LQ2tCblVaalZ3UEt2b2hUenNwRDR2NGl2d09IWitvdFBHb3lCcktFV01kVkFJbVMNCkhobWhnTTZCR0dZVUhKOTZXOExyT1VxTk55cURrMGRYa1FDNmNqK1hOVERiOTJZQ0tJbUlPNkI2WURydTB4Zko1Z09zR3dIay94MnANCkdHVThKSWFNU2wwNkdYMlUwbStSbDJIRlFaK0RnLysrb2R3RzhqZ01jZUtDTjJWR3YreC9LcDZEcVU4TmNtZzM1ZjF5TUVzOXhwbVENCnh0NTBpU0hBbVNXd1pKZXU2WmdieHpoTFZtNVZ3VlE3bnA5WUx1WnB1VkhkWHRETTFwc0thNUx1dlJqTWEzVWo1Ym9idjhLeFFLekgNCnozSHhHZz09PC9YNTA5Q2VydGlmaWNhdGU+PC9YNTA5RGF0YT48L0tleUluZm8+PE9iamVjdD48eGFkZXM6UXVhbGlmeWluZ1Byb3BlcnRpZXMgeG1sbnM6eGFkZXM9Imh0dHA6Ly91cmkuZXRzaS5vcmcvMDE5MDMvdjEuMy4yIyIgVGFyZ2V0PSIjX2ViY2U3NDA4LTk4NzYtNDVhNS1iMmY4LTA1OTg1OGY1YWY2OSI+PHhhZGVzOlNpZ25lZFByb3BlcnRpZXMgSWQ9Il9lYmNlNzQwOC05ODc2LTQ1YTUtYjJmOC0wNTk4NThmNWFmNjlfU2lnbmVkUHJvcGVydGllcyI+PHhhZGVzOlNpZ25lZFNpZ25hdHVyZVByb3BlcnRpZXMgSWQ9Il82ZGUxOGUwYS02YmNjLTQ1ZjctOTlkZC1hOTY4OGQ5NmJlNDIiPjx4YWRlczpTaWduaW5nVGltZT4yMDE2LTA0LTIxVDExOjU2OjI0LjI3MSswMjowMDwveGFkZXM6U2lnbmluZ1RpbWU+PHhhZGVzOlNpZ25pbmdDZXJ0aWZpY2F0ZT48eGFkZXM6Q2VydD48eGFkZXM6Q2VydERpZ2VzdD48RGlnZXN0TWV0aG9kIEFsZ29yaXRobT0iaHR0cDovL3d3dy53My5vcmcvMjAwMS8wNC94bWxlbmMjc2hhMjU2Ii8+PERpZ2VzdFZhbHVlPmw2dDR2eS95WGhMaDgzV013YkpSMWhWTkxIK1BTQ29EZXIrYjBSTFZnOHc9PC9EaWdlc3RWYWx1ZT48L3hhZGVzOkNlcnREaWdlc3Q+PC94YWRlczpDZXJ0PjwveGFkZXM6U2lnbmluZ0NlcnRpZmljYXRlPjwveGFkZXM6U2lnbmVkU2lnbmF0dXJlUHJvcGVydGllcz48eGFkZXM6U2lnbmVkRGF0YU9iamVjdFByb3BlcnRpZXMvPjwveGFkZXM6U2lnbmVkUHJvcGVydGllcz48L3hhZGVzOlF1YWxpZnlpbmdQcm9wZXJ0aWVzPjwvT2JqZWN0PjwvU2lnbmF0dXJlPg==
+                </dss:Base64Signature>
+            </dss:SignatureObject>
+        </esor:credential>
+    </esor:credentialsSection>
+</esor:XAIP>

@@ -22,18 +22,31 @@
 package de.bund.bsi.tr_esor.checktool.xml;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.util.JAXBSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
 
+import oasis.names.tc.dss._1_0.core.schema.Result;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.DetailedSignatureReportType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignedObjectIdentifierType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
+import oasis.names.tc.saml._2_0.assertion.NameIDType;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.util.JAXBSource;
+
+import org.apache.logging.log4j.util.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3._2000._09.xmldsig_.SignatureValueType;
@@ -48,16 +61,7 @@ import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.OutputCreator;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import oasis.names.tc.dss._1_0.core.schema.VerificationTimeInfoType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IdentifierType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ObjectFactory;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignedObjectIdentifierType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
-import oasis.names.tc.saml._2_0.assertion.NameIDType;
+import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
 
 
 /**
@@ -94,43 +98,39 @@ public final class VRCreator
   /**
    * Returns a verification report as defined in
    * "urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#".
-   *
-   * @param individualReports
    */
-  public static VerificationReportType createReport(List<ReportPart> individualReports,
+  public static VerificationReportType createReport(List<ReportPart> reportParts,
                                                     ReturnVerificationReport returnVerificationReport)
   {
-    VerificationReportType report = XmlHelper.FACTORY_OASIS_VR.createVerificationReportType();
-    VerificationTimeInfoType time = XmlHelper.FACTORY_DSS.createVerificationTimeInfoType();
+    var report = XmlHelper.FACTORY_OASIS_VR.createVerificationReportType();
+    var time = XmlHelper.FACTORY_DSS.createVerificationTimeInfoType();
     time.setVerificationTime(XmlHelper.getXMLGregorianCalendar(new Date()));
     report.setVerificationTimeInfo(time);
 
-    IdentifierType id = XmlHelper.FACTORY_OASIS_VR.createIdentifierType();
-    NameIDType value = new NameIDType();
+    var id = XmlHelper.FACTORY_OASIS_VR.createIdentifierType();
+    var value = new NameIDType();
     value.setValue(Configurator.getInstance().getVerifierID());
     id.setSAMLv2Identifier(value);
     report.setVerifierIdentity(id);
 
-    individualReports.stream()
-                     .map(r -> toIndividualReport(r, returnVerificationReport))
-                     .forEach(report.getIndividualReport()::add);
+    reportParts.stream()
+               .map(r -> toIndividualReports(r, returnVerificationReport))
+               .forEach(report.getIndividualReport()::addAll);
     validateXml(report);
     return report;
   }
 
   /**
    * Validates report against schema as demanded by TR-ESOR-ERS-FEIN, p&#46; 29.
-   *
-   * @param report
    */
   private static void validateXml(VerificationReportType report)
   {
     try
     {
-      Validator validator = schema.newValidator();
+      var validator = schema.newValidator();
       validator.setErrorHandler(new LoggingErrorHandler(LOG));
-      ObjectFactory factory = XmlHelper.FACTORY_OASIS_VR;
-      JAXBContext context = JAXBContext.newInstance(factory.getClass().getPackage().getName());
+      var factory = XmlHelper.FACTORY_OASIS_VR;
+      var context = JAXBContext.newInstance(factory.getClass().getPackage().getName());
       validator.validate(new JAXBSource(context, factory.createVerificationReport(report)));
     }
     catch (SAXException | JAXBException | IOException e)
@@ -165,21 +165,27 @@ public final class VRCreator
     {
       return (T)createResultOnly((ReportPart)report);
     }
-    return null;
+    throw new IllegalArgumentException("Can not translate " + report.getClass().getName() + " to "
+                                       + targetClass.getName());
   }
 
-  private static IndividualReportType toIndividualReport(ReportPart report, ReturnVerificationReport returnVR)
+  private static List<IndividualReportType> toIndividualReports(ReportPart report,
+                                                                ReturnVerificationReport returnVR)
   {
     if (report instanceof EvidenceRecordReport)
     {
-      return createIndividualReport((EvidenceRecordReport)report, returnVR);
+      return createIndividualReports((EvidenceRecordReport)report, returnVR);
     }
-    return translate(report, IndividualReportType.class);
+    if (report instanceof SignatureReportPart)
+    {
+      return createIndividualReports((SignatureReportPart)report, returnVR);
+    }
+    return List.of(translate(report, IndividualReportType.class));
   }
 
   private static IndividualReportType createResultOnly(ReportPart report)
   {
-    IndividualReportType result = XmlHelper.FACTORY_OASIS_VR.createIndividualReportType();
+    var result = XmlHelper.FACTORY_OASIS_VR.createIndividualReportType();
     result.setSignedObjectIdentifier(createIdentifier(report.getReference()));
     result.setResult(translateResult(report.getOverallResultVerbose()));
     return result;
@@ -187,14 +193,8 @@ public final class VRCreator
 
   private static SignedObjectIdentifierType createIdentifier(Reference ref)
   {
-    SignedObjectIdentifierType identifier = XmlHelper.FACTORY_OASIS_VR.createSignedObjectIdentifierType();
-    if (ref.getSignatureValue() != null) // NOPMD searching the one nun-null value
-    {
-      SignatureValueType value = XmlHelper.FACTORY_DSIG.createSignatureValueType();
-      value.setValue(ref.getSignatureValue());
-      identifier.setSignatureValue(value);
-    }
-    else if (ref.getxPath() != null) // NOPMD
+    var identifier = XmlHelper.FACTORY_OASIS_VR.createSignedObjectIdentifierType();
+    if (ref.getxPath() != null) // NOPMD
     {
       identifier.setXPath(ref.getxPath());
     }
@@ -205,10 +205,10 @@ public final class VRCreator
     return identifier;
   }
 
-  private static IndividualReportType createIndividualReport(EvidenceRecordReport report,
-                                                             ReturnVerificationReport returnVerificationReport)
+  private static List<IndividualReportType> createIndividualReports(EvidenceRecordReport report,
+                                                                    ReturnVerificationReport returnVerificationReport)
   {
-    IndividualReportType result = XmlHelper.FACTORY_OASIS_VR.createIndividualReportType();
+    var result = XmlHelper.FACTORY_OASIS_VR.createIndividualReportType();
     result.setSignedObjectIdentifier(createIdentifier(report.getReference()));
     result.setResult(translateResult(report.getOverallResultVerbose()));
     if (report.isDetailsPresent() && !specifiesNoDetails(returnVerificationReport))
@@ -216,9 +216,12 @@ public final class VRCreator
       result.setDetails(XmlHelper.FACTORY_DSS.createAnyType());
       try
       {
-        Element element = XmlHelper.toElement(report.getFormatted(),
-                                              XmlHelper.FACTORY_ESOR_VR.getClass().getPackage().getName(),
-                                              XmlHelper.FACTORY_ESOR_VR::createEvidenceRecordReport);
+        var contextPath = Strings.join(List.of(XmlHelper.FACTORY_ESOR_VR.getClass().getPackage().getName(),
+                                               XmlHelper.FACTORY_ECARD_EXT.getClass().getPackage().getName()),
+                                       ':');
+        var element = XmlHelper.toElement(report.getFormatted(),
+                                          contextPath,
+                                          XmlHelper.FACTORY_ESOR_VR::createEvidenceRecordReport);
         result.getDetails().getAny().add(element);
       }
       catch (JAXBException e)
@@ -226,7 +229,70 @@ public final class VRCreator
         LOG.error("Failed to process EvidenceRecordReport XML", e);
       }
     }
+    return List.of(result);
+  }
+
+  private static List<IndividualReportType> createIndividualReports(SignatureReportPart report,
+                                                                    ReturnVerificationReport returnVerificationReport)
+  {
+    var result = new ArrayList<IndividualReportType>();
+    if (report.isDetailsPresent() && !specifiesNoDetails(returnVerificationReport))
+    {
+      var contextPath = Strings.join(List.of(XmlHelper.FACTORY_ESOR_VR.getClass().getPackage().getName(),
+                                             XmlHelper.FACTORY_ECARD_EXT.getClass().getPackage().getName()),
+                                     ':');
+      for ( Map.Entry<byte[], Object> entry : report.findSignatureReportDetails().entrySet() )
+      {
+        var individualReport = createIndividualReport(report);
+        individualReport.setDetails(XmlHelper.FACTORY_DSS.createAnyType());
+
+        var signatureValueType = new SignatureValueType();
+        signatureValueType.setValue(entry.getKey());
+        individualReport.getSignedObjectIdentifier().setSignatureValue(signatureValueType);
+
+        var element = toElement(entry.getValue(), contextPath);
+        individualReport.getDetails().getAny().add(element);
+        result.add(individualReport);
+      }
+    }
+    else
+    {
+      var individualReport = createIndividualReport(report);
+      result.add(individualReport);
+    }
     return result;
+  }
+
+  private static Element toElement(Object reportType, String contextPath)
+  {
+    try
+    {
+      if (reportType instanceof DetailedSignatureReportType)
+      {
+        return XmlHelper.toElement((DetailedSignatureReportType)reportType,
+                                   contextPath,
+                                   XmlHelper.FACTORY_OASIS_VR::createDetailedSignatureReport);
+      }
+      else if (reportType instanceof TimeStampValidityType)
+      {
+        return XmlHelper.toElement((TimeStampValidityType)reportType,
+                                   contextPath,
+                                   XmlHelper.FACTORY_OASIS_VR::createIndividualTimeStampReport);
+      }
+    }
+    catch (JAXBException e)
+    {
+      LOG.error("Failed to process signature report XML", e);
+    }
+    throw new IllegalArgumentException("Given report type must be instance of DetailedSignatureReportType or TimeStampValidityType");
+  }
+
+  private static IndividualReportType createIndividualReport(SignatureReportPart report)
+  {
+    var individualReport = XmlHelper.FACTORY_OASIS_VR.createIndividualReportType();
+    individualReport.setSignedObjectIdentifier(createIdentifier(report.getReference()));
+    individualReport.setResult(translateResult(report.getOverallResultVerbose()));
+    return individualReport;
   }
 
   private static boolean specifiesNoDetails(ReturnVerificationReport returnVR)
@@ -239,7 +305,7 @@ public final class VRCreator
 
   private static Result translateResult(VerificationResultType input)
   {
-    Result result = XmlHelper.FACTORY_DSS.createResult();
+    var result = XmlHelper.FACTORY_DSS.createResult();
     result.setResultMajor(input.getResultMajor());
     result.setResultMinor(input.getResultMinor());
     result.setResultMessage(input.getResultMessage());
@@ -249,14 +315,14 @@ public final class VRCreator
   private static class LoggingErrorHandler implements ErrorHandler
   {
 
+    static final String MSG = "Schema violation in report detected";
+
     private final Logger log;
 
     LoggingErrorHandler(Logger log)
     {
       this.log = log;
     }
-
-    static final String MSG = "Schema violation in report detected";
 
     @Override
     public void warning(SAXParseException exception) throws SAXException
@@ -271,7 +337,7 @@ public final class VRCreator
     }
 
     @Override
-    public void fatalError(SAXParseException exception) throws SAXException
+    public void fatalError(SAXParseException exception)
     {
       log.error(MSG, exception);
     }

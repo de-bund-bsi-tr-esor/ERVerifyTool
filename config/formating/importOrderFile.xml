@@ -1,0 +1,11 @@
+#Organize Import Order
+#Thu Jan 30 11:15: 03 CET 2020
+8=de.bund.bsi
+7=de.governikus
+6=de.bos_bremen
+5=com
+4=javanet
+3=org
+2=jakarta
+1=javax
+0=java

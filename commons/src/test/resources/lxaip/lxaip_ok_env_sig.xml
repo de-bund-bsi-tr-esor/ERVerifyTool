@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xaip:XAIP XAIPVersion="1.3.0" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:asic="http://uri.etsi.org/02918/v1.2.1#" xmlns:xaip="http://www.bsi.bund.de/tr-esor/xaip" xmlns:xml="http://www.w3.org/XML/1998/namespace" xmlns:xmlers="urn:ietf:params:xml:ns:ers">
+	<xaip:packageHeader packageID="xf5b367b2-1581-4899-8e7d-f6f6aab2ce59">
+		<xaip:AOID>20b63bc2-aa1b-4051-ad64-9357b7375350</xaip:AOID>
+		<xaip:versionManifest VersionID="V001">
+			<xaip:preservationInfo>
+				<xaip:retentionPeriod>2022-09-23Z</xaip:retentionPeriod>
+			</xaip:preservationInfo>
+			<xaip:submissionInfo>
+				<xaip:clientID>remotebean_esor13</xaip:clientID>
+				<xaip:submissionTime>2022-09-23T08:49:39.957Z</xaip:submissionTime>
+			</xaip:submissionInfo>
+			<xaip:packageInfoUnit packageUnitID="_idxVersions_V001">
+				<xaip:protectedObjectPointer>DO_01</xaip:protectedObjectPointer>
+				<xaip:protectedObjectPointer>MD_01</xaip:protectedObjectPointer>
+				<xaip:protectedObjectPointer>V001</xaip:protectedObjectPointer>
+			</xaip:packageInfoUnit>
+		</xaip:versionManifest>
+		<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+	</xaip:packageHeader>
+	<xaip:metaDataSection>
+		<xaip:metaDataObject metaDataID="MD_01" relatedObjects="DO_01">
+			<xaip:binaryMetaData>QSB0ZXN0IGZpbGU=</xaip:binaryMetaData>
+		</xaip:metaDataObject>
+	</xaip:metaDataSection>
+	<xaip:dataObjectsSection>
+		<xaip:dataObject dataObjectID="DO_01">
+			<xaip:xmlData>
+				<asic:DataObjectReference URI="inlinesig.bin">
+					<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+					<ds:DigestValue>ew/8z45pF2p8WEQbg+MXEl2kXTmkRXOgcx27ctIwsz4=</ds:DigestValue>
+				</asic:DataObjectReference>
+			</xaip:xmlData>
+		</xaip:dataObject>
+	</xaip:dataObjectsSection>
+</xaip:XAIP>

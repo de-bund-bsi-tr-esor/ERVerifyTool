@@ -21,12 +21,13 @@
  */
 package de.bund.bsi.tr_esor.checktool.parser;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -39,10 +40,11 @@ import org.xml.sax.SAXException;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
+import de.bund.bsi.tr_esor.checktool.data.XaipAndSerializer;
 import de.bund.bsi.tr_esor.checktool.entry.IsValidXML;
 import de.bund.bsi.tr_esor.checktool.validation.ParserFactory;
-import de.bund.bsi.tr_esor.xaip._1.EvidenceRecordType;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
+import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
 
 
 /**
@@ -62,13 +64,13 @@ public class TestParsers
   @Test
   public void exampleErFile() throws IOException, SAXException
   {
-    try (InputStream ins = TestParsers.class.getResourceAsStream("/bin/example.er.xml");
-      Scanner scan = new Scanner(ins, "UTF-8"))
+    try (var ins = TestParsers.class.getResourceAsStream("/bin/example.er.xml");
+      var scan = new Scanner(ins, StandardCharsets.UTF_8))
     {
-      String xml = scan.useDelimiter("\\A").next();
+      var xml = scan.useDelimiter("\\A").next();
       assertThat(xml,
                  new IsValidXML("EvidenceRecordType",
-                                TestParsers.class.getResource("/tr-esor-xaip-v1_2.xsd")));
+                                TestParsers.class.getResource("/tr-esor-xaip-v1.3.xsd")));
     }
   }
 
@@ -82,13 +84,13 @@ public class TestParsers
   public void testFactoryBuiltInParsers() throws Exception
   {
     TestUtils.loadDefaultConfig();
-    int count = 0;
-    for ( Parser<?> parser : ParserFactory.getInstance().getAvailableParsers("unknown") )
+    var count = 0;
+    for ( var parser : ParserFactory.getInstance().getAvailableParsers("unknown") )
     {
       assertNotNull(parser);
       count++;
     }
-    assertThat("count", count, is(5));
+    assertThat("count", count, is(6));
   }
 
   /**
@@ -99,7 +101,7 @@ public class TestParsers
   @Test
   public void testXaipParser() throws IOException
   {
-    genericChecks(new XaipParser(), "/xaip/xaip_ok_ers.xml", XAIPType.class);
+    genericChecks(new XaipParser(mock(LXaipReader.class)), "/xaip/xaip_ok_ers.xml", XaipAndSerializer.class);
   }
 
   /**
@@ -121,9 +123,9 @@ public class TestParsers
   @Test
   public void testAsn1ErParser() throws IOException
   {
-    for ( String path : new String[]{"/bin/example.ers.b64", "/bin/ATS1_BIN_ER.ers.b64"} )
+    for ( var path : new String[]{"/bin/example.ers.b64", "/bin/ATS1_BIN_ER.ers.b64"} )
     {
-      try (InputStream ins = getBinaryStream(path))
+      try (var ins = getBinaryStream(path))
       {
         Parser<?> parser = new ASN1EvidenceRecordParser();
         parser.setInput(ins);
@@ -148,13 +150,13 @@ public class TestParsers
   @Test
   public void canParseCms() throws Exception
   {
-    CmsSignatureParser parser = new CmsSignatureParser();
-    try (InputStream ins = getBinaryStream("/cms/encapsulated_with_er.p7s.b64"))
+    var parser = new CmsSignatureParser();
+    try (var ins = getBinaryStream("/cms/encapsulated_with_er.p7s.b64"))
     {
       parser.setInput(ins);
       assertTrue(parser.canParse());
     }
-    try (InputStream ins = getBinaryStream("/bin/example.ers.b64"))
+    try (var ins = getBinaryStream("/bin/example.ers.b64"))
     {
       parser.setInput(ins);
       assertFalse(parser.canParse());
@@ -178,18 +180,18 @@ public class TestParsers
    */
   private <T> T genericChecks(Parser<T> parser, String inputPath, Class<T> expectedClass) throws IOException
   {
-    String wrong = "<ns:Comment xmlns:ns=\"urn:unknown\">This is certainly not the expected Input</ns:Comment>";
+    var wrong = "<ns:Comment xmlns:ns=\"urn:unknown\">This is certainly not the expected Input</ns:Comment>";
     try (InputStream ins = new ByteArrayInputStream(wrong.getBytes(StandardCharsets.UTF_8)))
     {
       parser.setInput(ins);
       assertFalse("can parse wrong input", parser.canParse());
     }
-    try (InputStream ins = TestParsers.class.getResourceAsStream(inputPath))
+    try (var ins = TestParsers.class.getResourceAsStream(inputPath))
     {
       parser.setInput(ins);
       assertTrue("can parse correct input", parser.canParse());
       assertTrue("can parse correct input (second try)", parser.canParse());
-      T result = parser.parse();
+      var result = parser.parse();
       assertThat("parsed", result, instanceOf(expectedClass));
       return result;
     }

@@ -44,20 +44,21 @@ public class TestArchiveTimeStampSequence
   @Test
   public void parseAndEncode() throws Exception
   {
-    byte[] erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-    byte[] atss = er.getAtss().getEncoded();
+    var erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
+    var er = new ASN1EvidenceRecordParser().parse(erBytes);
+    var atss = er.getAtss().getEncoded();
     assertTrue("Encoded ATSS is found in EvidenceRecord", findInArray(erBytes, atss));
   }
 
+  @SuppressWarnings("PMD.AssignmentInOperand")
   private boolean findInArray(byte[] haystack, byte[] needle)
   {
     if (needle.length == 0)
     {
       return true;
     }
-    int pos = 0;
-    for ( int i = 0 ; i < haystack.length ; i++ )
+    var pos = 0;
+    for ( var i = 0 ; i < haystack.length ; i++ )
     {
       if (haystack[i] != needle[pos++])
       {

@@ -25,14 +25,16 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+
 import org.bouncycastle.cms.CMSSignedData;
 
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -42,7 +44,7 @@ import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerif
  *
  * @author TT
  */
-public class ParameterFinder
+public abstract class ParameterFinder
 {
 
   /**
@@ -55,6 +57,9 @@ public class ParameterFinder
 
   /** XAIP (possibly with ERs contained) specified in input */
   protected XAIPType xaip;
+
+  /** serializer for XAIP elements */
+  protected XaipSerializer serializer;
 
   /** evidence record given separately as input */
   protected EvidenceRecord er;
@@ -123,6 +128,14 @@ public class ParameterFinder
   }
 
   /**
+   * Returns the Serializer for the Xaip
+   */
+  public XaipSerializer getSerializer()
+  {
+    return serializer;
+  }
+
+  /**
    * Returns profile name from request or configured default one if none was specified.
    */
   public String getProfileName()
@@ -183,11 +196,10 @@ public class ParameterFinder
    *
    * @param byRequest
    */
-  protected void setProfileName(String byRequest)
+  protected void handleProfileName(String byRequest)
   {
     profileName = Optional.ofNullable(Optional.ofNullable(byRequest)
                                               .orElse(Configurator.getInstance().getDefaultProfileName()))
                           .orElse(ProfileNames.RFC4998);
   }
-
 }

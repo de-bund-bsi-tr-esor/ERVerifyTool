@@ -46,7 +46,7 @@ public class TestBasisErsAlgorithmUsageValidator extends TestAlgorithmUsageValid
   @Test
   public void testBasisErsProfileRestriction() throws Exception
   {
-    final String hmacWithSHA256 = "1.2.840.113549.2.9";
+    final var hmacWithSHA256 = "1.2.840.113549.2.9";
     checkAlgorithm(createValidatorUnderTest(),
                    hmacWithSHA256,
                    ValidationResultMajor.INVALID,

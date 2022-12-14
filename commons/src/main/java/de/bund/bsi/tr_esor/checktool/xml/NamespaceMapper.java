@@ -23,10 +23,8 @@ package de.bund.bsi.tr_esor.checktool.xml;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 
 
 /**
@@ -41,7 +39,7 @@ public class NamespaceMapper
 
   static
   {
-    DEFAULT_NS_PREFIX_MAP.put("http://www.bsi.bund.de/tr-esor/xaip/1.2", "esor");
+    DEFAULT_NS_PREFIX_MAP.put("http://www.bsi.bund.de/tr-esor/xaip", "xaip");
     DEFAULT_NS_PREFIX_MAP.put("http://www.w3.org/2001/XMLSchema", "xs");
     DEFAULT_NS_PREFIX_MAP.put("http://www.w3.org/2000/09/xmldsig#", "ds");
     DEFAULT_NS_PREFIX_MAP.put("http://uri.etsi.org/01903/v1.3.2#", "xades");
@@ -56,15 +54,16 @@ public class NamespaceMapper
 
   /**
    * Constructs a name space mapper using given map
+   *
    * @param configured
    */
   public NamespaceMapper(Map<String, String> configured)
   {
     nsPrefixMap = new HashMap<>(DEFAULT_NS_PREFIX_MAP);
-    boolean tnsSet = false;
-    for ( Entry<String, String> entry : configured.entrySet() )
+    var tnsSet = false;
+    for ( var entry : configured.entrySet() )
     {
-      boolean isTargetNamespace = entry.getValue() == null || entry.getValue().isEmpty();
+      var isTargetNamespace = entry.getValue() == null || entry.getValue().isEmpty();
       if (tnsSet && isTargetNamespace)
       {
         throw new IllegalArgumentException("Only one targetNamespace (empty namespace prefix) may be defined in the configuration!");
@@ -87,10 +86,10 @@ public class NamespaceMapper
     {
       setNSPrefix(element);
     }
-    int children = element.getChildNodes().getLength();
-    for ( int i = 0 ; i < children ; i++ )
+    var children = element.getChildNodes().getLength();
+    for ( var i = 0 ; i < children ; i++ )
     {
-      Node child = element.getChildNodes().item(i);
+      var child = element.getChildNodes().item(i);
       if (child instanceof Element)
       {
         setNSPrefixRecursively((Element)child);
@@ -100,7 +99,7 @@ public class NamespaceMapper
 
   void setNSPrefix(Element element)
   {
-    String prefix = nsPrefixMap.get(element.getNamespaceURI());
+    var prefix = nsPrefixMap.get(element.getNamespaceURI());
     element.setPrefix(prefix);
     element.removeAttribute("xmlns");
     element.setAttributeNS("http://www.w3.org/2000/xmlns/",

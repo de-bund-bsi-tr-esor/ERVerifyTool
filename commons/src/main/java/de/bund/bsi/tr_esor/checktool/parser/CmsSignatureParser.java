@@ -39,11 +39,11 @@ public class CmsSignatureParser implements Parser<CMSSignedData>
 
   private static final byte CONSTRUCTED_SEQUENCE = 0x30;
 
-  private static final byte[] CMS_SIGNED_OBJECT_IDENTIFIER = new byte[]{0x06, // object identifier
-                                                                        0x09, // length of our OID
-                                                                        // OID value 1.2.840.113549.1.7.2:
-                                                                        0x2a, (byte)0x86, 0x48, (byte)0x86,
-                                                                        (byte)0xf7, 0x0d, 0x01, 0x07, 0x02};
+  private static final byte[] CMS_SIGNED_OBJECT_IDENTIFIER = {0x06, // object identifier
+                                                              0x09, // length of our OID
+                                                              // OID value 1.2.840.113549.1.7.2:
+                                                              0x2a, (byte)0x86, 0x48, (byte)0x86, (byte)0xf7,
+                                                              0x0d, 0x01, 0x07, 0x02};
 
   private static final int BUF_SIZE = CMS_SIGNED_OBJECT_IDENTIFIER.length + 5;
 
@@ -63,17 +63,17 @@ public class CmsSignatureParser implements Parser<CMSSignedData>
   public boolean canParse() throws IOException
   {
     input.mark(BUF_SIZE);
-    byte[] buf = new byte[BUF_SIZE];
-    int len = input.read(buf, 0, BUF_SIZE);
+    var buf = new byte[BUF_SIZE];
+    var len = input.read(buf, 0, BUF_SIZE);
     input.reset();
     if (len < BUF_SIZE || buf[0] != CONSTRUCTED_SEQUENCE)
     {
       return false;
     }
-    int numLenBytes = getNumLenBytes(buf[1]);
-    byte[] foundOid = Arrays.copyOfRange(buf,
-                                         1 + numLenBytes,
-                                         1 + numLenBytes + CMS_SIGNED_OBJECT_IDENTIFIER.length);
+    var numLenBytes = getNumLenBytes(buf[1]);
+    var foundOid = Arrays.copyOfRange(buf,
+                                      1 + numLenBytes,
+                                      1 + numLenBytes + CMS_SIGNED_OBJECT_IDENTIFIER.length);
     return Arrays.equals(foundOid, CMS_SIGNED_OBJECT_IDENTIFIER);
   }
 
@@ -101,9 +101,9 @@ public class CmsSignatureParser implements Parser<CMSSignedData>
    */
   private int getNumLenBytes(byte lengthByte)
   {
-    final int bit8Mask = 0b10000000;
-    final int numberFollowingMask = 0b01111111;
-    int numLenBytes = 1;
+    final var bit8Mask = 0b10000000;
+    final var numberFollowingMask = 0b01111111;
+    var numLenBytes = 1;
     if ((lengthByte & bit8Mask) > 0)
     {
       numLenBytes += lengthByte & numberFollowingMask;

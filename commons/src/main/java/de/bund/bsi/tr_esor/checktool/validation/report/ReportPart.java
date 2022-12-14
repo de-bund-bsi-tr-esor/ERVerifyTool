@@ -21,15 +21,18 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
+
 import de.bund.bsi.tr_esor.checktool.validation.NoValidatorException;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.VerificationResultCreator;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
 
 
 /**
@@ -88,7 +91,7 @@ public class ReportPart
    */
   private String message;
 
-  private final Map<Reference, String> subMessages = new HashMap<>();
+  private final Map<Reference, List<String>> subMessages = new HashMap<>();
 
   /**
    * Reference to the object the validation of which is reported.
@@ -109,57 +112,60 @@ public class ReportPart
 
   /**
    * Returns instance which states that the input was not parsed. Consequently, no validation is possible.
-   *
-   * @param ref
    */
   public static ReportPart forUnsupportedInput(Reference ref)
   {
-    ReportPart result = new ReportPart(ref);
+    var result = new ReportPart(ref);
     result.detailsPresent = false;
     result.major = ValidationResultMajor.INDETERMINED;
-    result.minor = "http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/invalidFormat";
+    result.minor = BsiResultMinor.INVALID_FORMAT.getUri();
     result.message = "illegal or unsupported data format";
     return result;
   }
 
   /**
    * Returns instance which states that no verification was done because of the reason given in the message.
-   *
-   * @param ref
-   * @param message
    */
   public static ReportPart forNoVerification(Reference ref, String message)
   {
-    ReportPart result = new ReportPart(ref);
+    var result = new ReportPart(ref);
     result.detailsPresent = false;
     result.major = ValidationResultMajor.INVALID;
-    result.minor = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError";
+    result.minor = BsiResultMinor.PARAMETER_ERROR.getUri();
     result.message = message;
     return result;
   }
 
   /**
+   * Returns instance which states that no verification was done because of broken LXAIP integrity.
+   */
+  public static ReportPart forLXaipDigestMismatch(Reference ref, Exception exception)
+  {
+    var result = new ReportPart(ref);
+    result.detailsPresent = false;
+    result.major = ValidationResultMajor.INVALID;
+    result.minor = BsiResultMinor.HASH_VALUE_MISMATCH.getUri();
+    result.message = exception.getMessage();
+    return result;
+  }
+
+  /**
    * Returns instance which states that no validator is available for that object.
-   *
-   * @param ref
-   * @param e
    */
   public static ReportPart forNoValidator(Reference ref, NoValidatorException e)
   {
-    ReportPart result = new ReportPart(ref);
+    var result = new ReportPart(ref);
     result.setNoValidator(e);
     return result;
   }
 
   /**
    * Sets result in case validator not available.
-   *
-   * @param e
    */
   public void setNoValidator(NoValidatorException e)
   {
     major = ValidationResultMajor.INDETERMINED;
-    minor = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError";
+    minor = BsiResultMinor.INTERNAL_ERROR.getUri();
     message = e == null ? "no validator available" : e.getMessage();
     detailsPresent = false;
   }
@@ -167,24 +173,19 @@ public class ReportPart
   /**
    * Returns an instance indicating that no validation has been done because of unknown profile. In that case,
    * the application does neither know how to parse data nor how to validate objects.
-   *
-   * @param ref
-   * @param profileName
    */
   public static ReportPart forNoProfile(Reference ref, String profileName)
   {
-    ReportPart result = new ReportPart(ref);
+    var result = new ReportPart(ref);
     result.detailsPresent = false;
     result.major = ValidationResultMajor.INDETERMINED;
-    result.minor = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError";
+    result.minor = BsiResultMinor.PARAMETER_ERROR.getUri();
     result.message = "unsupported profile: " + profileName;
     return result;
   }
 
   /**
    * Changes own result codes in case that sub-validations were not OK.
-   *
-   * @param subPart
    */
   public void updateCodes(ReportPart subPart)
   {
@@ -211,7 +212,7 @@ public class ReportPart
                           String newMessage,
                           Reference subRef)
   {
-    ValidationResultMajor oldMajor = major;
+    var oldMajor = major;
     major = major.worse(newMajor);
 
     if (major != oldMajor || newMajor == oldMajor && notLessImportant(pr))
@@ -219,7 +220,7 @@ public class ReportPart
       minor = newMinor;
       minorPriority = pr;
     }
-    if (newMessage != null)
+    if (newMessage != null && newMajor != ValidationResultMajor.VALID)
     {
       if (subRef.equals(reference))
       {
@@ -227,8 +228,21 @@ public class ReportPart
       }
       else
       {
-        subMessages.put(subRef, newMessage);
+        addSubmessage(subRef, newMessage);
       }
+    }
+  }
+
+  /** Add a message to the report. Messages can also be added for valid results */
+  public void addMessageOnly(String newMessage, Reference subRef)
+  {
+    if (subRef.equals(reference))
+    {
+      message = Optional.ofNullable(message).map(m -> m + ", " + newMessage).orElse(newMessage);
+    }
+    else
+    {
+      addSubmessage(subRef, newMessage);
     }
   }
 
@@ -279,7 +293,7 @@ public class ReportPart
   {
     detailsPresent = false;
     major = ValidationResultMajor.INVALID;
-    minor = "http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/invalidFormat";
+    minor = "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat";
     message = type + " cannot be parsed";
   }
 
@@ -288,7 +302,7 @@ public class ReportPart
    */
   public String getSummarizedMessage()
   {
-    StringBuilder result = new StringBuilder();
+    var result = new StringBuilder();
     if (message != null)
     {
       result.append(message);
@@ -296,16 +310,32 @@ public class ReportPart
     if (!subMessages.isEmpty())
     {
       Map<String, String> msgs = new TreeMap<>();
-      subMessages.forEach((r, m) -> addMessage(r, m, msgs));
+      subMessages.forEach((r, m) -> m.stream().forEach(subMessage -> addMessage(r, subMessage, msgs)));
       msgs.forEach((r, m) -> appendMesssage(result, r, m));
     }
-    return result.toString();
+    var summary = result.toString();
+    return summary.isBlank() ? null : summary;
   }
 
+  /** Add a message without adjusting codes. Can also add messages for valid case. */
   private void addMessage(Reference r, String m, Map<String, String> msgs)
   {
-    String rel = r.relativize(reference);
+    var rel = r.relativize(reference);
     msgs.put(rel, Optional.ofNullable(msgs.get(rel)).map(s -> s + ", " + m).orElse(m));
+  }
+
+  private void addSubmessage(Reference r, String m)
+  {
+    if (subMessages.containsKey(r))
+    {
+      subMessages.get(r).add(m);
+    }
+    else
+    {
+      List<String> messages = new ArrayList<>();
+      messages.add(m);
+      subMessages.put(r, messages);
+    }
   }
 
   private void appendMesssage(StringBuilder result, String relativeRef, String msg)

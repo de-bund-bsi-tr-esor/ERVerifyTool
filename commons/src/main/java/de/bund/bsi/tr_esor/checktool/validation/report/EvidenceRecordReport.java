@@ -23,8 +23,8 @@ package de.bund.bsi.tr_esor.checktool.validation.report;
 
 import de.bund.bsi.tr_esor.checktool.xml.VRCreator;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import de.bund.bsi.tr_esor.vr._1.EvidenceRecordValidityType;
-import de.bund.bsi.tr_esor.vr._1.EvidenceRecordValidityType.ArchiveTimeStampSequence;
+import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType;
+import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequence;
 
 
 /**
@@ -46,6 +46,8 @@ public class EvidenceRecordReport extends ReportPart implements OutputCreator<Ev
   {
     super(ref);
     xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityType();
+    xmlReport.setVersion("1.3.0");
+    xmlReport.setReportVersion("1.3.0");
   }
 
   @Override

@@ -26,9 +26,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.function.Consumer;
+import java.util.function.Function;
 
-import javax.xml.bind.JAXBException;
+import jakarta.xml.bind.JAXBException;
 
 import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.slf4j.Logger;
@@ -39,12 +39,17 @@ import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.NoVerificationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationContext;
+import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.VersionNotFoundException;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
+import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.DetachedSignatureValidationContextBuilder;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.InlineSignatureValidationContext;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipDigestMismatchException;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipUnprocessableException;
 import de.bund.bsi.tr_esor.checktool.xml.XaipReader;
-import de.bund.bsi.tr_esor.xaip._1.CredentialType;
-import de.bund.bsi.tr_esor.xaip._1.EvidenceRecordType;
-import de.bund.bsi.tr_esor.xaip._1.PackageHeaderType;
-import de.bund.bsi.tr_esor.xaip._1.VersionManifestType;
+import de.bund.bsi.tr_esor.xaip.CredentialType;
+import de.bund.bsi.tr_esor.xaip.VersionManifestType;
 
 
 /**
@@ -64,10 +69,6 @@ public class InputPreparator
 
   /**
    * Sorts the input in case the XAIP has already been identified.
-   *
-   * @param params
-   * @throws IOException
-   * @throws ReflectiveOperationException
    */
   public InputPreparator(ParameterFinder params) throws ReflectiveOperationException, IOException
   {
@@ -77,47 +78,21 @@ public class InputPreparator
     {
       return;
     }
-    else if (params.getXaip() != null)
+
+    if (params.getXaip() != null)
     {
-      XaipReader reader = new XaipReader(params.getXaip(), params.getXaipRef());
-      for ( Entry<Reference, CredentialType> entry : reader.getEvidenceRecords().entrySet() )
-      {
-        if (checkRelatedObjectsVersionId(entry.getValue()))
-        {
-          EvidenceRecordType er = entry.getValue().getEvidenceRecord();
-          if (er.getAsn1EvidenceRecord() == null)
-          {
-            validations.add(new ErValidationContext(entry.getKey(), "no ASN.1 evidence record given",
-                                                    params.getProfileName()));
-          }
-          else
-          {
-            ErValidationContext ctx = new ErValidationContext(entry.getKey(),
-                                                              new ASN1EvidenceRecordParser().parse(er.getAsn1EvidenceRecord()),
-                                                              params.getProfileName(),
-                                                              params.getReturnVerificationReport());
-            addProtectedElements(reader, er.getVersionID(), ctx);
-            validations.add(ctx);
-          }
-        }
-        else
-        {
-          createContextForNoVerification(entry.getKey(),
-                                         "Version ID for EvidenceRecord and relatedObjects reference in enveloping credential do not match");
-        }
-      }
-      createContextForDetachedEr(ctx -> addProtectedElements(reader,
-                                                             params.getXaipVersionAddressedByEr(),
-                                                             ctx));
+      scanXaipForEvidenceRecords();
+      scanXaipForInlineSignatures();
+      scanXaipForDetachedSignatures();
     }
     else if (params.getCmsDocument() != null)
     {
-      CmsSignedDataReader reader = new CmsSignedDataReader(params.getCmsDocument(), params.getCmsRef());
+      var reader = new CmsSignedDataReader(params.getCmsDocument(), params.getCmsRef());
       reader.getEmbeddedErs().forEach((r, v) -> createContextForErInCMS(r, v, reader));
     }
     else
     {
-      createContextForDetachedEr(ctx -> params.getBinaryDocuments().forEach(ctx::addProtectedData));
+      createContextForDetachedEr(this::addProtectedDataFromBinaryDocuments);
     }
 
     if (params.getUnsupportedRef() != null)
@@ -126,24 +101,128 @@ public class InputPreparator
     }
   }
 
-
-  private boolean checkRelatedObjectsVersionId(CredentialType cred)
+  private ErValidationContext addProtectedDataFromBinaryDocuments(ErValidationContext evc)
   {
-    List<Object> relatedObjects = cred.getRelatedObjects();
-    for ( Object o : relatedObjects )
+    var binaryDocuments = params.getBinaryDocuments();
+    binaryDocuments.forEach(evc::addProtectedData);
+    return evc;
+  }
+
+  private void scanXaipForEvidenceRecords() throws ReflectiveOperationException, IOException
+  {
+    var reader = new XaipReader(params.getXaip(), params.getXaipRef(), params.getProfileName());
+    scanXaipForEmbeddedER(reader);
+    createContextForDetachedEr(ctx -> addProtectedElements(reader,
+                                                           params.getXaipVersionAddressedByEr(),
+                                                           ctx));
+  }
+
+  private void scanXaipForInlineSignatures()
+  {
+    var reader = new XaipReader(params.getXaip(), params.getXaipRef(), params.getProfileName());
+    var potentiallySigned = reader.findPotentiallyInlineSignedElements();
+    for ( var data : potentiallySigned )
     {
-      if (o instanceof VersionManifestType)
+      var ctx = new InlineSignatureValidationContext(data, params.getProfileName());
+      validations.add(ctx);
+    }
+  }
+
+  private void scanXaipForDetachedSignatures() throws IOException
+  {
+    var reader = new XaipReader(params.getXaip(), params.getXaipRef(), params.getProfileName());
+    var signatures = reader.findDetachedSignatures();
+    for ( var cred : signatures )
+    {
+      var ctx = new DetachedSignatureValidationContextBuilder().withProfileName(params.getProfileName())
+                                                               .withXaipSerializer(params.serializer)
+                                                               .withRestrictedValidation(params instanceof WSParameterFinder)
+                                                               .create(cred);
+      validations.add(ctx);
+    }
+  }
+
+  private void scanXaipForEmbeddedER(XaipReader reader) throws IOException, ReflectiveOperationException
+  {
+    for ( var entry : reader.getEvidenceRecords().entrySet() )
+    {
+      if (verifyReferencedVersionForEvidenceRecord(entry))
       {
-        String versionID = ((VersionManifestType)o).getVersionID();
-        if (cred.getEvidenceRecord().getVersionID() == null)
+        var er = entry.getValue().getEvidenceRecord();
+        if (er.getVersionID() == null && reader.listVersions().size() > 1)
         {
-          cred.getEvidenceRecord().setVersionID(versionID);
+          createContextForNoVerification(entry.getKey(),
+                                         "There is more than one VersionManifest in the Xaip. The EvidenceRecord needs to specify which version it relates to. Possible versions are "
+                                                         + reader.listVersions());
+          return;
         }
-        else if (!cred.getEvidenceRecord().getVersionID().equals(versionID))
+
+        if (er.getAsn1EvidenceRecord() == null)
         {
-          return false;
+          validations.add(new ErValidationContext(entry.getKey(), "no ASN.1 evidence record given",
+                                                  params.getProfileName()));
+        }
+        else
+        {
+          var ctx = addProtectedElements(reader,
+                                         er.getVersionID(),
+                                         new ErValidationContext(entry.getKey(),
+                                                                 new ASN1EvidenceRecordParser().parse(er.getAsn1EvidenceRecord()),
+                                                                 params.getProfileName(),
+                                                                 params.getReturnVerificationReport(), true));
+          validations.add(ctx);
         }
       }
+    }
+  }
+
+
+  private boolean verifyReferencedVersionForEvidenceRecord(Entry<Reference, CredentialType> credEntry)
+  {
+    var cred = credEntry.getValue();
+    var relatedObjects = cred.getRelatedObjects();
+
+    if (relatedObjects.isEmpty())
+    {
+      return true;
+    }
+
+    var numberOfVersionManifestsFound = 0;
+    for ( var o : relatedObjects )
+    {
+      if (!(o instanceof VersionManifestType))
+      {
+        continue;
+      }
+
+      numberOfVersionManifestsFound++;
+
+      if (numberOfVersionManifestsFound > 1)
+      {
+        createContextForNoVerification(credEntry.getKey(),
+                                       "An EvidenceRecord can only refer to one VersionManifest.");
+        return false;
+      }
+
+      var versionID = ((VersionManifestType)o).getVersionID();
+      if (cred.getEvidenceRecord().getVersionID() == null)
+      {
+        cred.getEvidenceRecord().setVersionID(versionID);
+      }
+      else if (!cred.getEvidenceRecord().getVersionID().equals(versionID))
+      {
+        createContextForNoVerification(credEntry.getKey(),
+                                       "Version ID for EvidenceRecord and relatedObjects reference in enveloping credential do not match");
+        return false;
+      }
+
+    }
+
+    if (numberOfVersionManifestsFound == 0)
+    {
+      createContextForNoVerification(credEntry.getKey(),
+                                     "None of the relatedObjects of the given EvidenceRecord are referring to a VersionManifest.");
+      return false;
     }
     return true;
   }
@@ -154,8 +233,8 @@ public class InputPreparator
    */
   private boolean isAoidOrVersionBroken()
   {
-    String aoid = params.getXaipAoidAddressedByEr();
-    String version = params.getXaipVersionAddressedByEr();
+    var aoid = params.getXaipAoidAddressedByEr();
+    var version = params.getXaipVersionAddressedByEr();
     if (version == null && aoid == null)
     {
       return false; // No restrictions to check
@@ -166,7 +245,7 @@ public class InputPreparator
       createContextForNoVerification("Input specifies an evidence record for a XAIP but no XAIP is given.");
       return true;
     }
-    PackageHeaderType header = params.getXaip().getPackageHeader();
+    var header = params.getXaip().getPackageHeader();
     if (header == null)
     {
       createContextForNoVerification("Given XAIP is not well-formed, thus requirements from xaip:evidenceRecord are not met.");
@@ -198,12 +277,18 @@ public class InputPreparator
     validations.add(new NoVerificationContext(reference, params.getProfileName(), message));
   }
 
+  private boolean needsToCheckAllHashes()
+  {
+    // For XAIPs all hashes in an ER need to be checked
+    return params.getXaip() != null;
+  }
+
   private void createContextForErInCMS(Reference ref, EvidenceRecord er, CmsSignedDataReader reader)
   {
     try
     {
-      ErValidationContext ctx = new ErValidationContext(ref, er, params.getProfileName(),
-                                                        params.getReturnVerificationReport());
+      var ctx = new ErValidationContext(ref, er, params.getProfileName(),
+                                        params.getReturnVerificationReport(), needsToCheckAllHashes());
       params.getBinaryDocuments().forEach(ctx::addProtectedData);
       ctx.addProtectedData(ref, reader.getContentInfoProtectedByEr(ref));
       validations.add(ctx);
@@ -215,23 +300,59 @@ public class InputPreparator
     }
   }
 
-  private ErValidationContext addProtectedElements(XaipReader reader, String version, ErValidationContext val)
+  private ValidationContext<?> addProtectedElements(XaipReader reader,
+                                                    String version,
+                                                    ErValidationContext ctx)
   {
-    String effectiveVersion = Optional.ofNullable(version).orElse(reader.getVersion());
+    var effectiveVersion = Optional.ofNullable(version).orElse(reader.getVersion());
     try
     {
-      reader.getProtectedElements(effectiveVersion).forEach(val::addProtectedData);
-      return val;
+      reader.prepareProtectedElements(effectiveVersion, params.getSerializer())
+            .forEach(ctx::addProtectedData);
+      return ctx;
     }
-    catch (JAXBException | XMLSecurityException e)
+    catch (VersionNotFoundException e)
     {
-      LOG.error("Cannot get secured data", e);
-      return new ErValidationContext(val.getReference(), "Cannot get secured data: " + e.getMessage(),
-                                     val.getProfileName());
+      LOG.warn("Cannot find the secured data version referenced by the evidence record: {}", e.getMessage());
+      return new NoVerificationContext(ctx.getReference(), ctx.getProfileName(),
+                                       "Cannot find the secured data version referenced by the evidence record: "
+                                                                                 + e.getMessage(),
+                                       e);
+    }
+    catch (JAXBException | XMLSecurityException | IOException e)
+    {
+      LOG.warn("Cannot get secured data, see Verification Report", e);
+      return new NoVerificationContext(ctx.getReference(), "Cannot get secured data: " + e.getMessage(),
+                                       ctx.getProfileName());
+    }
+    catch (LXaipDigestMismatchException e)
+    {
+      LOG.warn("Error processing LXAIP: {}", e.getMessage(), e);
+      var report = ctx.getFormatOk();
+      report.updateCodes(ValidationResultMajor.INVALID,
+                         "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch",
+                         ReportPart.MinorPriority.MOST_IMPORTANT,
+                         e.getMessage(),
+                         new Reference(e.getDataObjectId()));
+      ctx.disableCheckForAdditionalHashes();
+      return ctx;
+    }
+    catch (LXaipUnprocessableException e)
+    {
+      LOG.warn("Error processing LXAIP: {}", e.getMessage(), e);
+      var report = ctx.getFormatOk();
+      var message = String.format("no protected data to check: %s", e.getMessage());
+      report.updateCodes(ValidationResultMajor.INDETERMINED,
+                         "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError",
+                         ReportPart.MinorPriority.MOST_IMPORTANT,
+                         message,
+                         new Reference(e.getDataObjectId()));
+      ctx.disableCheckForAdditionalHashes();
+      return ctx;
     }
   }
 
-  private void createContextForDetachedEr(Consumer<ErValidationContext> addProctedData)
+  private void createContextForDetachedEr(Function<ErValidationContext, ValidationContext<?>> addProtectedData)
     throws ReflectiveOperationException
   {
     if (params.getErRef() == null)
@@ -245,11 +366,9 @@ public class InputPreparator
     }
     else
     {
-      ErValidationContext ctx = new ErValidationContext(params.getErRef(), params.getEr(),
-                                                        params.getProfileName(),
-                                                        params.getReturnVerificationReport());
-      addProctedData.accept(ctx);
-      validations.add(ctx);
+      var ctx = new ErValidationContext(params.getErRef(), params.getEr(), params.getProfileName(),
+                                        params.getReturnVerificationReport(), needsToCheckAllHashes());
+      validations.add(addProtectedData.apply(ctx));
     }
   }
 

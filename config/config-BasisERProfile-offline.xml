@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bsi.bund.de/tr-esor/checktool/1.2 file:///C:/apps/ErVerifyTool-all-1.0.3/config/Config.xsd">
-	<General>
-		<VerifierID>urn:verifier_id</VerifierID>
-		<DefaultProfileName>http://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03125/BSI_TR_03125_Anlage_ERS_V1_2.html#Basis-ERS-Profil</DefaultProfileName>
-	</General>
-</Configuration>

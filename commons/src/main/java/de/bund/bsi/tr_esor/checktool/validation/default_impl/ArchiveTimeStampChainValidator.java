@@ -21,16 +21,22 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStamp;
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStampChain;
+import de.bund.bsi.tr_esor.checktool.data.DataGroup;
+import de.bund.bsi.tr_esor.checktool.data.DigestsToCover;
+import de.bund.bsi.tr_esor.checktool.hash.Concatenation;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.ATSChainReport;
@@ -54,6 +60,7 @@ public class ArchiveTimeStampChainValidator
 
   private byte[] prevChainHash;
 
+
   @Override
   protected ATSChainReport validateInternal(Reference ref, ArchiveTimeStampChain toCheck)
   {
@@ -62,18 +69,19 @@ public class ArchiveTimeStampChainValidator
     {
       return report;
     }
-    Map<Reference, byte[]> digestsToCover = new HashMap<>();
-    String digestOid = toCheck.get(0).getOidFromTimeStamp();
+    DigestsToCover digestsToCover;
+    var digestOid = toCheck.get(0).getOidFromTimeStamp();
 
     try
     {
       if (prevChainHash == null)
       {
-        digestsToCover.putAll(ctx.getRequiredDigests(digestOid));
+        digestsToCover = new DigestsToCover(ctx.getRequiredDigests(digestOid),
+                                            ctx.isCheckForAdditionalHashes());
       }
       else
       {
-        addHashedConcatenation(ref, digestsToCover, digestOid);
+        digestsToCover = getHashedConcatenation(ref, digestOid, ctx.getProfileName());
       }
       if (digestsToCover.isEmpty())
       {
@@ -95,32 +103,70 @@ public class ArchiveTimeStampChainValidator
       return report;
     }
 
-    for ( int i = 0 ; i < toCheck.size() ; i++ )
+    for ( var i = 0 ; i < toCheck.size() ; i++ )
     {
-      ArchiveTimeStamp ats = toCheck.get(i);
-      Reference atsRef = ref.newChild(Integer.toString(i));
-      report.addChild(callValidator(ats,
-                                    atsRef,
-                                    val -> ((ArchiveTimeStampValidator)val).setDigestsToCover(digestsToCover,
-                                                                                              digestOid),
-                                    ArchiveTimeStampReport.class));
-      digestsToCover.clear();
-      digestsToCover.put(new Reference("prev TSP of chain"),
-                         computeHash(ats::getContentOfTimeStampField, digestOid, atsRef, report));
+      var ats = toCheck.get(i);
+      var atsRef = ref.newChild(Integer.toString(i));
+      var isFirstChain = prevChainHash == null;
+      var isFirstInChain = i == 0;
+      var lastTimestampsContent = i == 0 ? null : timestampsContent(toCheck.get(i - 1));
+      // Check for additional hashes only for the first ArchiveTimeStamp in each chain.
+      var digestsToCoverThisRound = digestsToCover;
+
+      // CHECKSTYLE:OFF
+      report.addChild(callValidator(ats, atsRef, validator -> {
+        ArchiveTimeStampValidator v = (ArchiveTimeStampValidator)validator;
+        v.setDigestsToCover(digestsToCoverThisRound, digestOid);
+        v.setPositionInChains(isFirstChain, isFirstInChain);
+        v.setLastTimestampsContent(lastTimestampsContent);
+        v.setArchiveTimestampSequenceHashSoFar(prevChainHash);
+      }, ArchiveTimeStampReport.class));
+      // CHECKSTYLE:ON
+
+      // For the next timestamps in a chain, only the hash of the previous timestamp is expected
+      // Other hashes are arbitrary and should not be checked
+      var prevTspHash = new HashMap<Reference, byte[]>();
+      prevTspHash.put(new Reference("prev TSP of chain"),
+                      computeHash(ats::getContentOfTimeStampField, digestOid, atsRef, report));
+      digestsToCover = new DigestsToCover(prevTspHash, false);
     }
     return report;
   }
 
-  private void addHashedConcatenation(Reference id, Map<Reference, byte[]> digestsToCover, String digestOid)
+  private byte[] timestampsContent(ArchiveTimeStamp ats)
+  {
+    try
+    {
+      return ats.getContentOfTimeStampField();
+    }
+    catch (IOException e)
+    {
+      return null;
+    }
+  }
+
+  private DigestsToCover getHashedConcatenation(Reference id, String digestOid, String profileName)
     throws NoSuchAlgorithmException
   {
-    for ( Entry<Reference, byte[]> digestEntry : ctx.getRequiredDigests(digestOid).entrySet() )
+    Map<Reference, byte[]> unsortedDigestsMap = new HashMap<>();
+    Map<Reference, byte[]> sortedDigestsMap = new HashMap<>();
+    for ( var digestEntry : ctx.getRequiredDigests(digestOid).entrySet() )
     {
-      byte[] concatHash = new byte[prevChainHash.length * 2];
-      System.arraycopy(digestEntry.getValue(), 0, concatHash, 0, prevChainHash.length);
-      System.arraycopy(prevChainHash, 0, concatHash, prevChainHash.length, prevChainHash.length);
-      digestsToCover.put(digestEntry.getKey(), computeHash(() -> concatHash, digestOid, id, report));
+      // alternative sorted variant equivalent to other hash concatenations
+      List<byte[]> hashes = new ArrayList<>(2);
+      hashes.add(digestEntry.getValue());
+      hashes.add(prevChainHash);
+      var dg = new DataGroup(hashes, digestOid);
+      sortedDigestsMap.put(digestEntry.getKey(), dg.getDoubleHash());
+
+      // unsorted variant as specified in RFC
+      var concatHash = Concatenation.concat(digestEntry.getValue(), prevChainHash);
+      unsortedDigestsMap.put(digestEntry.getKey(), computeHash(() -> concatHash, digestOid, id, report));
     }
+
+    var expectSortedHashes = Configurator.getInstance().hashSortingMode(profileName);
+    return new DigestsToCover(sortedDigestsMap, unsortedDigestsMap, ctx.isCheckForAdditionalHashes(),
+                              expectSortedHashes);
   }
 
   /**

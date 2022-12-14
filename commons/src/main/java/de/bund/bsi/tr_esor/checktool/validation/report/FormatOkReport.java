@@ -53,7 +53,7 @@ public class FormatOkReport extends ReportPart
   public void invalidate(String newMessage, Reference ref)
   {
     updateCodes(ValidationResultMajor.INVALID,
-                "http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/invalidFormat",
+                "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat",
                 MinorPriority.MOST_IMPORTANT,
                 newMessage,
                 ref);

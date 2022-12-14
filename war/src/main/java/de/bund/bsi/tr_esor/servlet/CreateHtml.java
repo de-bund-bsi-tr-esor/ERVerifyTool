@@ -26,9 +26,7 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Scanner;
 import java.util.stream.Collectors;
 
@@ -91,18 +89,17 @@ public final class CreateHtml
   private static String createHtml(String resource, ConfigurationDataToRender data)
   {
 
-    try (InputStream ins = CreateHtml.class.getResourceAsStream(resource);
-      Scanner t = new Scanner(ins, "utf-8"))
+    try (var ins = CreateHtml.class.getResourceAsStream(resource); var t = new Scanner(ins, "utf-8"))
     {
-      String html = t.useDelimiter("\\A").next();
-      List<PropertyDescriptor> readableProperties = Arrays.asList(beanInfo.getPropertyDescriptors())
-                                                          .stream()
-                                                          .filter(pd -> pd.getReadMethod() != null)
-                                                          .collect(Collectors.toList());
-      for ( PropertyDescriptor property : readableProperties )
+      var html = t.useDelimiter("\\A").next();
+      var readableProperties = Arrays.asList(beanInfo.getPropertyDescriptors())
+                                     .stream()
+                                     .filter(pd -> pd.getReadMethod() != null)
+                                     .collect(Collectors.toList());
+      for ( var property : readableProperties )
       {
-        Object val = invokeValueFromConfigurationData(data, property);
-        String replacement = "";
+        var val = invokeValueFromConfigurationData(data, property);
+        var replacement = "";
         if (val instanceof String)
         {
           replacement = (String)val;

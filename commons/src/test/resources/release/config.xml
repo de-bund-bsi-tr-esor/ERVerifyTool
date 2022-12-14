@@ -11,21 +11,38 @@ instructions how to fill in this file.
     <VerifierID>urn:verifier_id</VerifierID>
     <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
   </General>
+
+  <!-- Use the TR-ESOR profile to comprehensively check timestamps and require qualified timestamps to be used.
+  An online validation service is required for this profile.
+  All other profile attributes can be added to this profile as well.-->
+  <!--
+  <Profile name="TR-ESOR" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl" requireQualifiedTimestamps="true">
+   </Profile>
+  -->
+
+  <!-- You may specify a directory LXAIP data object references should resolve to -->
+  <!--
+  <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="/path/to/lxaip/data">
+  </Profile>
+  -->
+  <!-- You may use sorted hashes (binary ascending) according to RFC 6283 (section 4.2.2, point 6), see schema definition -->
+  <!--
+  <Profile name="https://tools.ietf.org/html/rfc4998" hashMode="sorted">
+  </Profile>
+  -->
   <!-- For online verification of time stamps, fix URL and activate: -->
   <!--
-  <Profile name="https://tools.ietf.org/html/rfc4998">
+  <Profile name="https://tools.ietf.org/html/rfc4998" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl>
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
-      <parameter name="eCardURL">http://<HOSTNAME>:<PORT>/vi-ecard-webservice/eCard?wsdl</parameter>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
     </Validator>
   </Profile>
   <Profile
-    name="http://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03125/BSI_TR_03125_Anlage_ERS_V1_2.html#Basis-ERS-Profil">
+    name="Basis-ERS" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator
       </className>
-      <parameter name="eCardURL">http://<HOSTNAME>:<PORT>/vi-ecard-webservice/eCard?wsdl</parameter>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
     </Validator>
   </Profile>

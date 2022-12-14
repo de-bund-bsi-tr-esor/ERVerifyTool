@@ -21,27 +21,25 @@
  */
 package de.bund.bsi.tr_esor.checktool.conf;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Scanner;
 
-import javax.xml.bind.UnmarshalException;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.UnmarshalException;
 
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.xml.sax.SAXException;
 
-import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.entry.IsValidXML;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
@@ -54,49 +52,29 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
  *
  * @author TT
  */
+@SuppressWarnings({"PMD.CommentRequired", "checkstyle:JavadocMethod"})
 public class TestConfigurator
 {
 
-  private static String xml;
-
-  /**
-   * How JUnit checks exceptions.
-   */
   @Rule
   public ExpectedException expected = ExpectedException.none();
 
-  /**
-   * Provides some configuration data.
-   *
-   * @throws Exception
-   */
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    xml = readFile("/configForTestingFactory.xml");
-  }
+  private Configurator sut;
 
-  /**
-   * Reset configuration to continue normal testing.
-   *
-   * @throws Exception
-   */
-  @AfterClass
-  public static void tearDownClass() throws Exception
+  @Before
+  public void setUp()
   {
-    TestUtils.loadDefaultConfig();
+    sut = new Configurator();
   }
 
   /**
    * Asserts that the example configuration file is valid by its schema.
-   *
-   * @throws SAXException
    */
   @Test
   public void exampleConfig() throws Exception
   {
-    URL schema = IsValidXML.class.getResource("/Config.xsd");
-    for ( String path : new String[]{"/config.xml", "/configForTestingFactory.xml", "/release/config.xml"} )
+    var schema = IsValidXML.class.getResource("/Config.xsd");
+    for ( var path : new String[]{"/config.xml", "/configForTestingFactory.xml", "/release/config.xml"} )
     {
       assertThat(path, readFile(path), new IsValidXML("configuration", schema));
     }
@@ -104,37 +82,79 @@ public class TestConfigurator
 
   /**
    * Asserts that load method throws Exception if configuration cannot be parsed.
-   *
-   * @throws Exception
    */
   @Test
   public void wrongInput() throws Exception
   {
-    Configurator systemUnderTest = Configurator.getInstance();
-    try (InputStream ins = TestConfigurator.class.getResourceAsStream("/xaip/xaip_ok_ers.xml"))
+    try (var ins = TestConfigurator.class.getResourceAsStream("/xaip/xaip_ok_ers.xml"))
     {
       expected.expect(UnmarshalException.class);
-      systemUnderTest.load(ins);
+      sut.load(ins);
     }
   }
 
   /**
    * Asserts that the configured validator information can be returned.
-   *
-   * @throws Exception
    */
   @Test
-  public void getValidator() throws Exception
+  public void canGetValidator() throws Exception
   {
-    Configurator systemUnderTest = getSystemUnderTestFor("");
-    Validator<?, ?, ?> val = (Validator<?, ?, ?>)systemUnderTest.getValidators()
-                                                                .get(EvidenceRecord.class,
-                                                                     ErValidationContext.class,
-                                                                     ReportPart.class,
-                                                                     "test_profile")
-                                                                .get();
+    load(sut, readFile("/configForTestingFactory.xml"));
+
+    var val = (Validator<?, ?, ?>)sut.getValidators()
+                                     .get(EvidenceRecord.class,
+                                          ErValidationContext.class,
+                                          ReportPart.class,
+                                          "test_profile")
+                                     .get();
     assertThat(val.getClass().getName(),
                is("de.bund.bsi.tr_esor.checktool.validation.TestValidatorFactory$OtherErValidator"));
+  }
+
+  @Test
+  public void lXaipDataDirectoryHasDefault() throws Exception
+  {
+    load(sut, readFile("/configForTestingFactory.xml"));
+
+    assertThat(sut.getLXaipDataDirectory(ProfileNames.RFC4998), equalTo(Path.of(".")));
+  }
+
+  @Test
+  public void lXaipDataDirectoryHasDefaultForProfile() throws Exception
+  {
+    load(sut, readFile("/configForTestingFactory.xml"));
+
+    assertThat(sut.getLXaipDataDirectory("test_profile"), equalTo(Path.of(".")));
+  }
+
+  @Test
+  public void failsHasVerificationServiceNoProfileFound() throws Exception
+  {
+    load(sut, readFile("/configForTestingFactory.xml"));
+
+    var result = sut.hasVerificationService("notExisting");
+
+    assertThat(result, is(false));
+  }
+
+  @Test
+  public void failsHasVerificationServiceProfileWithoutVerificationService() throws Exception
+  {
+    load(sut, readFile("/configForTestingFactory.xml"));
+
+    var result = sut.hasVerificationService("test_profile");
+
+    assertThat(result, is(false));
+  }
+
+  @Test
+  public void passesHasVerificationService() throws Exception
+  {
+    load(sut, readFile("/config.xml"));
+
+    var result = sut.hasVerificationService("TR-ESOR");
+
+    assertThat(result, is(true));
   }
 
   /**
@@ -176,31 +196,33 @@ public class TestConfigurator
   private void checkWrongValidator(String valClazz, String targetClazz, String params, String expectedMessage)
     throws Exception
   {
-    String valTag = "<Validator><className>" + valClazz + "</className>" + params + "<targetType>"
-                    + targetClazz + "</targetType></Validator>";
+    var valTag = "<Validator><className>" + valClazz + "</className>" + params + "<targetType>" + targetClazz
+                 + "</targetType></Validator>";
+    var xml = readFile("/configForTestingFactory.xml").replace("<ConfiguredObjects />",
+                                                               "<ConfiguredObjects>" + valTag
+                                                                                        + "</ConfiguredObjects>");
+
     expected.expect(ReflectiveOperationException.class);
     expected.expectMessage(expectedMessage);
-    getSystemUnderTestFor(valTag);
+
+    load(sut, xml);
   }
 
   private static String readFile(String path) throws IOException
   {
-    try (InputStream ins = TestConfigurator.class.getResourceAsStream(path);
-      Scanner scan = new Scanner(ins, "utf-8"))
+    try (var ins = TestConfigurator.class.getResourceAsStream(path);
+      var scan = new Scanner(ins, StandardCharsets.UTF_8))
     {
       return scan.useDelimiter("\\A").next();
     }
   }
 
-  private Configurator getSystemUnderTestFor(String configPart) throws Exception
+  private static void load(Configurator sut, String file)
+    throws IOException, JAXBException, ReflectiveOperationException
   {
-    Configurator systemUnderTest = Configurator.getInstance();
-    String currentXml = xml.replace("<ConfiguredObjects />",
-                                    "<ConfiguredObjects>" + configPart + "</ConfiguredObjects>");
-    try (ByteArrayInputStream bis = new ByteArrayInputStream(currentXml.getBytes(StandardCharsets.UTF_8)))
+    try (var bis = new ByteArrayInputStream(file.getBytes(StandardCharsets.UTF_8)))
     {
-      systemUnderTest.load(bis);
+      sut.load(bis);
     }
-    return systemUnderTest;
   }
 }

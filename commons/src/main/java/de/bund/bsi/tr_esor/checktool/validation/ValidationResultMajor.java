@@ -30,6 +30,7 @@ package de.bund.bsi.tr_esor.checktool.validation;
  */
 public enum ValidationResultMajor
 {
+
   /**
    * The result of the validation is valid.
    */
@@ -63,7 +64,7 @@ public enum ValidationResultMajor
    */
   public ValidationResultMajor worse(ValidationResultMajor other)
   {
-    ValidationResultMajor effectiveOther = other == null ? INDETERMINED : other;
+    var effectiveOther = other == null ? INDETERMINED : other;
     return compareTo(effectiveOther) > 0 ? this : effectiveOther;
   }
 
@@ -74,7 +75,7 @@ public enum ValidationResultMajor
    */
   public static ValidationResultMajor forValue(String value)
   {
-    for ( ValidationResultMajor m : values() )
+    for ( var m : values() )
     {
       if (m.value.equals(value))
       {

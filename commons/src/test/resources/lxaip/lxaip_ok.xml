@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<xaip:XAIP xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema"
+    xmlns:xaip="http://www.bsi.bund.de/tr-esor/xaip" xmlns:asic="http://uri.etsi.org/02918/v1.2.1#" XAIPVersion="1.3.0">
+    <xaip:packageHeader packageID="x23c6ed48-8657-4994-88d9-3a994b1ec4ec">
+        <xaip:AOID>7d6a6b80-0c7c-486b-9720-5f48e65a8494</xaip:AOID>
+        <xaip:versionManifest VersionID="V001"><xaip:preservationInfo><xaip:retentionPeriod>2035-02-24Z</xaip:retentionPeriod></xaip:preservationInfo><xaip:submissionInfo><xaip:clientID>remotebean_esor13</xaip:clientID><xaip:submissionTime>2022-08-24T12:09:24.421Z</xaip:submissionTime></xaip:submissionInfo><xaip:packageInfoUnit packageUnitID="_idxVersions_V001"><xaip:protectedObjectPointer>HundesteuerAnmeldung_V001</xaip:protectedObjectPointer><xaip:protectedObjectPointer>Hundename_V001</xaip:protectedObjectPointer><xaip:protectedObjectPointer>fileSize_V001</xaip:protectedObjectPointer><xaip:protectedObjectPointer>V001</xaip:protectedObjectPointer></xaip:packageInfoUnit></xaip:versionManifest>
+        <ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+    </xaip:packageHeader>
+    <xaip:metaDataSection>
+        <xaip:metaDataObject metaDataID="Hundename_V001" relatedObjects="HundesteuerAnmeldung_V001">
+            <xaip:binaryMetaData MimeType="application/octet-stream">bHhhaXA=</xaip:binaryMetaData>
+        </xaip:metaDataObject>
+        <xaip:metaDataObject metaDataID="fileSize_V001" relatedObjects="HundesteuerAnmeldung_V001">
+            <xaip:binaryMetaData MimeType="application/octet-stream">NTU=</xaip:binaryMetaData>
+        </xaip:metaDataObject>
+    </xaip:metaDataSection>
+    <xaip:dataObjectsSection>
+        <xaip:dataObject dataObjectID="HundesteuerAnmeldung_V001">
+            <xaip:xmlData>
+                <asic:DataObjectReference URI="lxaip_ok_data_object.txt">
+                    <ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+                    <ds:DigestValue>L6N3vPvrVvHofj+V+MrUq3wwta+L7fvcJLbdoOnhGic=</ds:DigestValue>
+                </asic:DataObjectReference>
+            </xaip:xmlData>
+        </xaip:dataObject>
+    </xaip:dataObjectsSection>
+</xaip:XAIP>

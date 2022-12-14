@@ -21,15 +21,14 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
-import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
@@ -63,14 +62,14 @@ public class TestArchiveTimeStampSequenceValidator
   @Test
   public void testValidER() throws Exception
   {
-    String[] erToTest = {"/xaip/xaip_ok.rehashed.ers.b64", "/bin/example.ers.b64"};
-    for ( String erName : erToTest )
+    var erToTest = new String[]{"/xaip/xaip_ok.rehashed.ers.b64", "/bin/example.ers.b64"};
+    for ( var erName : erToTest )
     {
-      byte[] erBytes = TestUtils.decodeTestResource(erName);
-      EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-      ErValidationContext ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, null);
+      var erBytes = TestUtils.decodeTestResource(erName);
+      var er = new ASN1EvidenceRecordParser().parse(erBytes);
+      var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, null, false);
       ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
-      ArchiveTimeStampSequenceValidator atssv = new ArchiveTimeStampSequenceValidator();
+      var atssv = new ArchiveTimeStampSequenceValidator();
       atssv.setContext(ctx);
       ReportPart report = atssv.validate(new Reference("dummy"), er.getAtss());
       assertThat("ATSS validation result for " + erName,

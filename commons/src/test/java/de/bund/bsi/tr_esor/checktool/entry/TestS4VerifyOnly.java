@@ -24,6 +24,7 @@ package de.bund.bsi.tr_esor.checktool.entry;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ESOR_VR;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_OASIS_VR;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_XAIP;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.hasSize;
@@ -32,7 +33,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -41,12 +41,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.UUID;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
+
+import oasis.names.tc.dss._1_0.core.schema.DocumentType;
+import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
+import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,19 +66,8 @@ import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
 import de.bund.bsi.tr_esor.checktool.parser.EvidenceRecordTypeParser;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import de.bund.bsi.tr_esor.vr._1.EvidenceRecordValidityType;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
-import oasis.names.tc.dss._1_0.core.schema.AnyType;
-import oasis.names.tc.dss._1_0.core.schema.Base64Data;
-import oasis.names.tc.dss._1_0.core.schema.Base64Signature;
-import oasis.names.tc.dss._1_0.core.schema.DocumentType;
-import oasis.names.tc.dss._1_0.core.schema.InlineXMLType;
-import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import oasis.names.tc.dss._1_0.core.schema.SignatureObject;
-import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -81,6 +78,7 @@ import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.Verificatio
  *
  * @author TT
  */
+@SuppressWarnings("checkstyle:LeftCurly")
 public class TestS4VerifyOnly
 {
 
@@ -106,11 +104,12 @@ public class TestS4VerifyOnly
   public void verifyErEmbeddedInXaip() throws Exception
   {
 
-    callVerify(r -> {
+    var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.NO_DETAILS);
       addXaip(r, "xaip_ok_ers.xml");
-    }, "indetermined", false);
-
+    }, "indetermined");
+    var xPath = "VerifyRequest/InputDocuments/Document[1]/InlineXML/credentialSection/credential[@credentialID='ER_2.16.840.1.101.3.4.2.1_V001']/evidenceRecord/asn1EvidenceRecord";
+    checkReportFor(report, xPath, "indetermined", false);
   }
 
   /**
@@ -122,10 +121,10 @@ public class TestS4VerifyOnly
   @Test
   public void verifyWithoutReturnVR() throws Exception
   {
-    VerificationReportType verificationReport = callVerify(r -> {
+    var verificationReport = callVerify(r -> {
       addXaip(r, "xaip_ok_ers.xml");
-    }, "indetermined", false);
-    assertThat("VerificationReport is filled", verificationReport, is(nullValue()));
+    }, "indetermined");
+    assertThat("VerificationReport exists", verificationReport, is(nullValue()));
   }
 
   /**
@@ -136,11 +135,41 @@ public class TestS4VerifyOnly
   @Test
   public void verifyErForXaip() throws Exception
   {
-    callVerify(r -> {
+    var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       addXaip(r, "xaip_ok.xml");
       setBase64SignatureObject("/xaip/xaip_ok.ers.b64", r);
-    }, "indetermined", true);
+    }, "indetermined");
+    checkReportForBase64Signature(report, "indetermined", false);
+  }
+
+  /**
+   * Asserts that a XAIP with non default namespace can be validated when presented as Base64 encoded XML.
+   */
+  @Test
+  public void verifyXaipWithDifferentNamespaceBase64() throws Exception
+  {
+    var report = callVerify(r -> {
+      addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
+      addBase64Xml(r, "xaip_ok_ers_namespace.xml");
+    }, "indetermined");
+    assertThat(report.getIndividualReport(), hasSize(4));
+  }
+
+  /**
+   * Asserts that a XAIP with non default namespace can be validated when presented as inline XML. In this
+   * case, the namespace needs to be set through the namespace prefix map in the general section of the
+   * configuration.
+   */
+  @Test
+  public void verifyXaipWithDifferentNamespaceInlineXml() throws Exception
+  {
+    Configurator.getInstance().addXMLNSPrefix("http://www.bsi.bund.de/tr-esor/xaip", "namespace");
+    var report = callVerify(r -> {
+      addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
+      addXaip(r, "xaip_ok_ers_namespace.xml");
+    }, "indetermined");
+    TestUtils.loadDefaultConfig();
   }
 
   /**
@@ -151,11 +180,12 @@ public class TestS4VerifyOnly
   @Test
   public void verifyErInXmlForXaip() throws Exception
   {
-    callVerify(r -> {
+    var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       addXaip(r, "xaip_ok.xml");
       setXmlSignatureObject("/xaip/xaip_ok.er.xml", r);
-    }, "indetermined", true);
+    }, "indetermined");
+    checkReportFor(report, "SignatureObject/Other/evidenceRecord/asn1EvidenceRecord", "indetermined", true);
   }
 
   /**
@@ -165,13 +195,13 @@ public class TestS4VerifyOnly
   @Test
   public void wrongXaipVersionsOrAOID() throws Exception
   {
-    VerifyRequest request = XmlHelper.FACTORY_DSS.createVerifyRequest();
+    var request = XmlHelper.FACTORY_DSS.createVerifyRequest();
     request.setRequestID(UUID.randomUUID().toString());
     addXaip(request, "xaip_ok.xml");
     setXmlSignatureObject("/xaip/xaip_ok.er.xml", request);
-    Element xaipErs = (Element)request.getSignatureObject().getOther().getAny().get(0);
+    var xaipErs = (Element)request.getSignatureObject().getOther().getAny().get(0);
     xaipErs.setAttribute("VersionID", "V003");
-    ResponseBaseType resp = new S4VerifyOnly().verify(request);
+    var resp = new S4VerifyOnly().verify(request);
     assertThat(resp.getResult().getResultMajor(), is("urn:oasis:names:tc:dss:1.0:detail:invalid"));
     assertThat(resp.getResult().getResultMessage().getValue(),
                is("Given XAIP does not contain version V003 addressed in xaip:evidenceRecord."));
@@ -192,8 +222,11 @@ public class TestS4VerifyOnly
   @Test
   public void verifyErForEncapsulatedCms() throws Exception
   {
-    checkForBinaryData("/cms/encapsulated_with_er.p7s.b64", null, "indetermined");
-    checkForBinaryData("/cms/encapsulated_with_er.p7s.b64", "/cms/TestDataLogo.png.b64", "invalid");
+    checkForBinaryData("/cms/encapsulated_with_er.p7s.b64", null, "indetermined", "CmsSignature");
+    checkForBinaryData("/cms/encapsulated_with_er.p7s.b64",
+                       "/cms/TestDataLogo.png.b64",
+                       "invalid",
+                       "CmsSignature");
   }
 
   /**
@@ -205,9 +238,15 @@ public class TestS4VerifyOnly
   @Test
   public void verifyErForDetachedCms() throws Exception
   {
-    checkForBinaryData("/cms/TestDataLogo.png_er.p7s.b64", "/cms/TestDataLogo.png.b64", "indetermined");
+    checkForBinaryData("/cms/TestDataLogo.png_er.p7s.b64",
+                       "/cms/TestDataLogo.png.b64",
+                       "indetermined",
+                       "CmsSignature");
     // now with some data file not containing signed data
-    checkForBinaryData("/cms/TestDataLogo.png_er.p7s.b64", "/cms/TestDataLogo.png_er.p7s.b64", "invalid");
+    checkForBinaryData("/cms/TestDataLogo.png_er.p7s.b64",
+                       "/cms/TestDataLogo.png_er.p7s.b64",
+                       "invalid",
+                       "CmsSignature");
   }
 
   /**
@@ -218,7 +257,10 @@ public class TestS4VerifyOnly
   @Test
   public void verifyErForBinary() throws Exception
   {
-    checkForBinaryData("/bin/example.ers.b64", "/bin/example.tif.b64", "indetermined");
+    checkForBinaryData("/bin/example.ers.b64",
+                       "/bin/example.tif.b64",
+                       "indetermined",
+                       "SignatureObject/Base64Signature/Value");
   }
 
   /**
@@ -229,11 +271,12 @@ public class TestS4VerifyOnly
   @Test
   public void verifyInvalidAsn1() throws Exception
   {
-    VerificationReportType report = callVerify(r -> {
+    var report = callVerify(r -> {
       addReturnVR(r, ProfileNames.RFC4998, ReportDetailLevel.ALL_DETAILS);
       setBase64SignatureObject("/bin/example.tif.b64", r);
       addBinaryData("/bin/example.tif.b64", r);
-    }, "indetermined", false);
+    }, "indetermined");
+    checkReportFor(report, "SignatureObject/Base64Signature/Value", "indetermined", false);
     assertThat("message",
                report.getIndividualReport().get(0).getResult().getResultMessage().getValue(),
                is("illegal or unsupported data format"));
@@ -259,14 +302,14 @@ public class TestS4VerifyOnly
     }
     try
     {
-      VerifyRequest request = XmlHelper.FACTORY_DSS.createVerifyRequest();
+      var request = XmlHelper.FACTORY_DSS.createVerifyRequest();
       request.setRequestID(UUID.randomUUID().toString());
       addReturnVR(request, null, ReportDetailLevel.ALL_DETAILS);
       addXaip(request, "xaip_ok_ers.xml");
 
-      ResponseBaseType resp = new S4VerifyOnly().verify(request);
-      Result result = resp.getResult();
-      assertThat(result.getResultMajor(), is("urn:oasis:names:tc:dss:1.0:detail:invalid"));
+      var resp = new S4VerifyOnly().verify(request);
+      var result = resp.getResult();
+      assertThat(result.getResultMajor(), is("urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError"));
       assertThat(result.getResultMinor(),
                  is("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError"));
       assertThat(result.getResultMessage().getValue(), is("system has not been configured correctly"));
@@ -284,7 +327,7 @@ public class TestS4VerifyOnly
   @Test
   public void unsupportedOperation()
   {
-    S4VerifyOnly s4 = new S4VerifyOnly();
+    var s4 = new S4VerifyOnly();
     assertUnsupported("archiveData", () -> s4.archiveData(null));
     assertUnsupported("archiveDeletion", () -> s4.archiveDeletion(null));
     assertUnsupported("archiveEvidence", () -> s4.archiveEvidence(null));
@@ -302,56 +345,84 @@ public class TestS4VerifyOnly
    */
   private VerificationReportType checkForBinaryData(String sigObjectPath,
                                                     String dataPath,
-                                                    String expectedMajor)
+                                                    String expectedMajor,
+                                                    String fieldName)
     throws Exception
   {
-    return callVerify(r -> {
+    var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       setBase64SignatureObject(sigObjectPath, r);
       if (dataPath != null)
       {
         addBinaryData(dataPath, r);
       }
-    }, expectedMajor, true);
+    }, expectedMajor);
+    checkReportFor(report, fieldName, expectedMajor, true);
+    return report;
   }
 
   /**
    * Macro for building the request, calling verification and generic check of report.
    *
    * @param fillRequest
-   * @param expectedMajor
    * @return obtained report for further checks.
    * @throws Exception
    */
-  private VerificationReportType callVerify(Consumer<VerifyRequest> fillRequest,
-                                            String expectedMajor,
-                                            boolean expectDetails)
+  private VerificationReportType callVerify(Consumer<VerifyRequest> fillRequest, String expectedMajor)
     throws Exception
   {
-    VerifyRequest request = XmlHelper.FACTORY_DSS.createVerifyRequest();
+    var request = XmlHelper.FACTORY_DSS.createVerifyRequest();
     request.setRequestID(UUID.randomUUID().toString());
     fillRequest.accept(request);
 
-    ResponseBaseType resp = new S4VerifyOnly().verify(request);
+    var resp = new S4VerifyOnly().verify(request);
     assertThat(resp.getRequestID(), is(request.getRequestID()));
+    assertThat(resp.getResult().getResultMajor(), endsWith(expectedMajor));
     if (request.getOptionalInputs() != null)
     {
-
-      VerificationReportType report = getAndCheckVerificationReport(resp);
-      assertThat("individual reports", report.getIndividualReport(), hasSize(1));
-      if (expectDetails)
-      {
-        Object detail = report.getIndividualReport().get(0).getDetails().getAny().get(0);
-        assertThat("ER validity",
-                   ((JAXBElement<?>)detail).getValue(),
-                   instanceOf(EvidenceRecordValidityType.class));
-      }
-      assertThat("major",
-                 report.getIndividualReport().get(0).getResult().getResultMajor(),
-                 endsWith(":" + expectedMajor));
-      return report;
+      return getAndCheckVerificationReport(resp);
     }
     return null;
+  }
+
+  private void checkReportForBase64Signature(VerificationReportType report,
+                                             String expectedMajor,
+                                             boolean expectDetails)
+  {
+    checkReportFor(report, "SignatureObject/Base64Signature/Value", expectedMajor, expectDetails);
+  }
+
+  private void checkReportFor(VerificationReportType report,
+                              String fieldOrXPath,
+                              String expectedMajor,
+                              boolean expectDetails)
+  {
+    var evidenceReport = report.getIndividualReport()
+                               .stream()
+                               .filter(irt -> matchesFieldOrXPath(irt, fieldOrXPath))
+                               .collect(Collectors.toList());
+    assertThat(evidenceReport, hasSize(1));
+    if (expectDetails)
+    {
+      var detail = evidenceReport.get(0).getDetails().getAny().get(0);
+      assertThat("ER validity",
+                 ((JAXBElement<?>)detail).getValue(),
+                 instanceOf(EvidenceRecordValidityType.class));
+    }
+    assertThat("major", evidenceReport.get(0).getResult().getResultMajor(), endsWith(":" + expectedMajor));
+  }
+
+  private boolean matchesFieldOrXPath(IndividualReportType irt, String field)
+  {
+    if (irt.getSignedObjectIdentifier().getXPath() != null)
+    {
+      return irt.getSignedObjectIdentifier().getXPath().equals(field);
+    }
+    if (irt.getSignedObjectIdentifier().getFieldName() != null)
+    {
+      return irt.getSignedObjectIdentifier().getFieldName().contains(field);
+    }
+    return false;
   }
 
   private void assertUnsupported(String label, Runnable action)
@@ -373,31 +444,31 @@ public class TestS4VerifyOnly
     {
       request.setInputDocuments(XmlHelper.FACTORY_DSS.createInputDocuments());
     }
-    DocumentType document = XmlHelper.FACTORY_DSS.createDocumentType();
+    var document = XmlHelper.FACTORY_DSS.createDocumentType();
     request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash().add(document);
     return document;
   }
 
   private void addBinaryData(String path, VerifyRequest request)
   {
-    DocumentType document = newDocument(request);
-    Base64Data value = XmlHelper.FACTORY_DSS.createBase64Data();
+    var document = newDocument(request);
+    var value = XmlHelper.FACTORY_DSS.createBase64Data();
     value.setValue(TestUtils.decodeTestResource(path));
     document.setBase64Data(value);
   }
 
   private void setXmlSignatureObject(String path, VerifyRequest r)
   {
-    SignatureObject sigObject = XmlHelper.FACTORY_DSS.createSignatureObject();
-    try (InputStream res = TestS4VerifyOnly.class.getResourceAsStream(path);
+    var sigObject = XmlHelper.FACTORY_DSS.createSignatureObject();
+    try (var res = TestS4VerifyOnly.class.getResourceAsStream(path);
       InputStream ins = new BufferedInputStream(res))
     {
-      EvidenceRecordTypeParser parser = new EvidenceRecordTypeParser();
+      var parser = new EvidenceRecordTypeParser();
       parser.setInput(ins);
-      AnyType any = XmlHelper.FACTORY_DSS.createAnyType();
-      Element element = XmlHelper.toElement(parser.parse(),
-                                            FACTORY_XAIP.getClass().getPackage().getName(),
-                                            FACTORY_XAIP::createEvidenceRecord);
+      var any = XmlHelper.FACTORY_DSS.createAnyType();
+      var element = XmlHelper.toElement(parser.parse(),
+                                        FACTORY_XAIP.getClass().getPackage().getName(),
+                                        FACTORY_XAIP::createEvidenceRecord);
       any.getAny().add(element);
       sigObject.setOther(any);
     }
@@ -410,8 +481,8 @@ public class TestS4VerifyOnly
 
   private void setBase64SignatureObject(String path, VerifyRequest request)
   {
-    SignatureObject sigObject = XmlHelper.FACTORY_DSS.createSignatureObject();
-    Base64Signature ers = XmlHelper.FACTORY_DSS.createBase64Signature();
+    var sigObject = XmlHelper.FACTORY_DSS.createSignatureObject();
+    var ers = XmlHelper.FACTORY_DSS.createBase64Signature();
     ers.setType("urn:ingnored:asn1ER");
     ers.setValue(TestUtils.decodeTestResource(path));
     sigObject.setBase64Signature(ers);
@@ -424,9 +495,9 @@ public class TestS4VerifyOnly
     {
       request.setOptionalInputs(XmlHelper.FACTORY_DSS.createAnyType());
       request.setProfile(profile);
-      ReturnVerificationReport returnvr = FACTORY_OASIS_VR.createReturnVerificationReport();
+      var returnvr = FACTORY_OASIS_VR.createReturnVerificationReport();
       returnvr.setReportDetailLevel(reportDetailLevel.toString());
-      Element optIn = XmlHelper.toElement(returnvr, FACTORY_OASIS_VR.getClass().getPackage().getName(), null);
+      var optIn = XmlHelper.toElement(returnvr, FACTORY_OASIS_VR.getClass().getPackage().getName(), null);
       request.getOptionalInputs().getAny().add(optIn);
     }
     catch (JAXBException e)
@@ -444,15 +515,13 @@ public class TestS4VerifyOnly
   private VerificationReportType getAndCheckVerificationReport(ResponseBaseType resp) throws Exception
   {
     assertThat(resp.getOptionalOutputs().getAny(), hasSize(1));
-    Element vrElement = (Element)resp.getOptionalOutputs().getAny().get(0);
-    String path = FACTORY_OASIS_VR.getClass().getPackage().getName() + ":"
-                  + FACTORY_ESOR_VR.getClass().getPackage().getName();
-    VerificationReportType report = XmlHelper.parse(new DOMSource(vrElement),
-                                                    VerificationReportType.class,
-                                                    path);
+    var vrElement = (Element)resp.getOptionalOutputs().getAny().get(0);
+    var path = FACTORY_OASIS_VR.getClass().getPackage().getName() + ":"
+               + FACTORY_ESOR_VR.getClass().getPackage().getName();
+    var report = XmlHelper.parse(new DOMSource(vrElement), VerificationReportType.class, path);
     assertNotNull("parsed verification report", report);
-    String reportAsString = TestUtils.toString(FACTORY_OASIS_VR.createVerificationReport(report), path);
-    assertThat(reportAsString, IsValidXML.isValidVerificationReport());
+    var reportAsString = TestUtils.toString(FACTORY_OASIS_VR.createVerificationReport(report), path);
+    assertThat(reportAsString, IsValidXML.matcherForValidVerificationReport());
     return report;
   }
 
@@ -466,17 +535,33 @@ public class TestS4VerifyOnly
    */
   private void addXaip(VerifyRequest request, String fileName)
   {
-    DocumentType document = newDocument(request);
+    var document = newDocument(request);
 
-    InlineXMLType inlineXMLType = XmlHelper.FACTORY_DSS.createInlineXMLType();
+    var inlineXMLType = XmlHelper.FACTORY_DSS.createInlineXMLType();
     document.setInlineXML(inlineXMLType);
-    try (InputStream ins = TestS4VerifyOnly.class.getResourceAsStream("/xaip/" + fileName))
+    try (var ins = TestS4VerifyOnly.class.getResourceAsStream("/xaip/" + fileName))
     {
       inlineXMLType.setAny(toElement(XmlHelper.parseXaip(ins)));
     }
     catch (IOException | JAXBException e)
     {
       fail("parsing XAIP: " + e);
+    }
+  }
+
+  /**
+   * Adds a XAIP as base64 to the verify request.
+   */
+  private void addBase64Xml(VerifyRequest request, String fileName)
+  {
+    var document = newDocument(request);
+    try (var ins = TestS4VerifyOnly.class.getResourceAsStream("/xaip/" + fileName))
+    {
+      document.setBase64XML(ins.readAllBytes());
+    }
+    catch (IOException e)
+    {
+      fail("cannot read file");
     }
   }
 
@@ -488,8 +573,8 @@ public class TestS4VerifyOnly
    */
   private Element toElement(XAIPType xaip) throws JAXBException
   {
-    JAXBContext ctx = JAXBContext.newInstance(FACTORY_XAIP.getClass().getPackage().getName());
-    DOMResult result = new DOMResult();
+    var ctx = JAXBContext.newInstance(FACTORY_XAIP.getClass().getPackage().getName());
+    var result = new DOMResult();
     ctx.createMarshaller().marshal(FACTORY_XAIP.createXAIP(xaip), result);
     return ((Document)result.getNode()).getDocumentElement();
   }

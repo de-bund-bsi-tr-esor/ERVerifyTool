@@ -48,12 +48,12 @@ public class TestAlgorithmUsage
   @Test
   public void creation() throws Exception
   {
-    Date date = new Date();
-    AlgorithmUsage hashed = AlgorithmUsage.createHashed("1.2.3.4.5", date);
+    var date = new Date();
+    var hashed = AlgorithmUsage.createHashed("1.2.3.4.5", date);
     assertThat(hashed.getUsage(), is(UsageType.DATA_HASHING));
     assertThat(hashed.getValidationDate(), allOf(is(date), not(sameInstance(date))));
 
-    AlgorithmUsage signed = AlgorithmUsage.createSigned("1.2.3.4.5", date);
+    var signed = AlgorithmUsage.createSigned("1.2.3.4.5", date);
     assertThat(signed.getUsage(), is(UsageType.QES));
     assertThat(signed.getValidationDate(), allOf(is(date), not(sameInstance(date))));
   }

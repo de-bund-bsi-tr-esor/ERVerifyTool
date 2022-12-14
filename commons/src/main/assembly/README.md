@@ -6,10 +6,10 @@ ER Verify Tool - SDK
 This is a set of libraries which can be used to write
 - a web service client for the application (not required, can be done using any
   web service framework)
-- extenssions of the application (own validators)
+- extensions of the application (own validators)
 
 Furthermore, these libraries may be used to include the complete ER Verify Tool
-into other Java 1.8 applications (not recommended).
+into other Java applications (not recommended).
 
 For extending the application, please read chapter 4, "Creating an Additional
 Validator" of the product documentation.

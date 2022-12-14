@@ -91,7 +91,7 @@ public class TestBasisErsArchiveTimeStampSequenceValidator
   @Test
   public void someArchiveTimeStamps() throws Exception
   {
-    ATSSequenceReport report = validate(er -> er.getAtss());
+    var report = validate(er -> er.getAtss());
     assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
     assertThat("summarized message",
                report.getSummarizedMessage(),
@@ -106,14 +106,14 @@ public class TestBasisErsArchiveTimeStampSequenceValidator
   private ATSSequenceReport validate(Function<EvidenceRecord, ArchiveTimeStampSequence> getSequenceFor)
     throws Exception
   {
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
-    BasisErsArchiveTimeStampSequenceValidator validator = new BasisErsArchiveTimeStampSequenceValidator();
-    Reference ref = new Reference("er");
-    ErValidationContext ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS,
-                                                      TestUtils.createReturnVerificationReport());
+    var er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
+    var validator = new BasisErsArchiveTimeStampSequenceValidator();
+    var ref = new Reference("er");
+    var ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS,
+                                      TestUtils.createReturnVerificationReport(), false);
     ctx.setDeclaredDigestOIDs(Collections.singletonList("2.16.840.1.101.3.4.2.1"));
     validator.setContext(ctx);
-    ATSSequenceReport report = validator.validate(ref.newChild("test"), getSequenceFor.apply(er));
+    var report = validator.validate(ref.newChild("test"), getSequenceFor.apply(er));
     ersFormatOk = ctx.getFormatOk();
     return report;
   }

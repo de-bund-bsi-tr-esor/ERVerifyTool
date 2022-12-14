@@ -23,12 +23,17 @@ package de.bund.bsi.tr_esor.checktool.entry;
 
 import java.io.IOException;
 
-import javax.jws.WebMethod;
-import javax.jws.WebParam;
-import javax.jws.WebResult;
-import javax.jws.WebService;
-import javax.jws.soap.SOAPBinding;
-import javax.xml.bind.JAXBException;
+import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
+import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+
+import jakarta.jws.WebMethod;
+import jakarta.jws.WebParam;
+import jakarta.jws.WebResult;
+import jakarta.jws.WebService;
+import jakarta.jws.soap.SOAPBinding;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.annotation.XmlSeeAlso;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,25 +41,26 @@ import org.slf4j.LoggerFactory;
 import de.bund.bsi.tr_esor.api._1.ArchiveDataRequest;
 import de.bund.bsi.tr_esor.api._1.ArchiveDataResponse;
 import de.bund.bsi.tr_esor.api._1.ArchiveDeletionRequest;
+import de.bund.bsi.tr_esor.api._1.ArchiveDeletionResponse;
 import de.bund.bsi.tr_esor.api._1.ArchiveEvidenceRequest;
 import de.bund.bsi.tr_esor.api._1.ArchiveEvidenceResponse;
 import de.bund.bsi.tr_esor.api._1.ArchiveRetrievalRequest;
 import de.bund.bsi.tr_esor.api._1.ArchiveRetrievalResponse;
 import de.bund.bsi.tr_esor.api._1.ArchiveSubmissionRequest;
 import de.bund.bsi.tr_esor.api._1.ArchiveSubmissionResponse;
+import de.bund.bsi.tr_esor.api._1.ArchiveTraceRequest;
+import de.bund.bsi.tr_esor.api._1.ArchiveTraceResponse;
 import de.bund.bsi.tr_esor.api._1.ArchiveUpdateRequest;
 import de.bund.bsi.tr_esor.api._1.ArchiveUpdateResponse;
-import de.bund.bsi.tr_esor.api._1.ResponseType;
+import de.bund.bsi.tr_esor.api._1.RetrieveInfoRequest;
+import de.bund.bsi.tr_esor.api._1.RetrieveInfoResponse;
 import de.bund.bsi.tr_esor.api._1.S4;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationScheduler;
 import de.bund.bsi.tr_esor.checktool.validation.VerificationResultCreator;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
-import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
 
 /**
@@ -62,8 +68,9 @@ import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.Verificatio
  *
  * @author TT
  */
-@WebService(name = "S4", serviceName = "S4", portName = "S4", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2")
+@WebService(name = "S4", serviceName = "S4", portName = "S4", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3")
 @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
+@XmlSeeAlso({org.etsi.uri._02918.v1_2.ObjectFactory.class})
 public class S4VerifyOnly implements S4
 {
 
@@ -72,64 +79,82 @@ public class S4VerifyOnly implements S4
   private static final Logger LOG = LoggerFactory.getLogger(S4VerifyOnly.class);
 
   @Override
+  @WebMethod(operationName = "RetrieveInfo", action = "http://www.bsi.bund.de/tr-esor/RetrieveInfoRequest")
+  @WebResult(name = "RetrieveInfoResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public RetrieveInfoResponse retrieveInfo(@WebParam(name = "RetrieveInfoRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") RetrieveInfoRequest parameters)
+  {
+    throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
+  }
+
+  @Override
   @WebMethod(operationName = "ArchiveSubmission", action = "http://www.bsi.bund.de/tr-esor/ArchiveSubmission")
-  @WebResult(name = "ArchiveSubmissionResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters")
-  public ArchiveSubmissionResponse archiveSubmission(@WebParam(name = "ArchiveSubmissionRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters") ArchiveSubmissionRequest parameters)
+  @WebResult(name = "ArchiveSubmissionResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveSubmissionResponse archiveSubmission(@WebParam(name = "ArchiveSubmissionRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveSubmissionRequest parameters)
   {
     throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
   }
 
   @Override
   @WebMethod(operationName = "ArchiveUpdate", action = "http://www.bsi.bund.de/tr-esor/ArchiveUpdate")
-  @WebResult(name = "ArchiveUpdateResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters")
-  public ArchiveUpdateResponse archiveUpdate(@WebParam(name = "ArchiveUpdateRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters") ArchiveUpdateRequest parameters)
+  @WebResult(name = "ArchiveUpdateResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveUpdateResponse archiveUpdate(@WebParam(name = "ArchiveUpdateRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveUpdateRequest parameters)
   {
     throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
   }
 
   @Override
   @WebMethod(operationName = "ArchiveRetrieval", action = "http://www.bsi.bund.de/tr-esor/ArchiveRetrieval")
-  @WebResult(name = "ArchiveRetrievalResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters")
-  public ArchiveRetrievalResponse archiveRetrieval(@WebParam(name = "ArchiveRetrievalRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters") ArchiveRetrievalRequest parameters)
+  @WebResult(name = "ArchiveRetrievalResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveRetrievalResponse archiveRetrieval(@WebParam(name = "ArchiveRetrievalRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveRetrievalRequest parameters)
   {
     throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
   }
 
   @Override
   @WebMethod(operationName = "ArchiveEvidence", action = "http://www.bsi.bund.de/tr-esor/ArchiveEvidence")
-  @WebResult(name = "ArchiveEvidenceResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters")
-  public ArchiveEvidenceResponse archiveEvidence(@WebParam(name = "ArchiveEvidenceRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters") ArchiveEvidenceRequest parameters)
+  @WebResult(name = "ArchiveEvidenceResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveEvidenceResponse archiveEvidence(@WebParam(name = "ArchiveEvidenceRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveEvidenceRequest parameters)
   {
     throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
   }
 
   @Override
   @WebMethod(operationName = "ArchiveDeletion", action = "http://www.bsi.bund.de/tr-esor/ArchiveDeletion")
-  @WebResult(name = "ArchiveDeletionResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters")
-  public ResponseType archiveDeletion(@WebParam(name = "ArchiveDeletionRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters") ArchiveDeletionRequest parameters)
+  @WebResult(name = "ArchiveDeletionResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveDeletionResponse archiveDeletion(@WebParam(name = "ArchiveDeletionRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveDeletionRequest parameters)
   {
     throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
   }
 
   @Override
   @WebMethod(operationName = "ArchiveData", action = "http://www.bsi.bund.de/tr-esor/ArchiveData")
-  @WebResult(name = "ArchiveDataResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters")
-  public ArchiveDataResponse archiveData(@WebParam(name = "ArchiveDataRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.2", partName = "parameters") ArchiveDataRequest parameters)
+  @WebResult(name = "ArchiveDataResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveDataResponse archiveData(@WebParam(name = "ArchiveDataRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveDataRequest parameters)
   {
     throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
   }
+
+  @Override
+  @WebMethod(operationName = "ArchiveTrace", action = "http://www.bsi.bund.de/tr-esor/ArchiveUpdate")
+  @WebResult(name = "ArchiveTraceResponse", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters")
+  public ArchiveTraceResponse archiveTrace(@WebParam(name = "ArchiveTraceRequest", targetNamespace = "http://www.bsi.bund.de/tr-esor/api/1.3", partName = "parameters") ArchiveTraceRequest parameters)
+  {
+    throw new UnsupportedOperationException(OPERATION_NOT_SUPPORTED_MSG);
+  }
+
 
   @Override
   @WebMethod(operationName = "Verify", action = "http://www.bsi.bund.de/tr-esor/Verify")
   @WebResult(name = "VerifyResponse", targetNamespace = "urn:oasis:names:tc:dss:1.0:core:schema", partName = "parameters")
   public ResponseBaseType verify(@WebParam(name = "VerifyRequest", targetNamespace = "urn:oasis:names:tc:dss:1.0:core:schema", partName = "parameters") VerifyRequest parameters)
   {
-    ResponseBaseType resp = new ResponseBaseType();
+    var resp = new ResponseBaseType();
     resp.setRequestID(parameters.getRequestID());
 
     if (!Configurator.getInstance().isLoaded())
     {
-      return setInternalError(resp, "system has not been configured correctly", null);
+      makeInternalError(resp, "system has not been configured correctly", null);
+      return resp;
     }
 
     ParameterFinder params;
@@ -140,17 +165,18 @@ public class S4VerifyOnly implements S4
     catch (JAXBException | IllegalArgumentException e)
     {
       LOG.error("parsing failed", e);
-      resp.setResult(VerificationResultCreator.createDssResult(ValidationResultMajor.INVALID,
+      resp.setResult(VerificationResultCreator.createDssResult(OasisDssResultMajor.REQUESTER_ERROR,
                                                                "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError",
                                                                "parsing of input failed" + e.getMessage()));
       return resp;
     }
+
     resp.setProfile(params.getProfileName());
     resp.setOptionalOutputs(XmlHelper.FACTORY_DSS.createAnyType());
     try
     {
-      InputPreparator input = new InputPreparator(params);
-      VerificationReportType report = ValidationScheduler.validate(input.getValidations());
+      var input = new InputPreparator(params);
+      var report = ValidationScheduler.validate(input.getValidations());
       if (params.getReturnVerificationReport() != null)
       {
         resp.getOptionalOutputs().getAny().add(XmlHelper.toElement(report));
@@ -159,11 +185,11 @@ public class S4VerifyOnly implements S4
     }
     catch (JAXBException e)
     {
-      setInternalError(resp, "cannot translate report into DOM element", e);
+      makeInternalError(resp, "cannot translate report into DOM element", e);
     }
     catch (ReflectiveOperationException | IOException e)
     {
-      setInternalError(resp, "unexpected", e);
+      makeInternalError(resp, "unexpected", e);
     }
     return resp;
   }
@@ -172,15 +198,14 @@ public class S4VerifyOnly implements S4
   {
     if (resp.getResult() == null)
     {
-      resp.setResult(VerificationResultCreator.createDssResult(ValidationResultMajor.VALID, null, null));
+      resp.setResult(VerificationResultCreator.createDssResult(OasisDssResultMajor.SUCCESS, null, null));
     }
 
-    ValidationResultMajor vrm = ValidationResultMajor.forValue(resp.getResult().getResultMajor());
+    var vrm = ValidationResultMajor.forValue(resp.getResult().getResultMajor());
 
-    for ( IndividualReportType irt : report.getIndividualReport() )
+    for ( var irt : report.getIndividualReport() )
     {
-      ValidationResultMajor newValue = ValidationResultMajor.forValue(irt.getResult().getResultMajor())
-                                                            .worse(vrm);
+      var newValue = ValidationResultMajor.forValue(irt.getResult().getResultMajor()).worse(vrm);
       if (!newValue.equals(vrm))
       {
         resp.setResult(irt.getResult());
@@ -189,12 +214,11 @@ public class S4VerifyOnly implements S4
     }
   }
 
-  private ResponseBaseType setInternalError(ResponseBaseType resp, String msg, Exception e)
+  private void makeInternalError(ResponseBaseType resp, String msg, Exception e)
   {
     LOG.error(msg, e);
-    resp.setResult(VerificationResultCreator.createDssResult(ValidationResultMajor.INVALID,
+    resp.setResult(VerificationResultCreator.createDssResult(OasisDssResultMajor.REQUESTER_ERROR,
                                                              "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError",
                                                              msg + (e == null ? "" : ": " + e.getMessage())));
-    return resp;
   }
 }

@@ -23,6 +23,10 @@ package de.bund.bsi.tr_esor.checktool.conf;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -31,11 +35,12 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.xml.XMLConstants;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.SchemaFactory;
+
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -75,7 +80,10 @@ public final class Configurator
 
   private ValidatorRepository validators;
 
-  private Configurator()
+  /**
+   * for tests only
+   */
+  Configurator()
   {
     // Singleton
   }
@@ -90,27 +98,24 @@ public final class Configurator
 
   /**
    * Loads the configuration from given input.
-   *
-   * @param ins
-   * @throws JAXBException
-   * @throws ReflectiveOperationException
    */
+  @SuppressWarnings("PMD.NullAssignment")
   public void load(InputStream ins) throws JAXBException, ReflectiveOperationException
   {
     try
     {
-      JAXBContext ctx = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
-      Unmarshaller u = ctx.createUnmarshaller();
-      SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+      var ctx = JAXBContext.newInstance(ObjectFactory.class.getPackage().getName());
+      var u = ctx.createUnmarshaller();
+      var schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
       setSchemaForUnmarshaller(u, schemaFactory);
-      Object x = u.unmarshal(ins);
+      var x = u.unmarshal(ins);
       config = (Configuration)x;
       validators = new ValidatorRepository();
       if (config.getGeneral().getConfiguredObjects() != null)
       {
         addToRepo(config.getGeneral().getConfiguredObjects(), null);
       }
-      for ( ProfileType profile : config.getProfile() )
+      for ( var profile : config.getProfile() )
       {
         addToRepo(profile, profile.getName());
       }
@@ -141,11 +146,11 @@ public final class Configurator
   private void addToRepo(ConfiguredObjectsCollection collection, String profileName)
     throws ReflectiveOperationException
   {
-    for ( ValidatorType val : collection.getValidator() )
+    for ( var val : collection.getValidator() )
     {
-      Class<?> validatorClass = Class.forName(val.getClassName().trim());
-      Class<?> targetClass = Class.forName(val.getTargetType().trim());
-      TypeAnalyzer genTypes = assertIsValidatorForTarget(validatorClass, targetClass);
+      var validatorClass = Class.forName(val.getClassName().trim());
+      var targetClass = Class.forName(val.getTargetType().trim());
+      var genTypes = assertIsValidatorForTarget(validatorClass, targetClass);
       assertConstructorPresent(validatorClass, val.getParameter().isEmpty());
 
       validators.addToProfile(() -> createInstance(val, validatorClass),
@@ -158,10 +163,9 @@ public final class Configurator
 
   private static <T> T createInstance(ConfigurableObjectType cnf, Class<T> clazz)
   {
-    Map<String, String> params = cnf.getParameter()
-                                    .stream()
-                                    .collect(Collectors.toMap(ParameterType::getName,
-                                                              ParameterType::getValue));
+    var params = cnf.getParameter()
+                    .stream()
+                    .collect(Collectors.toMap(ParameterType::getName, ParameterType::getValue));
     try
     {
       return createNewMapInstance(clazz, params);
@@ -224,7 +228,7 @@ public final class Configurator
       throw new ReflectiveOperationException("Configured class does not extend Validator: "
                                              + clazz.getName());
     }
-    TypeAnalyzer genTypes = new TypeAnalyzer(clazz);
+    var genTypes = new TypeAnalyzer(clazz);
     if (genTypes.getFirstMatchingTypeArgument(targetClass) == null)
     {
       throw new ReflectiveOperationException("Validator " + clazz.getName()
@@ -236,8 +240,6 @@ public final class Configurator
 
   /**
    * Returns <code>true</code> if profile is configured.
-   *
-   * @param profileName
    */
   public boolean isProfileSupported(String profileName)
   {
@@ -285,21 +287,36 @@ public final class Configurator
   }
 
   /**
+   * Returns the name space prefixes to use for XML elements.
+   */
+  public void addXMLNSPrefix(String namespace, String prefix)
+  {
+    assertConfigLoaded();
+    var namespacePrefix = new NamespacePrefixType();
+    namespacePrefix.setNamespace(namespace);
+    namespacePrefix.setValue(prefix);
+    config.getGeneral().getNamespacePrefix().add(namespacePrefix);
+  }
+
+  /**
    * Returns a list of supported profiles.
    */
   public List<String> getSupportedProfileNames()
   {
     assertConfigLoaded();
-    List<String> result = config.getProfile().stream().map(ProfileType::getName).collect(Collectors.toList());
-    // avoid dependency:
-    result.addAll(ProfileNames.getPredefinedProfileNames());
+    var result = config.getProfile().stream().map(ProfileType::getName).collect(Collectors.toList());
+    for ( var profile : ProfileNames.getPredefinedProfileNames() )
+    {
+      if (result.stream().noneMatch(profile::equals))
+      {
+        result.add(profile);
+      }
+    }
     return result;
   }
 
   /**
    * Returns the parser configurations for specified profile.
-   *
-   * @param name
    */
   public List<ParserType> getParsers(String name)
   {
@@ -314,8 +331,6 @@ public final class Configurator
 
   /**
    * Returns the validator configurations for specified profile.
-   *
-   * @param name
    */
   public List<ValidatorType> getValidators(String name)
   {
@@ -337,6 +352,98 @@ public final class Configurator
     return Optional.ofNullable(config.getGeneral().getConfiguredObjects())
                    .map(ConfiguredObjectsCollection::getParser)
                    .orElse(Collections.emptyList());
+  }
+
+  /**
+   * @return true if the hashes should be sorted for a certain profile.
+   */
+  public HashSortingMode hashSortingMode(String profileName)
+  {
+    assertConfigLoaded();
+    var profile = getProfile(profileName);
+    if (profile != null)
+    {
+      return HashSortingMode.fromString(profile.getHashMode());
+    }
+    return HashSortingMode.DEFAULT;
+  }
+
+  /**
+   * @return the LXAIP data directory, may be null
+   */
+  public Path getLXaipDataDirectory(String profileName)
+  {
+    assertConfigLoaded();
+    var profile = getProfile(profileName);
+    if (profile == null)
+    {
+      return Path.of(".");
+    }
+    return Paths.get(profile.getLxaipDataDirectory());
+  }
+
+  /** check if qualified timestamps are required */
+  public boolean requiresQualifiedTimestamps(String profileName)
+  {
+    var profile = getProfile(profileName);
+    return profile != null && profile.isRequireQualifiedTimestamps();
+  }
+
+  /** check if a verification service URL is configured */
+  public boolean hasVerificationService(String profileName)
+  {
+    var profile = getProfile(profileName);
+    if (profile == null)
+    {
+      return false;
+    }
+
+    var validationService = profile.getValidationService();
+    return validationService != null && !validationService.isEmpty();
+  }
+
+  /**
+   * @return the verification service URL, may be null
+   */
+  public String getVerificationServiceURL(String profileName)
+  {
+    assertConfigLoaded();
+    var profile = getProfile(profileName);
+    if (profile == null)
+    {
+      return null;
+    }
+    return profile.getValidationService();
+  }
+
+  /**
+   * @return the verification service URL, fail with an IllegalArgumentException if it is not a valid URL
+   */
+  public URL getVerificationServiceOrFail(String profileName)
+  {
+    var eCardUrl = getVerificationServiceURL(profileName);
+    if (eCardUrl == null)
+    {
+      throw new IllegalArgumentException("A valid URL to an eCard webservice must be passed as profile attribute 'validationService'");
+    }
+    try
+    {
+      return new URL(eCardUrl);
+    }
+    catch (MalformedURLException e)
+    {
+      throw new IllegalArgumentException("Malformed URL " + eCardUrl
+                                         + " passed as profile attribute 'validationService'", e);
+    }
+  }
+
+  /**
+   * Get all information about a configured profile. Changes to the object will apply into the current
+   * configuration.
+   */
+  public ProfileType getProfile(String profileName)
+  {
+    return config.getProfile().stream().filter(p -> profileName.equals(p.getName())).findAny().orElse(null);
   }
 
   /**

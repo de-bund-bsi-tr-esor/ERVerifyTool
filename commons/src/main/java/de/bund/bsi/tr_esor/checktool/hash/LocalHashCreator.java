@@ -25,6 +25,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 
+
 /**
  * HashCreator using the default JDK crypto provider for hashing.
  *
@@ -36,7 +37,7 @@ public class LocalHashCreator implements HashCreator
   @Override
   public byte[] calculateHash(byte[] data, String oid) throws NoSuchAlgorithmException
   {
-    MessageDigest digest = MessageDigest.getInstance(oid);
+    var digest = MessageDigest.getInstance(oid);
     return digest.digest(data);
   }
 

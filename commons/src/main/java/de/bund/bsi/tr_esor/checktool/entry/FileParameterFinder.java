@@ -32,12 +32,13 @@ import java.nio.file.Path;
 import org.bouncycastle.cms.CMSSignedData;
 
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
+import de.bund.bsi.tr_esor.checktool.data.UnsupportedData;
+import de.bund.bsi.tr_esor.checktool.data.XaipAndSerializer;
 import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
-import de.bund.bsi.tr_esor.checktool.parser.BinaryParser;
 import de.bund.bsi.tr_esor.checktool.validation.ParserFactory;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.xaip._1.EvidenceRecordType;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
+import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -58,7 +59,9 @@ public class FileParameterFinder extends ParameterFinder
    */
   public FileParameterFinder(Path protectedData, Path er, String profileName) throws IOException
   {
-    setProfileName(profileName);
+    super();
+    handleProfileName(profileName);
+
     returnVerificationReport = FACTORY_OASIS_VR.createReturnVerificationReport();
     returnVerificationReport.setReportDetailLevel(ReportDetailLevel.ALL_DETAILS.toString());
     if (er != null)
@@ -73,7 +76,7 @@ public class FileParameterFinder extends ParameterFinder
 
   private void setErAttributes(Object parsedEr) throws IOException
   {
-    Reference baseErRef = new Reference("command line parameter er");
+    var baseErRef = new Reference("command line parameter er");
     if (parsedEr instanceof EvidenceRecord)
     {
       er = (EvidenceRecord)parsedEr;
@@ -81,7 +84,7 @@ public class FileParameterFinder extends ParameterFinder
     }
     else if (parsedEr instanceof EvidenceRecordType)
     {
-      EvidenceRecordType r = (EvidenceRecordType)parsedEr;
+      var r = (EvidenceRecordType)parsedEr;
       xaipVersionAddressdByEr = r.getVersionID();
       xaipAoidAddressdByEr = r.getAOID();
       erRef = baseErRef.newChild("asn1EvidenceRecord");
@@ -109,10 +112,15 @@ public class FileParameterFinder extends ParameterFinder
 
   private void setDataAttribute(Path protectedData, Object parsedData) throws IOException
   {
-    Reference dataRef = new Reference("command line parameter data");
-    if (parsedData instanceof XAIPType)
+    var dataRef = new Reference("command line parameter data");
+    if (parsedData instanceof UnsupportedData)
     {
-      xaip = (XAIPType)parsedData;
+      unsupportedRef = dataRef;
+    }
+    else if (parsedData instanceof XaipAndSerializer)
+    {
+      xaip = ((XaipAndSerializer)parsedData).getXaip();
+      serializer = ((XaipAndSerializer)parsedData).getSerializer();
       xaipRef = dataRef;
     }
     else if (parsedData instanceof byte[])
@@ -123,7 +131,7 @@ public class FileParameterFinder extends ParameterFinder
     {
       try (InputStream ins = new FileInputStream(protectedData.toFile()))
       {
-        binaryDocuments.put(dataRef, BinaryParser.readAll(ins));
+        binaryDocuments.put(dataRef, ins.readAllBytes());
       }
     }
   }

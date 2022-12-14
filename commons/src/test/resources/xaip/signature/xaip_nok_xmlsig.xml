@@ -1,0 +1,125 @@
+<esor:XAIP xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip" XAIPVersion="1.3.0">
+   <esor:packageHeader packageID="xd933b44c-aa96-4d2d-9a32-9e563e6dded3">
+      <esor:AOID>xaip_nok_xmlsig</esor:AOID>
+      <esor:versionManifest VersionID="V001">
+         <esor:preservationInfo>
+            <esor:retentionPeriod>2114-01-01+01:00
+            </esor:retentionPeriod>
+         </esor:preservationInfo>
+         <esor:packageInfoUnit packageUnitID="_idx_data_V001">
+            <esor:protectedObjectPointer>data</esor:protectedObjectPointer>
+            <esor:protectedObjectPointer>meta</esor:protectedObjectPointer>
+            <esor:unprotectedObjectPointer>data2</esor:unprotectedObjectPointer>
+            <esor:unprotectedObjectPointer>detachedSignature</esor:unprotectedObjectPointer>
+         </esor:packageInfoUnit>
+      </esor:versionManifest>
+      <ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#"
+         Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"></ds:CanonicalizationMethod>
+   </esor:packageHeader>
+   <esor:metaDataSection>
+      <esor:metaDataObject relatedObjects="data"
+         metaDataID="meta"><esor:xmlMetaData/>Some XML to be signed, signature is broken by
+         non-exclusive canonicalization.<esor:xmlMetaData/>
+      </esor:metaDataObject>
+   </esor:metaDataSection>
+   <esor:dataObjectsSection>
+      <esor:dataObject dataObjectID="data">
+         <esor:binaryData>PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4NCjxTYW1wbGU+DQpMb3JlbSBpcHN1bSBkb2xvciBzaXQgYW1ldCwgY29uc2VjdGV0dXIgYWRpcGlzaWNpbmcgZWxpdCwgc2VkIGRvIGVpdXNtb2QgdGVtcG9yIGluY2lkaWR1bnQgdXQgbGFib3JlIGV0IGRvbG9yZSBtYWduYSBhbGlxdWEuIFV0IGVuaW0gYWQgbWluaW0gdmVuaWFtLCBxdWlzIG5vc3RydWQgZXhlcmNpdGF0aW9uIHVsbGFtY28gbGFib3JpcyBuaXNpIHV0IGFsaXF1aXAgZXggZWEgY29tbW9kbyBjb25zZXF1YXQuIER1aXMgYXV0ZSBpcnVyZSBkb2xvciBpbiByZXByZWhlbmRlcml0IGluIHZvbHVwdGF0ZSB2ZWxpdCBlc3NlIGNpbGx1bSBkb2xvcmUgZXUgZnVnaWF0IG51bGxhIHBhcmlhdHVyLiBFeGNlcHRldXIgc2ludCBvY2NhZWNhdCBjdXBpZGF0YXQgbm9uIHByb2lkZW50LCBzdW50IGluIGN1bHBhIHF1aSBvZmZpY2lhIGRlc2VydW50IG1vbGxpdCBhbmltIGlkIGVzdCBsYWJvcnVtDQo8L1NhbXBsZT4NCg==
+         </esor:binaryData>
+      </esor:dataObject>
+      <esor:dataObject dataObjectID="data2" xmlns:f="uri:for.checking.canonicalization">
+         <esor:xmlData>
+            <content xmlns="uri:special.propriarity.stuff">Note that this file is manipulated for test purposes.</content>
+         </esor:xmlData>
+      </esor:dataObject>
+   </esor:dataObjectsSection>
+   <esor:credentialsSection>
+      <esor:credential credentialID="detachedSignature"
+         relatedObjects="data">
+         <dss:SignatureObject xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema">
+            <Signature xmlns="http://www.w3.org/2000/09/xmldsig#"
+               Id="_ebce7408-9876-45a5-b2f8-059858f5af69">
+               <SignedInfo>
+                  <CanonicalizationMethod
+                     Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                  <SignatureMethod
+                     Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256" />
+                  <Reference Id="_ecf3ff65-ccc5-4397-a0cb-ba184c261d34"
+                     URI="D:/test/Testdaten_zu_Signer/XAdES/3.2.4.1_XAdES-Signatur_unbekannter_Fachdatenformat/sample.xml">
+                     <DigestMethod
+                        Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                     <DigestValue>VlaiRvMAQ1w0OqKkqoRQTl10z+qYIV8H4t76LUB1JMQ=
+                     </DigestValue>
+                  </Reference>
+                  <Reference
+                     URI="#_ebce7408-9876-45a5-b2f8-059858f5af69_SignedProperties">
+                     <Transforms>
+                        <Transform
+                           Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315" />
+                     </Transforms>
+                     <DigestMethod
+                        Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                     <DigestValue>MTsP6kIcPQ97WryoHhicTcMtYS/LrsWefjUKu1gqPtU=
+                     </DigestValue>
+                  </Reference>
+               </SignedInfo>
+               <SignatureValue>Od0pKN1Q7zLJdsG1SN/GQSKs2qb+sujUfM45czPVIPlTKHm4FLkG6/eGnJX27h0fdFL6lZBPl+R0
+                  8DpzhvgjMnCgFpDlsii12lBcKjvL4hqNSmMnQZWQNRk9nvsvecjGBLLq2r4HnqDZF1kj1SEzlZ9+
+                  QkoFQt0dqTS+HI1hBg1NlJcCVuECQkDhfnu9SIHyeh+DdiLkZhuB+/n8tyou3XW0H+7kAIMpt317
+                  T10EbapOgPE+jH9/1Xsw9oil87zC3w4pk7uhjdap/n6Ry3e3n3S2p+J6UvYul+Rak222ismRsPjF
+                  Y9frOf474q/C+LtxAxN6p+YaXB7A/qZ6j6MerA==
+               </SignatureValue>
+               <KeyInfo>
+                  <X509Data>
+                     <X509SubjectName>C=de,OU=SAFE neu,O=bos
+                        KG,CN=Dietrich</X509SubjectName>
+                     <X509Certificate>
+                        MIIDVzCCAj+gAwIBAgIGAUEHr5i1MA0GCSqGSIb3DQEBBQUAMEQxETAPBgNVBAMMCERpZXRyaWNo
+                        MQ8wDQYDVQQKDAZib3MgS0cxETAPBgNVBAsMCFNBRkUgbmV1MQswCQYDVQQGDAJkZTAeFw0xMzA5
+                        MTAxMTQxMDlaFw0xNjA5MTAxMTQ0MDlaMEQxETAPBgNVBAMMCERpZXRyaWNoMQ8wDQYDVQQKDAZi
+                        b3MgS0cxETAPBgNVBAsMCFNBRkUgbmV1MQswCQYDVQQGDAJkZTCCASIwDQYJKoZIhvcNAQEBBQAD
+                        ggEPADCCAQoCggEBAKpb6OWYPfpzrFddlmolNmzGJ6R8DJM5b1s/1ADFLHVfv8G5NFF98q8G15Ws
+                        t3x8NeOxGdo6lNKlf6jcORYwI9RJIkZh8CAqX5/G/16rzp3ayJIwttujUPWxgn4SDxLH7IpHM+B0
+                        mzLSUtulZt20UlEXS35RLjlR4xYqFUBzv7ISkb3MFpwNdtqhX5ruwHT2P6ZBvGeOFqQK9CWRZ6Fz
+                        ha1kGdPLiqlO4gfuV7T/uQcg1VHWLA/MCIvdGsbfq5ynRCMzPwf2j/qlf+OGLsZpp+b05hhclT9B
+                        4cKsD0p5rjg6KBMtoqImz4z+7maAmm8nKpQtqlW95jDnQagZWC/gYEMCAwEAAaNPME0wHQYDVR0O
+                        BBYEFIkHR7QGhgX9wFS0YYxUuaSlJzQuMB8GA1UdIwQYMBaAFIkHR7QGhgX9wFS0YYxUuaSlJzQu
+                        MAsGA1UdDwQEAwIF4DANBgkqhkiG9w0BAQUFAAOCAQEAmPMk8zwGQUwDG6SnapwHEEN3xnH+YoDz
+                        wgfB0CmqOuJhZ2qG+v7g5f/8/1+/KCkBnUZjVwPKvohTzspD4v4ivwOHZ+otPGoyBrKEWMdVAImS
+                        HhmhgM6BGGYUHJ96W8LrOUqNNyqDk0dXkQC6cj+XNTDb92YCKImIO6B6YDru0xfJ5gOsGwHk/x2p
+                        GGU8JIaMSl06GX2U0m+Rl2HFQZ+Dg/++odwG8jgMceKCN2VGv+x/Kp6DqU8Ncmg35f1yMEs9xpmQ
+                        xt50iSHAmSWwZJeu6ZgbxzhLVm5VwVQ7np9YLuZpuVHdXtDM1psKa5LuvRjMa3Uj5bobv8KxQKzH
+                        z3HxGg==
+                     </X509Certificate>
+                  </X509Data>
+               </KeyInfo>
+               <Object>
+                  <xades:QualifyingProperties
+                     xmlns:xades="http://uri.etsi.org/01903/v1.3.2#"
+                     Target="#_ebce7408-9876-45a5-b2f8-059858f5af69">
+                     <xades:SignedProperties
+                        Id="_ebce7408-9876-45a5-b2f8-059858f5af69_SignedProperties">
+                        <xades:SignedSignatureProperties
+                           Id="_6de18e0a-6bcc-45f7-99dd-a9688d96be42">
+                           <xades:SigningTime>2016-04-21T11:56:24.271+02:00
+                           </xades:SigningTime>
+                           <xades:SigningCertificate>
+                              <xades:Cert>
+                                 <xades:CertDigest>
+                                    <DigestMethod
+                                       Algorithm="http://www.w3.org/2001/04/xmlenc#sha256" />
+                                    <DigestValue>l6t4vy/yXhLh83WMwbJR1hVNLH+PSCoDer+b0RLVg8w=
+                                    </DigestValue>
+                                 </xades:CertDigest>
+                              </xades:Cert>
+                           </xades:SigningCertificate>
+                        </xades:SignedSignatureProperties>
+                        <xades:SignedDataObjectProperties />
+                     </xades:SignedProperties>
+                  </xades:QualifyingProperties>
+               </Object>
+            </Signature>
+         </dss:SignatureObject>
+      </esor:credential>
+   </esor:credentialsSection>
+</esor:XAIP>

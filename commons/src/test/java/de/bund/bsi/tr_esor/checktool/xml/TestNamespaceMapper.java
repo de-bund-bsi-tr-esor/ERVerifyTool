@@ -21,9 +21,9 @@
  */
 package de.bund.bsi.tr_esor.checktool.xml;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
 
 import java.io.StringWriter;
 import java.io.Writer;
@@ -31,10 +31,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -66,19 +64,19 @@ public class TestNamespaceMapper
   @Test
   public void testDefaultMapping() throws Exception
   {
-    Document doc = getDocument();
-    Element xaip = buildElementsWithWrongPrefix(doc);
+    var doc = getDocument();
+    var xaip = buildElementsWithWrongPrefix(doc);
     doc.appendChild(xaip);
 
     assertThat("Marshalled xml of unmapped element",
                toString(doc),
                allOf(containsString("<test1 xmlns"),
                      containsString("<notStandardPrefix:test3 xmlns:notStandardPrefix")));
-    NamespaceMapper m = new NamespaceMapper(Collections.emptyMap());
+    var m = new NamespaceMapper(Collections.emptyMap());
     m.setNSPrefixRecursively(xaip);
     assertThat("Marshalled xml of unmapped element",
                toString(doc),
-               allOf(containsString("<esor:test1 xmlns:esor="), containsString("<xades:test3 xmlns:xades=")));
+               allOf(containsString("<xaip:test1 xmlns:xaip="), containsString("<xades:test3 xmlns:xades=")));
   }
 
   /**
@@ -89,13 +87,13 @@ public class TestNamespaceMapper
   @Test
   public void testCustomMapping() throws Exception
   {
-    Document doc = getDocument();
-    Element xaip = buildElementsWithWrongPrefix(doc);
+    var doc = getDocument();
+    var xaip = buildElementsWithWrongPrefix(doc);
     doc.appendChild(xaip);
     Map<String, String> configuredPrefix = new HashMap<>();
     configuredPrefix.put("http://uri.etsi.org/01903/v1.3.2#", ""); // target namespace
-    configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip/1.2", "other");
-    NamespaceMapper m = new NamespaceMapper(configuredPrefix);
+    configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip", "other");
+    var m = new NamespaceMapper(configuredPrefix);
     m.setNSPrefixRecursively(xaip);
     assertThat("Marshalled xml of unmapped element",
                toString(doc),
@@ -121,9 +119,9 @@ public class TestNamespaceMapper
 
   private Element buildElementsWithWrongPrefix(Document doc)
   {
-    Element xaip = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip/1.2", "test1");
-    Element xaip2 = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip/1.2", "test2");
-    Element xades = doc.createElementNS("http://uri.etsi.org/01903/v1.3.2#", "test3");
+    var xaip = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip", "test1");
+    var xaip2 = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip", "test2");
+    var xades = doc.createElementNS("http://uri.etsi.org/01903/v1.3.2#", "test3");
     xades.setPrefix("notStandardPrefix");
     xaip.appendChild(xaip2);
     xaip.appendChild(xades);
@@ -132,15 +130,14 @@ public class TestNamespaceMapper
 
   private Document getDocument() throws ParserConfigurationException
   {
-    DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-    DocumentBuilder builder = dbf.newDocumentBuilder();
-    Document doc = builder.newDocument();
-    return doc;
+    var dbf = DocumentBuilderFactory.newInstance();
+    var builder = dbf.newDocumentBuilder();
+    return builder.newDocument();
   }
 
   private String toString(Document doc) throws Exception
   {
-    Transformer tf = TransformerFactory.newInstance().newTransformer();
+    var tf = TransformerFactory.newInstance().newTransformer();
     Writer out = new StringWriter();
     tf.transform(new DOMSource(doc), new StreamResult(out));
     return out.toString();

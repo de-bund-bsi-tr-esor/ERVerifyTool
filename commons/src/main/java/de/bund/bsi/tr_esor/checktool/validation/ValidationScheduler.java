@@ -24,9 +24,10 @@ package de.bund.bsi.tr_esor.checktool.validation;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 import de.bund.bsi.tr_esor.checktool.xml.VRCreator;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
 
 /**
@@ -49,11 +50,10 @@ public final class ValidationScheduler
    *
    * @param contexts sorted out elements and required data to validate each one
    */
+  @SuppressWarnings("PMD.NullAssignment")
   public static VerificationReportType validate(List<ValidationContext<?>> contexts)
   {
-    List<ReportPart> reports = contexts.stream()
-                                       .map(ValidationScheduler::doValidation)
-                                       .collect(Collectors.toList());
+    var reports = contexts.stream().map(ValidationScheduler::doValidation).collect(Collectors.toList());
     return VRCreator.createReport(reports,
                                   contexts.isEmpty() ? null : contexts.get(0).getReturnVerificationReport());
   }

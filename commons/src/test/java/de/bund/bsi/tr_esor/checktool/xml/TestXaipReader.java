@@ -21,103 +21,129 @@
  */
 package de.bund.bsi.tr_esor.checktool.xml;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.startsWith;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertThrows;
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.hamcrest.Matcher;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
+import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
+import de.bund.bsi.tr_esor.checktool.validation.VersionNotFoundException;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.xaip._1.CredentialType;
-import de.bund.bsi.tr_esor.xaip._1.EvidenceRecordType;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
+import de.bund.bsi.tr_esor.xaip.CredentialType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
- * Unit test for {@link XaipReader}.
- *
- * @author BVO
+ * Test for the XAIP reader for physical XAIPs
  */
+@SuppressWarnings({"PMD.CommentRequired", "checkstyle:JavadocMethod"})
 public class TestXaipReader
 {
 
   private static final Reference REFERENCE = new Reference("XAIP");
 
-  /** Used to expect exception in tests. */
-  @Rule
-  public ExpectedException expectedException = ExpectedException.none();
+  private static final String PROFILE_NAME = ProfileNames.RFC4998;
 
-  private XaipReader systemUnderTest;
+  private XaipReader sut;
 
   /**
    * Creates new {@link XaipReader} for an example XAIP.
-   *
-   * @throws Exception
    */
   @Before
   public void initializeSystemUnderTest() throws Exception
   {
     TestUtils.loadDefaultConfig();
-    XAIPType xaip = XmlHelper.parseXaip(TestXaipReader.class.getResourceAsStream("/xaip/xaip_ok_ers.xml"));
-    systemUnderTest = new XaipReader(xaip, REFERENCE);
   }
 
   /**
    * Asserts that the EvidenceRecords can be obtained.
    */
   @Test
-  public void testGetEvidenceRecords()
+  public void testGetEvidenceRecords() throws Exception
   {
-    List<EvidenceRecordType> evidenceRecords = systemUnderTest.getEvidenceRecords()
-                                                              .values()
-                                                              .stream()
-                                                              .map(CredentialType::getEvidenceRecord)
-                                                              .collect(Collectors.toList());
+    sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
+
+    var evidenceRecords = sut.getEvidenceRecords()
+                             .values()
+                             .stream()
+                             .map(CredentialType::getEvidenceRecord)
+                             .collect(Collectors.toList());
     assertThat(evidenceRecords, hasSize(1));
-    assertThat(evidenceRecords.get(0).getAOID(), is("adc7ae71-bd2b-496f-83ec-1e8b11ad3161"));
+    assertThat(evidenceRecords.get(0).getAOID(), is("d9984bc6-2268-4d93-a9ea-50b20dfde3db"));
     assertThat(evidenceRecords.get(0).getVersionID(), is("V001"));
   }
 
   /**
    * Asserts exception with useful message in case of illegal version ID.
-   *
-   * @throws Exception
    */
   @Test
   public void testGetProtectedElementsByWrongVersionID() throws Exception
   {
-    expectedException.expect(IllegalArgumentException.class);
-    expectedException.expectMessage("unknown versionID");
-    systemUnderTest.getProtectedElements("Nada");
+    sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
+
+    var actual = assertThrows(VersionNotFoundException.class,
+                              () -> sut.prepareProtectedElements("Nada", null));
+    assertThat(actual.getMessage(),
+               is("The requested version Nada could not be found in the XAIP. Available versions are: [V001]"));
   }
 
-  /**
-   * Asserts that protected elements can be obtained for a valid version ID.
-   *
-   * @throws Exception
-   */
   @Test
-  public void testGetProtectedElements() throws Exception
+  public void getsProtectedMetaDataObject() throws Exception
   {
-    Map<Reference, byte[]> protectedElements = systemUnderTest.getProtectedElements("V001");
-    checkElement(protectedElements, "dataObjectID:data2_V001", startsWith("Dies ist ein Testdokument"));
-    checkElement(protectedElements, "metaDataID:data2_meta_V001", startsWith("<esor:metaDataObject"));
+    sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
+    var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", null);
+
+    var protectedElements = sut.prepareProtectedElements("V001", serializer);
+
+    checkElement(protectedElements, "metaDataID:Hundename_V001", containsString("TestData"));
+  }
+
+  @Test
+  public void getsProtectedVersionManifestObject() throws Exception
+  {
+    sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
+    var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", null);
+
+    var protectedElements = sut.prepareProtectedElements("V001", serializer);
+
+    checkElement(protectedElements, "versionID:V001", startsWith("<xaip:versionManifest"));
+  }
+
+  @Test
+  public void getsProtectedDataObjectFromXaip() throws Exception
+  {
+    sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
+    var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", null);
+
+    var protectedElements = sut.prepareProtectedElements("V001", serializer);
+
+    checkElement(protectedElements, "dataObjectID:HundesteuerAnmeldung_V001", startsWith("my name is"));
+  }
+
+  @Test
+  public void getsProtectedDataObjectFromLXaip() throws Exception
+  {
+    sut = new XaipReader(xaip("/lxaip/lxaip_ok.xml"), REFERENCE, PROFILE_NAME);
+    var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory("TR-ESOR"));
+    var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", lXaipReader);
+
+    var protectedElements = sut.prepareProtectedElements("V001", serializer);
+
     checkElement(protectedElements,
-                 "metaDataID:data2_meta_V001",
-                 containsString("data for qualified signature"));
-    checkElement(protectedElements, "versionID:V001", startsWith("<esor:versionManifest"));
+                 "dataObjectID:HundesteuerAnmeldung_V001",
+                 startsWith("Dies ist ein Testdokument mit qualifizierter Signatur"));
   }
 
   private void checkElement(Map<Reference, byte[]> protectedElements, String field, Matcher<String> expected)
@@ -125,5 +151,10 @@ public class TestXaipReader
     assertThat("Content of " + field,
                new String(protectedElements.get(REFERENCE.newChild(field)), StandardCharsets.UTF_8),
                expected);
+  }
+
+  private static XAIPType xaip(String file) throws Exception
+  {
+    return XmlHelper.parseXaip(TestXaipReader.class.getResourceAsStream(file));
   }
 }

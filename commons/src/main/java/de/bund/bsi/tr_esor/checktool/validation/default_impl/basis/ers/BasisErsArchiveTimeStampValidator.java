@@ -38,7 +38,7 @@ public class BasisErsArchiveTimeStampValidator extends ArchiveTimeStampValidator
   @Override
   protected ArchiveTimeStampReport validateInternal(Reference ref, ArchiveTimeStamp ats)
   {
-    ArchiveTimeStampReport report = super.validateInternal(ref, ats);
+    var report = super.validateInternal(ref, ats);
     if (ats.getAttributes() != null)
     {
       ctx.getFormatOk().invalidate("attributes must be omitted", ref.newChild("attributes"));

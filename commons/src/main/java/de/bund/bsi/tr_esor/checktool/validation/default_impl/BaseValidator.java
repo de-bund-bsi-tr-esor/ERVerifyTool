@@ -58,7 +58,7 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
   public void setContext(C context)
   {
     Objects.requireNonNull(context, "The context may not be null");
-    Class<C> clazz = getRequiredContextClass();
+    var clazz = getRequiredContextClass();
     if (!clazz.isInstance(context))
     {
       throw new IllegalArgumentException("Context is not a " + clazz.getName());
@@ -108,10 +108,8 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
   {
     try
     {
-      Validator<TP, ?, RP> val = (Validator<TP, ?, RP>)ValidatorFactory.getInstance()
-                                                                       .getValidator(toValidate.getClass(),
-                                                                                     reportType,
-                                                                                     ctx);
+      var val = (Validator<TP, ?, RP>)ValidatorFactory.getInstance()
+                                                      .getValidator(toValidate.getClass(), reportType, ctx);
       if (prepareValidator != null)
       {
         prepareValidator.accept(val);
@@ -120,7 +118,7 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
     }
     catch (NoValidatorException e)
     {
-      RP er = emptyReport.get();
+      var er = emptyReport.get();
       if (er != null)
       {
         er.setNoValidator(e);
@@ -194,6 +192,7 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
    * @param report
    * @return <code>null</code> if computation failed
    */
+  @SuppressWarnings("PMD.ReturnEmptyArrayRatherThanNull")
   protected byte[] computeHash(ByteArraySupplier supplier, String hashOID, Reference ref, ReportPart report)
   {
     try

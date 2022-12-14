@@ -1,155 +1,163 @@
-description = 'ER-Prüftool des BSI'
-
-buildscript {
-  repositories {
-    jcenter()
-  }
-  dependencies {
-    classpath 'org.unbroken-dome.gradle-plugins:gradle-xjc-plugin:1.1.3'
-    classpath 'org.sonarsource.scanner.gradle:sonarqube-gradle-plugin:2.6.1'
-  }
+plugins {
+    id 'application'
+    id 'com.github.spotbugs' version '4.6.0'
+    id 'pmd'
+    id 'checkstyle'
+    id 'com.diffplug.spotless' version '6.9.1'
+    id 'org.unbroken-dome.xjc' version '2.0.0'
 }
 
-apply plugin: 'org.sonarqube'
+description = 'ER-Prüftool des BSI'
+
+spotless {
+    groovy {
+        target '**/*.gradle'
+        greclipse()
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+    }
+    java {
+        target '**/*.java'
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+        eclipse().configFile("${project.projectDir}/config/formating/formatting.xml")
+        importOrder("java", "javax", "jakarta", "org", "com.javanet", "de.bos_bremen", "de.governikus", "de.bund.bsi")
+        removeUnusedImports()
+    }
+    lineEndings 'UNIX'
+}
 
 allprojects {
-  group = 'de.bund.bsi.tr_esor'
-  version = "${version}"
-  repositories {
-    mavenCentral()
-  }
-  apply plugin: 'eclipse'
-
-  // Sanitize eclipse project names for subprojects.
-  def eclipseName = project == rootProject ? project.name : rootProject.name + '-' + project.path.substring(1).replaceAll(':', '-')
-  eclipse {
-    project {
-      name = eclipseName
-    }
-  }
+    group = 'de.bund.bsi.tr_esor'
+    version = "${version}"
+    repositories { mavenCentral() }
 }
 
 subprojects {
-  ext.baseName = rootProject.name + '-' + project.name
+    ext.baseName = rootProject.name + '-' + project.name
 
-  apply plugin: 'maven-publish'
-  publishing {
-    repositories {
-      mavenLocal()
-      if(project.hasProperty('nexusUser') && project.hasProperty('nexusPassword') &&
-         project.hasProperty('mavenSnapshotUrl') && project.hasProperty('mavenReleaseUrl')) {
-        maven {
-          credentials {
-            username property('nexusUser')
-            password property('nexusPassword')
-          }
-          url project.version.endsWith('SNAPSHOT') ? property('mavenSnapshotUrl') : property('mavenReleaseUrl');
+    apply plugin: 'maven-publish'
+
+    tasks.withType(AbstractArchiveTask){
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    tasks.withType(Sync){
+        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    }
+
+    publishing {
+        repositories {
+            mavenLocal()
+            if(project.hasProperty('nexusUser') && project.hasProperty('nexusPassword') &&
+                    project.hasProperty('mavenSnapshotUrl') && project.hasProperty('mavenReleaseUrl')) {
+                maven {
+                    credentials {
+                        username property('nexusUser')
+                        password property('nexusPassword')
+                    }
+                    url project.version.endsWith('SNAPSHOT') ? property('mavenSnapshotUrl') : property('mavenReleaseUrl')
+                }
+            }
         }
-      }
-    }
-  }
-
-  def noJava = [':doc', ':all']
-  if(!noJava.any(project.path.&endsWith)) {
-    // Configure common settings and dependencies for Java projects
-    apply plugin: 'java-library'
-
-    def defaultEncoding = 'UTF-8'
-    [compileJava, compileTestJava]*.options*.encoding = defaultEncoding
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
-
-    jar.baseName = project.baseName
-
-    dependencies {
-      compile 'org.apache.logging.log4j:log4j-slf4j-impl:2.16.0'
-      testCompile ('junit:junit:4.12') {
-        exclude group: 'org.hamcrest', module: 'hamcrest-core'
-      }
-      testCompile 'org.hamcrest:hamcrest-all:1.3'
-      testCompile 'org.mockito:mockito-core:2.7.1'
     }
 
-    tasks.withType(Jar) {
-      doFirst {
-        manifest {
-          attributes( 'Specification-Title': baseName,
-                      'Specification-Vendor': 'Bundesamt für Sicherheit in der Informationstechnik',
-                      'Implementation-Title': baseName,
-                      'Implementation-Vendor': 'Governikus GmbH &amp; Co. KG',
-                      'Implementation-Version': project.version,
-                      'Built-By': System.getProperty('user.name'),
-                      'Build-Jdk': System.getProperty('java.version') )
+    def noJava = [':all']
+    if(!noJava.any(project.path.&endsWith)) {
+        // Configure common settings and dependencies for Java projects
+        apply plugin: 'java-library'
+
+        def defaultEncoding = 'UTF-8'
+        [compileJava, compileTestJava]*.options*.encoding = defaultEncoding
+        sourceCompatibility = 11
+        targetCompatibility = 11
+
+        jar.archiveBaseName = project.baseName
+
+        dependencies {
+            implementation 'org.apache.logging.log4j:log4j-core:2.17.1'
+            implementation 'org.apache.logging.log4j:log4j-slf4j-impl:2.17.1'
+            implementation 'org.apache.logging.log4j:log4j-1.2-api:2.17.1'
+            testImplementation ('junit:junit:4.13') {
+                exclude group: 'org.hamcrest', module: 'hamcrest-core'
+            }
+            testImplementation 'org.assertj:assertj-core:3.23.1'
+            testImplementation 'org.hamcrest:hamcrest:2.2'
+            testImplementation 'org.hamcrest:hamcrest-library:2.2'
+            testImplementation 'org.mockito:mockito-core:3.6.0'
         }
-      }
-    }
 
-    // Configure tests
-    apply plugin: 'jacoco'
+        tasks.withType(Jar) {
+            doFirst {
+                manifest {
+                    attributes( 'Specification-Title': baseName,
+                    'Specification-Vendor': 'Bundesamt für Sicherheit in der Informationstechnik',
+                    'Implementation-Title': baseName,
+                    'Implementation-Vendor': 'Governikus GmbH &amp; Co. KG',
+                    'Implementation-Version': project.version,
+                    'Built-By': System.getProperty('user.name'),
+                    'Build-Jdk': System.getProperty('java.version') )
+                }
+            }
+        }
 
-    jacoco.toolVersion = '0.7.9'
-    test {
-      jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacoco.exec")
-      }
-      exclude '**/*IT.class'
-    }
-    task integrationTest(type: Test) {
-      dependsOn test
-      jacoco {
-        append = false
-        destinationFile = file("$buildDir/jacoco/jacoco-integration.exec")
-      }
-      include '**/*IT.class'
-    }
-    tasks.withType(JacocoReport) {
-      afterEvaluate {
-        classDirectories = files(classDirectories.files.collect {
-          fileTree(dir: it, exclude: ['**/_1/*.class', 'ietf/**/*.class', 'iso/**/*.class', 'oasis/**/*.class', 'org/**/*.class'])
-        })
-      }
-    }
-    test.onlyIf { System.getProperty('skipTests') == null && System.getProperty('skipUnitTests') == null }
-    integrationTest.onlyIf { System.getProperty('skipTests') == null && System.getProperty('skipIntegrationTests') == null }
-    check.dependsOn integrationTest
+        // Configure tests
+        apply plugin: 'jacoco'
 
-    // Configure source code analysis plugins
-    apply plugin: 'findbugs'
-    apply plugin: 'checkstyle'
-    apply plugin: 'pmd'
+        jacoco.toolVersion = '0.8.3'
+        test {
+            jacoco {
+                destinationFile = file("$buildDir/jacoco/jacoco.exec")
+            }
+            exclude '**/*IT.class'
+        }
+        task integrationTest(type: Test) {
+            jacoco {
+                destinationFile = file("$buildDir/jacoco/jacoco-integration.exec")
+            }
+            include '**/*IT.class'
+        }
 
-    tasks.withType(FindBugs){
-      ignoreFailures = true
-      reports {
-        xml.enabled true
-        html.enabled false
-        excludeFilter = file("$rootProject.projectDir/findbugs-exclude.xml")
-      }
+        test.onlyIf { System.getProperty('skipTests') == null && System.getProperty('skipUnitTests') == null }
+        integrationTest.onlyIf { System.getProperty('skipTests') == null && System.getProperty('skipIntegrationTests') == null }
+        check.dependsOn integrationTest
+
+        // Configure source code analysis plugins
+        apply plugin: "com.github.spotbugs"
+        apply plugin: 'checkstyle'
+        apply plugin: 'pmd'
+
+        spotbugs {
+            toolVersion = '4.1.4'
+            reportLevel = 'high'
+            onlyAnalyze = [
+                'de.bund.bsi.tr_esor.checktool.-' // '.-' is necessary to includes all subpackages
+            ]
+        }
+
+        checkstyle {
+            toolVersion = '8.2'
+            ignoreFailures = true
+            showViolations = false
+        }
+        checkstyleMain.source = 'src/main/java'
+
+        pmd {
+            toolVersion = '6.29.0'
+            ignoreFailures = true
+            ruleSets = [] // required; otherwise the default rule sets are applied to all sources additionally
+            ruleSetFiles = files("$rootProject.projectDir/config/pmd/ruleset.xml")
+        }
+        tasks.withType(Checkstyle) {
+            ignoreFailures = true
+            reports {
+                xml.required = true
+                html.required = true
+            }
+        }
     }
-    checkstyle {
-      toolVersion = '8.2'
-      ignoreFailures = true
-      showViolations = false
-      configFile = file("$rootProject.projectDir/checkstyle_checks.xml")
-    }
-    checkstyleMain.source = 'src/main/java'
-    pmd {
-      toolVersion = '6.0.0'
-      ignoreFailures = true
-    }
-    findbugs.toolVersion = '3.0.1'
-    tasks.withType(Checkstyle) {
-      reports {
-        xml.enabled true
-        html.enabled true
-      }
-    }
-  }
 }
 
-sonarqube {
-  properties {
-    property 'sonar.host.url', 'http://sonar.boskg.local'
-  }
-}
+task publishLocal { dependsOn ':commons:publishToMavenLocal', ':cli:publishToMavenLocal', ':war:publishToMavenLocal' }

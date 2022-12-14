@@ -77,7 +77,7 @@ public class EncryptionInfo implements ASN1Encodable
     {
       throw new IOException("not valid (EI-1)");
     }
-    ASN1Sequence s = (ASN1Sequence)obj;
+    var s = (ASN1Sequence)obj;
     oid = ASN1ObjectIdentifier.getInstance(s.getObjectAt(0));
     value = s.getObjectAt(1).toASN1Primitive().getEncoded(ASN1Encoding.DER);
   }
@@ -85,7 +85,7 @@ public class EncryptionInfo implements ASN1Encodable
   @Override
   public ASN1Primitive toASN1Primitive()
   {
-    ASN1EncodableVector v = new ASN1EncodableVector();
+    var v = new ASN1EncodableVector();
     v.add(oid);
     v.add(new DEROctetString(value));
     return new DERSequence(v);

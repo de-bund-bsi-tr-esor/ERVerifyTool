@@ -21,8 +21,8 @@
  */
 package de.bund.bsi.tr_esor.checktool.hash;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
@@ -55,15 +55,15 @@ public class HashCreatorTest
   @Test
   public void testHashing() throws Exception
   {
-    byte[] testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
+    var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
     HashCreator hashCreator = new LocalHashCreator();
-    byte[] sha1hash = hashCreator.calculateHash(testData, "1.3.14.3.2.26"); // SHA1
-    byte[] sha256hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.1"); // SHA256
-    byte[] sha512hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.3"); // SHA512
-    byte[] expectedSha1hash = Base64.getDecoder().decode("YAdYMOObfFeKOweBAemmaPaNHCg=");
-    byte[] expectedSha256hash = Base64.getDecoder().decode("KiM2HJ3YhN10kF0+7S4MkwIgEZjzZSmgNDhLdIqpGes=");
-    byte[] expectedSha512hash = Base64.getDecoder()
-                                      .decode("yChVyfMAZHt5A2vxLek1TDhVHmRg3E/2aKpHX0L+kiz/9HyR6APIrEbaaM8DtVuzDN+F7McDSbVr1z9MaT22VQ==");
+    var sha1hash = hashCreator.calculateHash(testData, "1.3.14.3.2.26"); // SHA1
+    var sha256hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.1"); // SHA256
+    var sha512hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.3"); // SHA512
+    var expectedSha1hash = Base64.getDecoder().decode("YAdYMOObfFeKOweBAemmaPaNHCg=");
+    var expectedSha256hash = Base64.getDecoder().decode("KiM2HJ3YhN10kF0+7S4MkwIgEZjzZSmgNDhLdIqpGes=");
+    var expectedSha512hash = Base64.getDecoder()
+                                   .decode("yChVyfMAZHt5A2vxLek1TDhVHmRg3E/2aKpHX0L+kiz/9HyR6APIrEbaaM8DtVuzDN+F7McDSbVr1z9MaT22VQ==");
     assertThat("SHA1 hash", sha1hash, is(expectedSha1hash));
     assertThat("SHA256 hash", sha256hash, is(expectedSha256hash));
     assertThat("SHA512 hash", sha512hash, is(expectedSha512hash));
@@ -79,7 +79,7 @@ public class HashCreatorTest
   {
     exp.expect(NoSuchAlgorithmException.class);
     exp.expectMessage("1.3.3.7.1 MessageDigest not available");
-    byte[] testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
+    var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
     HashCreator hashCreator = new LocalHashCreator();
     hashCreator.calculateHash(testData, "1.3.3.7.1");
   }

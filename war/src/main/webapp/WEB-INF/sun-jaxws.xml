@@ -2,9 +2,9 @@
 <endpoints version="2.0"
    xmlns="http://java.sun.com/xml/ns/jax-ws/ri/runtime">
     <endpoint
-      service="{http://www.bsi.bund.de/tr-esor/api/1.2}S4"
-      port="{http://www.bsi.bund.de/tr-esor/api/1.2}S4"
+      service="{http://www.bsi.bund.de/tr-esor/api/1.3}S4"
+      port="{http://www.bsi.bund.de/tr-esor/api/1.3}S4"
       implementation="de.bund.bsi.tr_esor.checktool.entry.S4VerifyOnly"
       name="S4"
-      url-pattern="/esor12/exec" />
+      url-pattern="/esor13/exec" />
 </endpoints>

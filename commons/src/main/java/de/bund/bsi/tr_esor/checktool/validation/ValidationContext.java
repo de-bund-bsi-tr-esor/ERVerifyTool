@@ -21,8 +21,9 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation;
 
-import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+
+import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 
 
 /**
@@ -47,7 +48,6 @@ public abstract class ValidationContext<T>
    *
    * @param reference unique during the verify request
    * @param objectToValidate object to validate
-   * @param returnVerificationReport
    */
   protected ValidationContext(Reference reference,
                               T objectToValidate,
@@ -90,6 +90,11 @@ public abstract class ValidationContext<T>
   }
 
   /**
+   * Returns <code>true</code> if validation is restricted in certain cases.
+   */
+  public abstract boolean isRestrictedValidation();
+
+  /**
    * Returns the ReturnVerificationReport.
    */
   public ReturnVerificationReport getReturnVerificationReport()
@@ -99,8 +104,6 @@ public abstract class ValidationContext<T>
 
   /**
    * Returns a context indication that the object is not recognized and therefore cannot be validated.
-   *
-   * @param ref
    */
   public static ValidationContext<Object> forUnsupported(Reference ref, String profileName)
   {
@@ -115,9 +118,6 @@ public abstract class ValidationContext<T>
 
     /**
      * Creates new instance
-     *
-     * @param reference
-     * @param profileName
      */
     protected UnsupportedContext(Reference reference, String profileName)
     {
@@ -131,6 +131,12 @@ public abstract class ValidationContext<T>
     public Class<Object> getTargetClass()
     {
       return null;
+    }
+
+    @Override
+    public boolean isRestrictedValidation()
+    {
+      return false;
     }
   }
 }

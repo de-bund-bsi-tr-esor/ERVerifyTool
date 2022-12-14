@@ -21,25 +21,21 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
-import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
-import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 
 
 /**
  * Tests the validation capabilities for evidence records with available online validation.
- *
- * @author MO
  */
 public class TestEvidenceRecordValidatorIT
 {
@@ -57,22 +53,19 @@ public class TestEvidenceRecordValidatorIT
    * Tests two valid evidence records to be checked as valid. No assertions regarding the protected elements
    * are made. Note that the context is not filled with protected documents, so presence of document hashes is
    * not checked here.
-   *
-   * @throws Exception
    */
   @Test
   public void testValidER() throws Exception
   {
-    String[] erToTest = {"/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
-    for ( String erName : erToTest )
+    var erToTest = new String[]{"/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
+    for ( var erName : erToTest )
     {
-      byte[] erBytes = TestUtils.decodeTestResource(erName);
-      EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-      EvidenceRecordValidator validator = new EvidenceRecordValidator();
-      validator.setContext(new ErValidationContext(new Reference("dummy"), er, "online_profile", null));
-      EvidenceRecordReport report = validator.validate(new Reference("dummy"), er);
-      assertThat("validation result for " + erName,
-                 report.getOverallResult().getResultMajor(),
+      var erBytes = TestUtils.decodeTestResource(erName);
+      var er = new ASN1EvidenceRecordParser().parse(erBytes);
+      var validator = new EvidenceRecordValidator();
+      validator.setContext(new ErValidationContext(new Reference("dummy"), er, "custom", null, false));
+      var report = validator.validate(new Reference("dummy"), er);
+      assertThat(report.getOverallResult().getResultMajor(),
                  is(ValidationResultMajor.INDETERMINED.toString()));
     }
   }

@@ -53,7 +53,7 @@ public class EvidenceRecordValidator
     }
     reference = ctx.getReference();
 
-    EvidenceRecordReport detailReport = new EvidenceRecordReport(ref);
+    var detailReport = new EvidenceRecordReport(ref);
     if (record == null)
     {
       ctx.getFormatOk().setNoParsedObject("Evidence record");
@@ -109,17 +109,17 @@ public class EvidenceRecordValidator
 
   private void checkTimeStampSequence(ArchiveTimeStampSequence atss, EvidenceRecordReport detailReport)
   {
-    Reference ref = reference.newChild("atss");
+    var ref = reference.newChild("atss");
     detailReport.addChild(callValidator(atss, ref, ATSSequenceReport.class));
   }
 
   private void checkDigestAlgorithmValidity(EvidenceRecord record, EvidenceRecordReport detailReport)
   {
-    for ( String oid : record.getDigestAlgorithms() )
+    for ( var oid : record.getDigestAlgorithms() )
     {
-      AlgorithmUsage usage = AlgorithmUsage.createHashed(oid, ctx.getLatestPossibleUsage(oid));
+      var usage = AlgorithmUsage.createHashed(oid, ctx.getLatestPossibleUsage(oid));
 
-      Reference ref = reference.newChild("digestAlgorithms:" + oid);
+      var ref = reference.newChild("digestAlgorithms:" + oid);
       detailReport.addChild(callValidator(usage,
                                           ref,
                                           null,

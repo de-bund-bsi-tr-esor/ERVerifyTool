@@ -27,6 +27,7 @@ import org.bouncycastle.tsp.TimeStampToken;
 
 import de.bund.bsi.tr_esor.checktool.data.CAdESReader;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
+import de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.ContentInfoChecker;
 import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 
@@ -40,9 +41,6 @@ public abstract class BaseTimeStampValidator
   extends BaseValidator<TimeStampToken, ErValidationContext, TimeStampReport>
 {
 
-  /** Minor code for invalid format */
-  protected static final String MINOR_INVALID_FORMAT = "http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/invalidFormat";
-
   /**
    * Checks the unsigned attributes of a time stamp for presence of certificate and revocation info.
    *
@@ -50,15 +48,21 @@ public abstract class BaseTimeStampValidator
    */
   protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
   {
-    SignedData signedData = SignedData.getInstance(ContentInfo.getInstance(ts.toCMSSignedData()
-                                                                             .toASN1Structure())
-                                                              .getContent());
-    CAdESReader reader = new CAdESReader(ts.toCMSSignedData());
+    var signedData = SignedData.getInstance(ContentInfo.getInstance(ts.toCMSSignedData().toASN1Structure())
+                                                       .getContent());
+    if (!ContentInfoChecker.SUPPORTED_CMS_VERSION.equals(signedData.getVersion()))
+    {
+      var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
+                                  signedData.getVersion().getValue().intValue(),
+                                  ContentInfoChecker.SUPPORTED_CMS_VERSION.getValue().intValue());
+      formatOk.invalidate(message, formatOk.getReference());
+    }
+
+    var reader = new CAdESReader(ts.toCMSSignedData());
     if (!reader.hasCertificateValues()
         && (signedData.getCertificates() == null || signedData.getCertificates().size() == 0))
     {
-      formatOk.invalidate("Missing certificates in time stamp",
-                          formatOk.getReference());
+      formatOk.invalidate("Missing certificates in time stamp", formatOk.getReference());
     }
     if (!reader.hasRevocationValues() && (signedData.getCRLs() == null || signedData.getCRLs().size() == 0))
     {

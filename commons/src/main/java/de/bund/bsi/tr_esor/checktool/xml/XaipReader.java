@@ -21,31 +21,49 @@
  */
 package de.bund.bsi.tr_esor.checktool.xml;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.namespace.QName;
+import oasis.names.tc.dss._1_0.core.schema.Base64Signature;
+import oasis.names.tc.dss._1_0.core.schema.SignatureObject;
+import oasis.names.tc.dss._1_0.core.schema.Timestamp;
+
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
 
 import org.apache.xml.security.Init;
+import org.apache.xml.security.c14n.CanonicalizationException;
 import org.apache.xml.security.c14n.Canonicalizer;
+import org.apache.xml.security.c14n.InvalidCanonicalizerException;
 import org.apache.xml.security.exceptions.XMLSecurityException;
-import org.w3c.dom.Element;
+import org.etsi.uri._01903.v1_3.CRLValuesType;
+import org.etsi.uri._01903.v1_3.CertificateValuesType;
+import org.etsi.uri._01903.v1_3.EncapsulatedPKIDataType;
+import org.etsi.uri._01903.v1_3.OCSPValuesType;
+import org.etsi.uri._01903.v1_3.RevocationValuesType;
 
+import de.bund.bsi.tr_esor.checktool.Toolbox;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
+import de.bund.bsi.tr_esor.checktool.data.InlineSignedData;
+import de.bund.bsi.tr_esor.checktool.data.InlineSignedDataObject;
+import de.bund.bsi.tr_esor.checktool.data.InlineSignedMetaDataObject;
+import de.bund.bsi.tr_esor.checktool.validation.VersionNotFoundException;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.xaip._1.CredentialType;
-import de.bund.bsi.tr_esor.xaip._1.DataObjectType;
-import de.bund.bsi.tr_esor.xaip._1.MetaDataObjectType;
-import de.bund.bsi.tr_esor.xaip._1.PackageInfoUnitType;
-import de.bund.bsi.tr_esor.xaip._1.VersionManifestType;
-import de.bund.bsi.tr_esor.xaip._1.XAIPType;
+import de.bund.bsi.tr_esor.xaip.CredentialType;
+import de.bund.bsi.tr_esor.xaip.CredentialsSectionType;
+import de.bund.bsi.tr_esor.xaip.DataObjectType;
+import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
+import de.bund.bsi.tr_esor.xaip.MetaDataObjectType;
+import de.bund.bsi.tr_esor.xaip.PackageInfoUnitType;
+import de.bund.bsi.tr_esor.xaip.VersionManifestType;
+import de.bund.bsi.tr_esor.xaip.XAIPType;
 
 
 /**
@@ -56,11 +74,13 @@ import de.bund.bsi.tr_esor.xaip._1.XAIPType;
 public class XaipReader
 {
 
-  private static final String TR_ESOR_XAIP_1_2_NS = "http://www.bsi.bund.de/tr-esor/xaip/1.2";
+  private static final String TR_ESOR_XAIP_1_3_NS = "http://www.bsi.bund.de/tr-esor/xaip";
 
   private final XAIPType xaip;
 
   private final Reference reference;
+
+  private final String profileName;
 
   private final NamespaceMapper namespaceMapper;
 
@@ -77,10 +97,11 @@ public class XaipReader
   /**
    * Create a new reader instance for XAIP.
    */
-  public XaipReader(XAIPType xaip, Reference reference)
+  public XaipReader(XAIPType xaip, Reference reference, String profileName)
   {
     this.xaip = xaip;
     this.reference = reference;
+    this.profileName = profileName;
     this.namespaceMapper = new NamespaceMapper(Configurator.getInstance().getXMLNSPrefixes());
   }
 
@@ -100,10 +121,84 @@ public class XaipReader
                .collect(Collectors.toMap(this::createRefForEr, Function.identity()));
   }
 
+  /** List of all data and meta data objects not covered by detached signatures */
+  public List<InlineSignedData> findPotentiallyInlineSignedElements()
+  {
+    var results = new ArrayList<InlineSignedData>();
+    var dataSection = xaip.getDataObjectsSection();
+    var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(profileName));
+
+    if (dataSection != null)
+    {
+      for ( var data : dataSection.getDataObject() )
+      {
+        if (!hasDetachedSignature(data) && (lXaipReader.isValidLXaipElement(data, data.getDataObjectID())
+                                            || data.getBinaryData() != null))
+        {
+          results.add(new InlineSignedDataObject(new Reference(data.getDataObjectID()), lXaipReader, data));
+        }
+      }
+    }
+
+    var metaDataSection = xaip.getMetaDataSection();
+
+    if (metaDataSection != null)
+    {
+      for ( var meta : metaDataSection.getMetaDataObject() )
+      {
+        if (!hasDetachedSignature(meta) && (lXaipReader.isValidLXaipElement(meta, meta.getMetaDataID())
+                                            || meta.getBinaryMetaData() != null))
+        {
+          results.add(new InlineSignedMetaDataObject(new Reference(meta.getMetaDataID()), lXaipReader, meta));
+        }
+      }
+    }
+    return results;
+  }
+
+  /** List all credentials that contain signatures */
+  public List<CredentialType> findDetachedSignatures()
+  {
+    var results = new ArrayList<CredentialType>();
+    CredentialsSectionType credentialSection = xaip.getCredentialsSection();
+    if (credentialSection == null)
+    {
+      return List.of();
+    }
+
+    var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(profileName));
+    for ( CredentialType cred : credentialSection.getCredential() )
+    {
+      if (lXaipReader.isValidLXaipElement(cred, cred.getCredentialID())
+          || cred.getSignatureObject() != null && isSupportedSignatureObject(cred.getSignatureObject()))
+      {
+        results.add(cred);
+      }
+    }
+    return results;
+  }
+
+  private boolean isSupportedSignatureObject(SignatureObject sigObj)
+  {
+    return sigObj.getBase64Signature() != null || sigObj.getSignature() != null
+           || sigObj.getTimestamp() != null;
+  }
+
+
+
+  private boolean hasDetachedSignature(Object data)
+  {
+    return xaip.getCredentialsSection() != null && xaip.getCredentialsSection()
+                                                       .getCredential()
+                                                       .stream()
+                                                       .map(CredentialType::getRelatedObjects)
+                                                       .anyMatch(ro -> ro.contains(data));
+  }
+
   private Reference createRefForEr(CredentialType cred)
   {
-    String cid = cred.getCredentialID();
-    Reference ref = reference.newChild("evidenceRecord:" + cid);
+    var cid = cred.getCredentialID();
+    var ref = reference.newChild("evidenceRecord:" + cid);
     if (reference.getxPath() != null)
     {
       ref.setxPath(reference.getxPath() + "/credentialSection/credential[@credentialID='" + cid
@@ -115,69 +210,173 @@ public class XaipReader
   /**
    * Returns a map containing all protected elements of the specified version represented as canonicalized
    * byte arrays. Key is respective ID.
-   *
-   * @param versionId
-   * @throws JAXBException
-   * @throws XMLSecurityException
    */
-  public Map<Reference, byte[]> getProtectedElements(String versionId)
-    throws JAXBException, XMLSecurityException
+  public Map<Reference, byte[]> prepareProtectedElements(String versionId, XaipSerializer serializer)
+    throws JAXBException, XMLSecurityException, IOException
   {
     Map<Reference, byte[]> result = new HashMap<>();
-    VersionManifestType manifest = getVersionManifest(versionId);
+    var manifest = getVersionManifest(versionId);
     List<JAXBElement<Object>> pointer = new ArrayList<>();
     addPointers(manifest.getPackageInfoUnit(), pointer);
 
-    String algorithm = xaip.getPackageHeader().getCanonicalizationMethod().getAlgorithm();
-    Canonicalizer canon = Canonicalizer.getInstance(algorithm);
+    var algorithm = xaip.getPackageHeader().getCanonicalizationMethod().getAlgorithm();
+    var canon = Canonicalizer.getInstance(algorithm);
+    var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(profileName));
 
-    for ( JAXBElement<Object> p : pointer )
+    for ( var p : pointer )
     {
-      Element element = null;
       Reference id = null;
-      Object value = p.getValue();
+      var value = p.getValue();
 
       if (value instanceof DataObjectType)
       {
-        DataObjectType data = (DataObjectType)value;
-        result.put(createRef("dataObjectID", data.getDataObjectID()), data.getBinaryData().getValue());
+        var data = (DataObjectType)value;
+        var binaryData = Toolbox.readBinaryData(lXaipReader, data);
+        result.put(createRef("dataObjectID", data.getDataObjectID()), binaryData);
         continue;
       }
       if (value instanceof MetaDataObjectType)
       {
-        MetaDataObjectType meta = (MetaDataObjectType)value;
-        element = XmlHelper.toElement(meta, CONTEXT_PATH, XmlHelper.FACTORY_XAIP::createMetaDataObject);
-        namespaceMapper.setNSPrefix(element);
-        id = createRef("metaDataID", meta.getMetaDataID());
+        var meta = (MetaDataObjectType)value;
+        var binaryData = Toolbox.readBinaryData(lXaipReader, meta);
+        if (binaryData != null)
+        {
+          result.put(createRef("metaDataID", meta.getMetaDataID()), binaryData);
+          continue;
+        }
+        else
+        {
+          id = createRef("metaDataID", meta.getMetaDataID());
+        }
       }
       if (value instanceof CredentialType)
       {
-        CredentialType cred = (CredentialType)value;
-        element = XmlHelper.toElement(cred, CONTEXT_PATH, XmlHelper.FACTORY_XAIP::createCredential);
-        namespaceMapper.setNSPrefixRecursively(element);
-        id = createRef("credentialID", cred.getCredentialID());
+        id = createRef("credentialID", ((CredentialType)value).getCredentialID());
+        result.put(id, handleCredentialForHashing((CredentialType)value, canon, serializer));
+        continue;
       }
       if (value instanceof VersionManifestType)
       {
-        VersionManifestType mani = (VersionManifestType)value;
-        QName name = new QName(TR_ESOR_XAIP_1_2_NS, "versionManifest");
-        JAXBElement<VersionManifestType> je = new JAXBElement<>(name, VersionManifestType.class, null, mani);
-        element = XmlHelper.toElement(je, CONTEXT_PATH, null);
-        namespaceMapper.setNSPrefixRecursively(element);
+        var mani = (VersionManifestType)value;
         id = createRef("versionID", mani.getVersionID());
       }
-
-      if (id != null && element != null)
+      if (value instanceof EncapsulatedPKIDataType)
       {
-        result.put(id, canon.canonicalizeSubtree(element));
+        id = createRef("EncapsulatedPKIData", ((EncapsulatedPKIDataType)value).getId());
+        result.put(id, ((EncapsulatedPKIDataType)value).getValue());
+        continue;
+      }
+
+      if (id != null)
+      {
+        result.put(id, serializer.serialize(value));
       }
     }
     return result;
   }
 
+  private byte[] handleCredentialForHashing(CredentialType cred,
+                                            Canonicalizer canon,
+                                            XaipSerializer serializer)
+    throws JAXBException, CanonicalizationException, IOException, InvalidCanonicalizerException
+  {
+    var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(profileName));
+    if (lXaipReader.isValidLXaipElement(cred, cred.getCredentialID()))
+    {
+      return lXaipReader.readBinaryData(cred, cred.getCredentialID());
+    }
+    // This is the formats that have a binary content
+    // RFC3161 TimeStamp as signature
+    var timestamp = Optional.ofNullable(cred.getSignatureObject())
+                            .map(SignatureObject::getTimestamp)
+                            .map(Timestamp::getRFC3161TimeStampToken);
+    if (timestamp.isPresent())
+    {
+      return timestamp.get();
+    }
+
+    // encoded Signature (e.g. CMS)
+    var encodedSignature = Optional.ofNullable(cred.getSignatureObject())
+                                   .map(SignatureObject::getBase64Signature)
+                                   .map(Base64Signature::getValue);
+    if (encodedSignature.isPresent())
+    {
+      return encodedSignature.get();
+    }
+
+    // encapsulated X509 certificate
+    var certs = Optional.ofNullable(cred.getCertificateValues())
+                        .map(CertificateValuesType::getEncapsulatedX509CertificateOrOtherCertificate);
+    if (certs.isPresent())
+    {
+      return handleCertificates(cred, certs.get(), canon);
+    }
+
+    // CRL Values
+    var crl = Optional.ofNullable(cred.getRevocationValues())
+                      .map(RevocationValuesType::getCRLValues)
+                      .map(CRLValuesType::getEncapsulatedCRLValue);
+    if (crl.isPresent())
+    {
+      if (crl.get().size() != 1)
+      {
+        throw new IllegalArgumentException("The credential " + cred.getCredentialID()
+                                           + " does not contain exactly one CRL. The hash value can not be generated.");
+      }
+      return crl.get().get(0).getValue();
+    }
+
+    // OSCP Values
+    var ocsp = Optional.ofNullable(cred.getRevocationValues())
+                       .map(RevocationValuesType::getOCSPValues)
+                       .map(OCSPValuesType::getEncapsulatedOCSPValue);
+    if (ocsp.isPresent())
+    {
+      if (ocsp.get().size() != 1)
+      {
+        throw new IllegalArgumentException("The credential " + cred.getCredentialID()
+                                           + " does not contain exactly one OCSP value. The hash value can not be generated.");
+      }
+      return ocsp.get().get(0).getValue();
+    }
+    // ASN.1 Evidence Record
+    var er = Optional.ofNullable(cred.getEvidenceRecord()).map(EvidenceRecordType::getAsn1EvidenceRecord);
+    if (er.isPresent())
+    {
+      return er.get();
+    }
+
+    return serializer.serialize(cred);
+  }
+
+  private byte[] handleCertificates(CredentialType cred, List<Object> certs, Canonicalizer canon)
+    throws JAXBException, CanonicalizationException, IOException
+  {
+    var numberOfBinaryCertificates = certs.stream().filter(EncapsulatedPKIDataType.class::isInstance).count();
+    if (numberOfBinaryCertificates > 1)
+    {
+      throw new IllegalArgumentException("The credential " + cred.getCredentialID()
+                                         + " contains more than one certificate. The hash value can not be generated.");
+    }
+    if (numberOfBinaryCertificates == certs.size())
+    {
+      var cert = (EncapsulatedPKIDataType)certs.get(0);
+      return cert.getValue();
+    }
+    if (numberOfBinaryCertificates != 0)
+    {
+      throw new IllegalArgumentException("The credential " + cred.getCredentialID()
+                                         + " contains a mix of encapsulated and other certificate values. The hash value can not be generated.");
+    }
+
+    var element = XmlHelper.toElement(cred, CONTEXT_PATH, XmlHelper.FACTORY_XAIP::createCredential);
+    namespaceMapper.setNSPrefixRecursively(element);
+    return XmlHelper.canonicalizeSubtree(canon, element);
+  }
+
   private Reference createRef(String attributeName, String id)
   {
-    Reference ref = reference.newChild(attributeName + ":" + id);
+    var ref = reference.newChild(attributeName + ":" + id);
     if (reference.getxPath() != null)
     {
       ref.setxPath(reference.getxPath() + "//*[@" + attributeName + "='" + id + "']");
@@ -187,7 +386,7 @@ public class XaipReader
 
   private void addPointers(List<PackageInfoUnitType> packageInfoUnit, List<JAXBElement<Object>> pointer)
   {
-    for ( PackageInfoUnitType info : packageInfoUnit )
+    for ( var info : packageInfoUnit )
     {
       pointer.addAll(info.getProtectedObjectPointer());
       addPointers(info.getPackageInfoUnit(), pointer);
@@ -201,7 +400,7 @@ public class XaipReader
                .stream()
                .filter(man -> man.getVersionID().equals(versionId))
                .findAny()
-               .orElseThrow(() -> new IllegalArgumentException("unknown versionID"));
+               .orElseThrow(() -> new VersionNotFoundException(versionId, listVersions()));
   }
 
   /**
@@ -218,4 +417,15 @@ public class XaipReader
                .orElse(null);
   }
 
+  /**
+   * List all versions available in the XAIP-container.
+   */
+  public List<String> listVersions()
+  {
+    return xaip.getPackageHeader()
+               .getVersionManifest()
+               .stream()
+               .map(VersionManifestType::getVersionID)
+               .collect(Collectors.toList());
+  }
 }

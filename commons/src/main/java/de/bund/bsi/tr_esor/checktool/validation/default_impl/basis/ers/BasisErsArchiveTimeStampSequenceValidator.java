@@ -40,8 +40,8 @@ public class BasisErsArchiveTimeStampSequenceValidator extends ArchiveTimeStampS
   {
     if (toCheck.isEmpty())
     {
-      ctx.getFormatOk().invalidate("must contain at least one ArchiveTimeStampChain",
-                                   ref.newChild("number chains"));
+      ctx.getFormatOk()
+         .invalidate("must contain at least one ArchiveTimeStampChain", ref.newChild("number chains"));
     }
     return super.validateInternal(ref, toCheck);
   }

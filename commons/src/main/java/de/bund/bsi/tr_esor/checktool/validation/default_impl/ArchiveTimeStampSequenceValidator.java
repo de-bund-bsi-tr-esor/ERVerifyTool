@@ -24,7 +24,6 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 import java.util.Date;
 
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStamp;
-import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStampChain;
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStampSequence;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.report.ATSChainReport;
@@ -44,17 +43,17 @@ public class ArchiveTimeStampSequenceValidator
   @Override
   protected ATSSequenceReport validateInternal(Reference ref, ArchiveTimeStampSequence toCheck)
   {
-    ATSSequenceReport report = new ATSSequenceReport(ref);
+    var report = new ATSSequenceReport(ref);
     if (toCheck.isEmpty())
     {
       return report;
     }
     setupSecuredTimes(toCheck);
-    for ( int i = 0 ; i < toCheck.size() ; i++ )
+    for ( var i = 0 ; i < toCheck.size() ; i++ )
     {
-      ArchiveTimeStampChain chain = toCheck.get(i);
-      Reference chainRef = ref.newChild(Integer.toString(i));
-      byte[] ph = computeHashOfSequenceSoFar(toCheck, i, chainRef, report);
+      var chain = toCheck.get(i);
+      var chainRef = ref.newChild(Integer.toString(i));
+      var ph = computeHashOfSequenceSoFar(toCheck, i, chainRef, report);
 
       report.addChild(callValidator(chain,
                                     chainRef,
@@ -73,11 +72,11 @@ public class ArchiveTimeStampSequenceValidator
   private void setupSecuredTimes(ArchiveTimeStampSequence toCheck)
   {
     ArchiveTimeStamp lastAts = null;
-    for ( ArchiveTimeStampChain chain : toCheck )
+    for ( var chain : toCheck )
     {
-      for ( ArchiveTimeStamp ats : chain )
+      for ( var ats : chain )
       {
-        Date secure = ats.getSignDateFromTimeStamp();
+        var secure = ats.getSignDateFromTimeStamp();
         if (lastAts != null)
         {
           ctx.setSecureData(lastAts, secure);
@@ -106,9 +105,9 @@ public class ArchiveTimeStampSequenceValidator
     {
       return null;
     }
-    String hashOID = toCheck.get(pos).get(0).getOidFromTimeStamp();
-    ArchiveTimeStampSequence seq = new ArchiveTimeStampSequence();
-    for ( int i = 0 ; i < pos ; i++ )
+    var hashOID = toCheck.get(pos).get(0).getOidFromTimeStamp();
+    var seq = new ArchiveTimeStampSequence();
+    for ( var i = 0 ; i < pos ; i++ )
     {
       seq.add(toCheck.get(i));
     }

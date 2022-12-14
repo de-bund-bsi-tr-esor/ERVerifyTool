@@ -21,8 +21,8 @@
  */
 package de.bund.bsi.tr_esor.checktool.conf;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 import org.bouncycastle.tsp.TimeStampToken;
 import org.junit.Test;
@@ -49,7 +49,7 @@ public class TestTypeAnalyzer
   @Test
   public void checkValidator()
   {
-    TypeAnalyzer systemUnderTest = new TypeAnalyzer(BasisErsECardTimeStampValidator.class);
+    var systemUnderTest = new TypeAnalyzer(BasisErsECardTimeStampValidator.class);
     assertThat("target class",
                systemUnderTest.getFirstMatchingTypeArgument(TimeStampToken.class).getName(),
                is(TimeStampToken.class.getName()));

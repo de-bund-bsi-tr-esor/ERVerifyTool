@@ -21,21 +21,21 @@
  */
 package de.bund.bsi.tr_esor.checktool;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.Socket;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 
@@ -62,6 +62,7 @@ import de.bund.bsi.tr_esor.checktool.entry.TestS4VerifyOnly;
  *
  * @author TT
  */
+@SuppressWarnings("PMD.AvoidDuplicateLiterals")
 public class TestMain extends TestBase
 {
 
@@ -94,12 +95,12 @@ public class TestMain extends TestBase
   public void unknownProfile() throws IOException
   {
 
-    String report = callMain("-conf",
-                             RES_DIR + "config.xml",
-                             "-data",
-                             RES_DIR + "/xaip/xaip_ok_ers.xml",
-                             "-profile",
-                             "unknown");
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_ok_ers.xml",
+                          "-profile",
+                          "unknown");
     assertThat("report", report, containsString("Unsupported profile"));
     assertThat("report", report, containsString("  https://tools.ietf.org/html/rfc4998\n"));
   }
@@ -116,7 +117,7 @@ public class TestMain extends TestBase
   public void erInXaip() throws IOException
   {
 
-    String report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "xaip/xaip_ok_ers.xml");
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "xaip/xaip_ok_ers.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
     assertFirstMajor(report, "indetermined");
@@ -132,12 +133,54 @@ public class TestMain extends TestBase
   @Test
   public void detachedErForXaip() throws IOException
   {
-    String report = callMain("-conf",
-                             RES_DIR + "config.xml",
-                             "-data",
-                             RES_DIR + "/xaip/xaip_ok.xml",
-                             "-er",
-                             RES_DIR + "/xaip/xaip_ok.er.xml");
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_ok.xml",
+                          "-er",
+                          RES_DIR + "/xaip/xaip_ok.er.xml");
+    assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
+    assertNumberElements(report, "ReducedHashTree", 1);
+    assertFirstMajor(report, "indetermined");
+  }
+
+  /**
+   * Asserts that a standard detached ER can be verified in the Basis-ERS profile
+   *
+   * @throws IOException
+   */
+  @Test
+  public void usingBasisErsProfile() throws IOException
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-profile",
+                          "Basis-ERS",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_ok.xml",
+                          "-er",
+                          RES_DIR + "/xaip/xaip_ok.er.xml");
+    assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
+    assertNumberElements(report, "ReducedHashTree", 1);
+    assertFirstMajor(report, "indetermined");
+  }
+
+  /**
+   * Asserts that an evidence record for a XAIP given separately can be validated.
+   * <p>
+   * See TR-ESOR-ERS-FEIN p. 23 UC1.1/1.2 paragraph 2.
+   *
+   * @throws IOException
+   */
+  @Test
+  public void detachedErForLXaip() throws IOException
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/lxaip/lxaip_ok.xml",
+                          "-er",
+                          RES_DIR + "/lxaip/lxaip_ok.ers.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
     assertFirstMajor(report, "indetermined");
@@ -153,8 +196,8 @@ public class TestMain extends TestBase
   @Test
   public void erInCmsEncapsulated() throws IOException
   {
-    File data = createDecodedTempFile("/cms/encapsulated_with_er.p7s.b64");
-    String report = callMain("-conf", RES_DIR + "config.xml", "-er", data.getAbsolutePath());
+    var data = createDecodedTempFile("/cms/encapsulated_with_er.p7s.b64");
+    var report = callMain("-conf", RES_DIR + "config.xml", "-er", data.getAbsolutePath());
     assertNumberElements(report, "ReducedHashTree", 1);
     assertFirstMajor(report, "indetermined");
   }
@@ -170,10 +213,10 @@ public class TestMain extends TestBase
   @Test
   public void erInCmsDetached() throws IOException
   {
-    String data = createDecodedTempFile("/cms/TestDataLogo.png.b64").getAbsolutePath();
-    String ers = createDecodedTempFile("/cms/TestDataLogo.png_er.p7s.b64").getAbsolutePath();
+    var data = createDecodedTempFile("/cms/TestDataLogo.png.b64").getAbsolutePath();
+    var ers = createDecodedTempFile("/cms/TestDataLogo.png_er.p7s.b64").getAbsolutePath();
 
-    String report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
     assertNumberElements(report, "ReducedHashTree", 1);
     assertFirstMajor(report, "indetermined");
 
@@ -192,12 +235,12 @@ public class TestMain extends TestBase
   @Test
   public void erInvalidVersion() throws IOException
   {
-    String ers = createDecodedTempFile("/bin/er_nok_wrong_version.er.b64").getAbsolutePath();
-    String report = callMain("-conf", RES_DIR + "config.xml", "-er", ers);
+    var ers = createDecodedTempFile("/bin/er_nok_wrong_version.er.b64").getAbsolutePath();
+    var report = callMain("-conf", RES_DIR + "config.xml", "-er", ers);
     assertFirstMajor(report, "invalid");
     assertThat("the invalidFormat result minor is contained in the report",
                report,
-               containsString("http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/invalidFormat"));
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
     assertThat("an unexpected version number message is included in the report",
                report,
                containsString("unexpected version number"));
@@ -215,16 +258,51 @@ public class TestMain extends TestBase
   @Test
   public void erForBinary() throws IOException
   {
-    String data = createDecodedTempFile("/bin/example.tif.b64").getAbsolutePath();
-    String ers = createDecodedTempFile("/bin/example.ers.b64").getAbsolutePath();
+    var data = createDecodedTempFile("/bin/example.tif.b64").getAbsolutePath();
+    var ers = createDecodedTempFile("/bin/example.ers.b64").getAbsolutePath();
 
-    for ( String erPath : new String[]{ers, RES_DIR + "bin/example.er.xml"} )
+    for ( var erPath : new String[]{ers, RES_DIR + "bin/example.er.xml"} )
     {
-      String report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", erPath);
+      var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", erPath);
       assertNumberElements(report, "IndividualReport", 1);
       assertNumberElements(report, "ArchiveTimeStamp", 1);
       assertFirstMajor(report, "indetermined");
     }
+  }
+
+  /**
+   * Asserts that binary contents extracted from a XAIP can be checked against the ER generated for the whole
+   * XAIP.
+   */
+  @Test
+  public void erFromXaipWithBinOnly() throws IOException
+  {
+    // Binary data from xaip_ok
+    var dataFile = File.createTempFile("Hundename_V001", ".bin");
+    dataFile.deleteOnExit();
+    try (OutputStream outs = new FileOutputStream(dataFile))
+    {
+      outs.write("TestData".getBytes(StandardCharsets.US_ASCII));
+    }
+
+    var erPath = createDecodedTempFile("/xaip/xaip_ok.ers.b64").getAbsolutePath();
+
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          dataFile.getAbsolutePath(),
+                          "-er",
+                          erPath);
+    assertFirstMajor(report, "indetermined");
+    assertThat("There is no mismatch detected",
+               report,
+               not(containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch")));
+    assertThat("No error message",
+               report,
+               not(containsString("The evidence record contains additional protected hash values")));
+    assertNumberElements(report, "IndividualReport", 1);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertNumberElements(report, "HashValue", 4);
   }
 
   /**
@@ -233,7 +311,7 @@ public class TestMain extends TestBase
   @Test
   public void invalidConfig() throws IOException
   {
-    String msg = callMain("-conf", "build.gradle");
+    var msg = callMain("-conf", "build.gradle");
     assertThat("Message after loading bad config",
                msg,
                containsString("Config file build.gradle is not valid XML."));
@@ -247,7 +325,7 @@ public class TestMain extends TestBase
   @Test
   public void verifyInvalidErParam() throws Exception
   {
-    String report = callMain("-conf", RES_DIR + "config.xml", "-er", RES_DIR + "config.xml");
+    var report = callMain("-conf", RES_DIR + "config.xml", "-er", RES_DIR + "config.xml");
     assertThat("report", report, containsString("urn:oasis:names:tc:dss:1.0:detail:indetermined"));
     assertThat("report", report, containsString("resultminor/invalidFormat"));
     assertThat("report", report, not(containsString("Details")));
@@ -261,17 +339,17 @@ public class TestMain extends TestBase
   @Test
   public void wrongXaipVersion() throws Exception
   {
-    String xaipPath = "/xaip/xaip_ok.xml";
-    String erPath = "/bin/mock_wrong_version.er.xml";
+    var xaipPath = "/xaip/xaip_ok.xml";
+    var erPath = "/bin/mock_wrong_version.er.xml";
 
-    String report = callMain("-conf",
-                             RES_DIR + "config.xml",
-                             "-data",
-                             RES_DIR + xaipPath,
-                             "-er",
-                             RES_DIR + erPath);
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + xaipPath,
+                          "-er",
+                          RES_DIR + erPath);
 
-    assertThat("report", report, IsValidXML.isValidVerificationReport());
+    assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
 
     assertFirstMajor(report, "invalid");
     assertThat("report",
@@ -290,18 +368,17 @@ public class TestMain extends TestBase
   @Test
   public void wrongAoidInDetachedEr() throws Exception
   {
-    String xaipPath = "/xaip/xaip_ok_er_resigned.xml";
-    String erPath = "/bin/mock_wrong_version.er.xml";
+    var xaipPath = "/xaip/xaip_ok_2_er_resigned.xml";
+    var erPath = "/bin/mock_wrong_version.er.xml";
 
-    String report = callMain("-conf",
-                             RES_DIR + "config.xml",
-                             "-data",
-                             RES_DIR + xaipPath,
-                             "-er",
-                             RES_DIR + erPath);
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + xaipPath,
+                          "-er",
+                          RES_DIR + erPath);
 
-    assertThat("report", report, IsValidXML.isValidVerificationReport());
-
+    assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
     assertFirstMajor(report, "invalid");
     assertThat("report",
                report,
@@ -310,29 +387,174 @@ public class TestMain extends TestBase
   }
 
   /**
-   * Asserts that S4 web server can be started using the command line parameters "-server" and default port.
+   * Asserts that the validation of an evidence record that contains an invalid CMS version leads to a clear
+   * and understandable error message. The test data is an otherwise valid ER where only the CMS version of
+   * the first timestamp has been manipulated.
    */
-  @Test(timeout = 5_000)
-  public void callServerWithDefaultPort() throws Exception
+  @Test
+  public void wrongCmsVersionInDetachedEr() throws Exception
   {
-    final int port = 9999;
-    assumeAddressNotInUse("localhost", port);
-    String msg = callMain("-conf", RES_DIR + "config.xml", "-server");
-    assertThat(msg, is("Running S4 webservice on address http://localhost:9999/ErVerifyTool/esor12/exec\n"));
-    checkConnection("http://localhost:9999/ErVerifyTool/esor12/exec?wsdl");
+    var data = createDecodedTempFile("/bin/example.tif.b64").getAbsolutePath();
+    var ers = createDecodedTempFile("/bin/example_wrong_cms_version.ers.b64").getAbsolutePath();
+
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
+
+    assertFirstMajor(report, "invalid");
+    assertNumberElements(report, "IndividualReport", 1);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
+    assertThat("report",
+               report,
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
+    assertThat("report", report, containsString("Invalid CMS version 1 in timestamp"));
+  }
+
+  /**
+   * Checks report validity when hashes are not sorted(according to RFC 4998) and are sorted.
+   *
+   * @throws Exception
+   */
+  @Test
+  public void checkSortedHashValidation() throws Exception
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-profile",
+                          "sorted",
+                          "-data",
+                          RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
+    assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
+    assertThat("report",
+               report,
+               not(containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch")));
+
+    var report2 = callMain("-conf",
+                           RES_DIR + "config.xml",
+                           "-profile",
+                           "unsorted",
+                           "-data",
+                           RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
+    assertThat("report", report2, IsValidXML.matcherForValidVerificationReport());
+    assertFirstMajor(report, "indetermined");
+    assertThat("report",
+               report2,
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
+    assertThat("report",
+               report2,
+               containsString("The hashes present in the evidence record do not match the mode (sorted/unsorted) given by the configuration."));
+    assertThat("report",
+               report2,
+               containsString("The hashes present seem to conform to the sorted hash mode."));
+    assertThat("report", report2, not(containsString("Missing digest(s) for:")));
+    assertThat("report", report2, not(containsString("additional protected hash values")));
+  }
+
+  /**
+   * Assert that the "both" mode for the hashMode-Parameter can check both hashing types.
+   */
+  @Test
+  public void checkValidationUsingBothHashMode() throws Exception
+  {
+    var reportSorted = callMain("-conf",
+                                RES_DIR + "config.xml",
+                                "-profile",
+                                "both",
+                                "-data",
+                                RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
+    assertThat("report", reportSorted, IsValidXML.matcherForValidVerificationReport());
+    assertFirstMajor(reportSorted, "indetermined");
+    assertThat("report", reportSorted, not(containsString("hashValueMismatch")));
+    assertThat("report", reportSorted, not(containsString("Missing digest(s) for:")));
+    assertThat("report", reportSorted, not(containsString("additional protected hash values")));
+    assertThat("report", reportSorted, not(containsString("do not match the mode (sorted/unsorted)")));
+
+    var reportUnsorted = callMain("-conf",
+                                  RES_DIR + "config.xml",
+                                  "-profile",
+                                  "both",
+                                  "-data",
+                                  RES_DIR + "/xaip/xaip_ok.xml",
+                                  "-er",
+                                  RES_DIR + "/xaip/xaip_ok.rehashed.ers.b64");
+    assertThat("report", reportUnsorted, IsValidXML.matcherForValidVerificationReport());
+    assertFirstMajor(reportUnsorted, "indetermined");
+    assertThat("report", reportUnsorted, not(containsString("hashValueMismatch")));
+    assertThat("report", reportUnsorted, not(containsString("Missing digest(s) for:")));
+    assertThat("report", reportUnsorted, not(containsString("additional protected hash values")));
+    assertThat("report", reportUnsorted, not(containsString("do not match the mode (sorted/unsorted)")));
+  }
+
+  /**
+   * Asserts that a verification report stating that no online validation was possible can be obtained.
+   */
+  @Test
+  public void signatureInXaip() throws IOException
+  {
+    var data = RES_DIR + "xaip/signature/xaip_ok_sig.xml";
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", data);
+    assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
+    assertThat("report",
+               report,
+               containsString("No online validation of a potential signature was possible"));
+    assertFirstMajor(report, "indetermined");
+  }
+
+  /**
+   * Assert that presenting an unsupported XAIP version is detected
+   */
+  @Test
+  public void checkUnsupportedXaipVersion() throws Exception
+  {
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "/xaip/esor12/xaip_ok.xml");
+    assertFirstMajor(report, "indetermined");
+    assertThat("report", report, containsString("illegal or unsupported data format"));
+  }
+
+  /**
+   * Assert that a XAIP using non-exclusive xml canonicalization can be validated.
+   */
+  @Test
+  public void checkNonExclusiveCanonicalization() throws Exception
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_xml_meta.xml",
+                          "-er",
+                          RES_DIR + "/xaip/xaip_xml_meta.ers");
+    assertFirstMajor(report, "indetermined");
+    assertThat("report",
+               report,
+               containsString("ResultMessage xml:lang=\"en\">atss/0/0/tsp: no online validation of time stamp done</"));
+  }
+
+  /**
+   * Asserts that namespaces are not rewritten on a XAIP that uses namespaces other than the default
+   */
+  @Test
+  public void checkNonDefaultNamespacesAccepted() throws IOException
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "xaip/xaip_ok_ers_namespace.xml");
+    assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
+    assertThat("report", report, not(containsString("hashValueMismatch")));
+    assertFirstMajor(report, "indetermined");
   }
 
   /**
    * Asserts that S4 web server can be started using the command line parameters "-server" and "-port".
    */
-  @Test(timeout = 5_000)
-  public void callServerWithSpecificPort() throws Exception
+  @Test(timeout = 30_000)
+  public void callServer() throws Exception
   {
-    final int port = 9876;
+    final var port = 9876;
     assumeAddressNotInUse("localhost", port);
-    String msg = callMain("-conf", RES_DIR + "config.xml", "-server", "-port", "9876");
-    assertThat(msg, is("Running S4 webservice on address http://localhost:9876/ErVerifyTool/esor12/exec\n"));
-    checkConnection("http://localhost:9876/ErVerifyTool/esor12/exec?wsdl");
+    var msg = callMain("-conf", RES_DIR + "config.xml", "-server", "-port", "9876");
+    assertThat(msg,
+               startsWith("Running S4 webservice on address http://localhost:9876/ErVerifyTool/esor13/exec"));
+    checkConnection("http://localhost:9876/ErVerifyTool/esor13/exec?wsdl");
   }
 
   /**
@@ -343,7 +565,7 @@ public class TestMain extends TestBase
    */
   private void assumeAddressNotInUse(String host, int port)
   {
-    try (Socket socket = SocketFactory.getDefault().createSocket(host, port))
+    try (var socket = SocketFactory.getDefault().createSocket(host, port))
     {
       throw new AssumptionViolatedException(host + ":" + port + " is already in use");
     }
@@ -358,27 +580,26 @@ public class TestMain extends TestBase
    *
    * @param address
    */
-  @SuppressWarnings("boxing")
+  @SuppressWarnings({"boxing", "PMD.DataflowAnomalyAnalysis"})
   private void checkConnection(String address)
   {
     HttpURLConnection connection = null;
     try
     {
-      URL url = new URL(address);
+      var url = new URL(address);
       connection = (HttpURLConnection)url.openConnection();
-      final int timeout = 1_000;
+      final var timeout = 1_000;
       connection.setConnectTimeout(timeout);
       connection.setReadTimeout(timeout);
       connection.connect();
       assertEquals(HttpURLConnection.HTTP_OK, connection.getResponseCode());
-      try (InputStream is = connection.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);)
+      try (var is = connection.getInputStream(); var isr = new InputStreamReader(is, StandardCharsets.UTF_8);)
       {
-        final int bufSize = 1024;
-        char[] cbuf = new char[bufSize];
+        final var bufSize = 1024;
+        var cbuf = new char[bufSize];
         assertThat("number read bytes", isr.read(cbuf), greaterThan(1));
         assertThat(String.valueOf(cbuf),
-                   containsString("targetNamespace=\"http://www.bsi.bund.de/tr-esor/api/1.2\" name=\"S4\""));
+                   containsString("targetNamespace=\"http://www.bsi.bund.de/tr-esor/api/1.3\" name=\"S4\""));
       }
     }
     catch (IOException e)

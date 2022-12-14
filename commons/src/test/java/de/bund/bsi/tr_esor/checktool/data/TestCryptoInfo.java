@@ -58,9 +58,9 @@ public class TestCryptoInfo
   @Test
   public void testCryptoInfo() throws Exception
   {
-    ASN1ObjectIdentifier oid = new ASN1ObjectIdentifier("1.2.3.4.5");
-    Attribute attribute = Attribute.getInstance(new DERSequence(new ASN1Encodable[]{oid, new DERSet()}));
-    CryptoInfo cryptoInfo = new CryptoInfo(new DERSequence(attribute));
+    var oid = new ASN1ObjectIdentifier("1.2.3.4.5");
+    var attribute = Attribute.getInstance(new DERSequence(new ASN1Encodable[]{oid, new DERSet()}));
+    var cryptoInfo = new CryptoInfo(new DERSequence(attribute));
     assertEquals(1, cryptoInfo.numberOfAttributes());
     assertThat(cryptoInfo.getAttribute(0).getAttrType(), is(oid));
     assertThat(cryptoInfo.getAttribute(1), nullValue());

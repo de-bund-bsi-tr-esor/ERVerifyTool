@@ -21,15 +21,10 @@
  */
 package de.bund.bsi.tr_esor.checktool.conf;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertEquals;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Calendar;
-import java.util.Collections;
-import java.util.Map;
 
 import org.junit.Test;
 
@@ -50,29 +45,28 @@ public class TestAlgorithmCatalog
   @Test
   public void testGetSupportedAlgorithms() throws Exception
   {
-    Map<String, SupportedHashAlgorithm> algorithms = AlgorithmCatalog.getInstance().getSupportedAlgorithms();
+    var algorithms = AlgorithmCatalog.getInstance().getSupportedAlgorithms();
 
-    SupportedHashAlgorithm sha256 = algorithms.get("SHA256");
-    assertThat(sha256.getOids(), contains("1.2.840.113549.2.9", "2.16.840.1.101.3.4.2.1"));
-    expiresAfter(sha256, 2023, 12, 31);
-    assertThat(sha256.getParameter(), is(Collections.emptyMap()));
+    var sha256 = algorithms.get("SHA256");
+    assertThat(sha256.getOids()).contains("1.2.840.113549.2.9", "2.16.840.1.101.3.4.2.1");
+    expiresAfter(sha256, 2099, 12, 31);
+    assertThat(sha256.getParameter()).isEmpty();
 
-    SupportedHashAlgorithm dsa = algorithms.get("DSA");
-    assertThat(dsa.getOids(), contains("1.2.840.10040.4"));
-    expiresAfter(dsa, 2022, 12, 31);
-    Map<String, String> params = dsa.getParameter();
-    assertThat("params", params.entrySet(), hasSize(2));
-    assertThat("plength", params.get("plength"), is("2048"));
-    assertThat("qlength", params.get("qlength"), is("256"));
+    var dsa = algorithms.get("DSA");
+    assertThat(dsa.getOids()).contains("1.2.840.10040.4");
+    expiresAfter(dsa, 2025, 12, 31);
+    var params = dsa.getParameter();
+    assertThat(params).hasSize(2);
+    assertThat(params.get("plength")).isEqualTo("2048");
+    assertThat(params.get("qlength")).isEqualTo("250");
   }
 
   private void expiresAfter(SupportedHashAlgorithm sha256, int year, int month, int day)
   {
-    Calendar cal = Calendar.getInstance();
+    var cal = Calendar.getInstance();
     cal.setTime(sha256.getValidity());
-    assertEquals("year", year, cal.get(Calendar.YEAR));
-    assertEquals("month", month, cal.get(Calendar.MONTH) + 1);
-    assertEquals("day", day, cal.get(Calendar.DATE));
+    assertThat(year).isEqualTo(cal.get(Calendar.YEAR));
+    assertThat(month).isEqualTo(cal.get(Calendar.MONTH) + 1);
+    assertThat(day).isEqualTo(cal.get(Calendar.DATE));
   }
-
 }

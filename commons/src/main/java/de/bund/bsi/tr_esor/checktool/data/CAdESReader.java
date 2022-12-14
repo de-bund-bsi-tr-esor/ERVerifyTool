@@ -30,12 +30,9 @@ import java.util.function.BiConsumer;
 
 import org.bouncycastle.asn1.ASN1Object;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
-import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.asn1.cms.AttributeTable;
 import org.bouncycastle.asn1.pkcs.PKCSObjectIdentifiers;
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,8 +58,8 @@ public class CAdESReader
    */
   public CAdESReader(CMSSignedData signature)
   {
-    SignerInformationStore signerInfos = signature.getSignerInfos();
-    SignerInformation info = signerInfos.getSigners().iterator().next();
+    var signerInfos = signature.getSignerInfos();
+    var info = signerInfos.getSigners().iterator().next();
     attributeTable = info.getUnsignedAttributes();
   }
 
@@ -79,8 +76,7 @@ public class CAdESReader
    */
   public boolean hasCertificateValues()
   {
-    return attributeTable != null
-           && attributeTable.get(PKCSObjectIdentifiers.id_aa_ets_certValues) != null;
+    return attributeTable != null && attributeTable.get(PKCSObjectIdentifiers.id_aa_ets_certValues) != null;
   }
 
   /**
@@ -116,7 +112,7 @@ public class CAdESReader
 
   private <T> List<T> getParsedValues(ASN1ObjectIdentifier attributeName, BiConsumer<Object, List<T>> parser)
   {
-    Attribute attr = attributeTable == null ? null : attributeTable.get(attributeName);
+    var attr = attributeTable == null ? null : attributeTable.get(attributeName);
     if (attr == null)
     {
       return Collections.emptyList();

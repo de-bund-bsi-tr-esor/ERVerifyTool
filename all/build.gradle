@@ -2,86 +2,91 @@ ext.distAssembleDir = file("${buildDir}/install")
 ext.distDir = file("${buildDir}/dists")
 
 configurations {
-  commons
-  cli
-  war
-  doc
+    commons
+    cli
+    war
 }
 
 dependencies {
-  commons project(path: ':commons', configuration: 'archives')
-  cli project(path: ':cli', configuration: 'archives')
-  war project(path: ':war', configuration: 'archives')
-  doc project(path: ':doc', configuration: 'archives')
+    commons project(path: ':commons', configuration: 'archives')
+    cli project(path: ':cli', configuration: 'archives')
+    war project(path: ':war', configuration: 'archives')
 }
 
 // Shortcut to unzip distribution contents from projects omitting the first folder from the zip
 ext.copyDistribution = { configuration, targetDir ->
-  copySpec {
-    from (zipTree(configuration.asFileTree.matching { include '*.zip' }.singleFile)) {
-      into targetDir
-      eachFile { f -> f.path = f.path.replaceFirst("^${targetDir}/.+?/", "${targetDir}/") }
+    copySpec {
+        from(zipTree(configuration.asFileTree.matching { include '*.zip' }.singleFile)) {
+            into targetDir
+            eachFile { f -> f.path = f.path.replaceFirst("^${targetDir}/.+?/", "${targetDir}/") }
+        }
     }
-  }
 }
+
 
 task assembleDist {
-  dependsOn configurations.commons, configurations.cli, configurations.war, configurations.doc
-  outputs.dir distAssembleDir
-  doLast {
-    copy {
-      from ('src/main/assembly') {
-        expand('version': project.version)
-      }
-      with copyDistribution(configurations.commons, 'sdk')
-      with copyDistribution(configurations.cli, 'cli')
-      with copyDistribution(configurations.war, 'war')
-      if(project.hasProperty('release')) {
-        with copyDistribution(configurations.doc, 'doc')
-      }
-      from ( "${project(':commons').projectDir}/src/main/resources" ) {
-        include 'Config.xsd'
-        include 'release/config.xml'
-        into 'config'
-      }
-      from ( "${project(':commons').projectDir}/src/test/resources/release" ) {
-        include 'config.xml'
-        into 'config'
-      }
-      from ( rootProject.projectDir ) {
-        include 'LICENSE'
-        include 'licenses/**'
-      }
-      into distAssembleDir
-      includeEmptyDirs false
+    dependsOn configurations.commons, configurations.cli, configurations.war
+    outputs.dir distAssembleDir
+    doLast {
+        copy {
+            from('src/main/assembly') {
+                expand('version': project.version)
+            }
+            from("${rootProject.projectDir}/doc") {
+                include '*'
+                into 'doc'
+            }
+            with copyDistribution(configurations.commons, 'sdk')
+            with copyDistribution(configurations.cli, 'cli')
+            with copyDistribution(configurations.war, 'war')
+            from("${project(':commons').projectDir}/src/main/resources") {
+                include 'Config.xsd'
+                include 'release/config.xml'
+                into 'config'
+            }
+            from("${project(':commons').projectDir}/src/test/resources/release") {
+                include 'config.xml'
+                into 'config'
+            }
+            from(rootProject.projectDir) {
+                include 'LICENSE'
+                include 'licenses/**'
+            }
+            into distAssembleDir
+            includeEmptyDirs false
+        }
     }
-  }
 }
 
+
 task assembleZip(type: Zip) {
-  baseName = "${project.baseName}-${project.version}"
-  destinationDir = distDir
-  from assembleDist
-  into baseName
+    archiveBaseName.set("${project.baseName}-${project.version}")
+    destinationDirectory = distDir
+    from assembleDist
+    into archiveBaseName
 }
 
 task build(type: DefaultTask, dependsOn: assembleZip)
 
 task clean {
-  delete 'build'
+    delete 'build'
 }
 
 publishing {
-  publications {
-    mavenJava(MavenPublication) {
-      artifactId project.baseName
-      artifact assembleZip {
-        classifier = 'bin'
-      }
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId project.baseName
+            artifact assembleZip {
+                classifier = 'bin'
+            }
+        }
     }
-  }
 }
 
-[assembleDist, assembleZip, build].each {
-  it.onlyIf { project.hasProperty('release') || project.hasProperty('release-nosphinx')  }
+[
+    assembleDist,
+    assembleZip,
+    build
+].each {
+    it.onlyIf { project.hasProperty('release')}
 }

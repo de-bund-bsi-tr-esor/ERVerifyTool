@@ -8,7 +8,7 @@ for its logging as well as the configuration schema.
 
 See product documentation section "Configuration" on how to fill in these data.
 
-Upon creating your configuration, you can check its vaditiy by calling the
+Upon creating your configuration, you can check its validity by calling the
 command line interface with `-conf` parameter set only.
 
 

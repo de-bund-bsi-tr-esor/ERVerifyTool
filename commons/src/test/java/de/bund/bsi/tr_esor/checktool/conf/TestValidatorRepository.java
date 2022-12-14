@@ -21,9 +21,9 @@
  */
 package de.bund.bsi.tr_esor.checktool.conf;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -52,7 +52,7 @@ public class TestValidatorRepository
   @Test
   public void select()
   {
-    ValidatorRepository systemUnderTest = new ValidatorRepository();
+    var systemUnderTest = new ValidatorRepository();
     systemUnderTest.addGeneral(() -> "map", Map.class, ValidationContext.class, ReportPart.class);
     systemUnderTest.addGeneral(() -> "hashmap", HashMap.class, ValidationContext.class, ReportPart.class);
     systemUnderTest.addGeneral(() -> "treemap", TreeMap.class, ValidationContext.class, ReportPart.class);

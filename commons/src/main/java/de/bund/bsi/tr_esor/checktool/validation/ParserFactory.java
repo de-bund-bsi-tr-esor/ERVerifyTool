@@ -42,7 +42,9 @@ import de.bund.bsi.tr_esor.checktool.parser.BinaryParser;
 import de.bund.bsi.tr_esor.checktool.parser.CmsSignatureParser;
 import de.bund.bsi.tr_esor.checktool.parser.EvidenceRecordTypeParser;
 import de.bund.bsi.tr_esor.checktool.parser.Parser;
+import de.bund.bsi.tr_esor.checktool.parser.UnsupportedXaipParser;
 import de.bund.bsi.tr_esor.checktool.parser.XaipParser;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 
 
 /**
@@ -55,11 +57,102 @@ public final class ParserFactory
 
   private static final Logger LOG = LoggerFactory.getLogger(ParserFactory.class);
 
-  private final List<Supplier<Parser<?>>> generic = new ArrayList<>();
+  private static final ParserFactory INSTANCE = new ParserFactory();
+
+  private static final String ALL_PROFILE_KEY = "all";
+
+  private final Map<String, List<Supplier<Parser<?>>>> parsersByProfile = new HashMap<>();
 
   private final List<Class<Parser<?>>> configured = new ArrayList<>();
 
-  private final Map<String, List<Class<Parser<?>>>> configuredForProfile = new HashMap<>();
+  private final Map<String, List<Class<Parser<?>>>> configuredByProfile = new HashMap<>();
+
+
+  private ParserFactory()
+  {
+    var parserForAllProfiles = new ArrayList<Supplier<Parser<?>>>();
+    parserForAllProfiles.add(UnsupportedXaipParser::new);
+    parserForAllProfiles.add(EvidenceRecordTypeParser::new);
+    parserForAllProfiles.add(ASN1EvidenceRecordParser::new);
+    parserForAllProfiles.add(CmsSignatureParser::new);
+    parserForAllProfiles.add(BinaryParser::new); // Make sure this is the last one!
+    parsersByProfile.put(ALL_PROFILE_KEY, parserForAllProfiles);
+    var conf = Configurator.getInstance();
+    for ( var name : conf.getSupportedProfileNames() )
+    {
+      var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(name));
+      parsersByProfile.put(name, List.of(() -> new XaipParser(lXaipReader)));
+      configuredByProfile.put(name, loadClasses(conf.getParsers(name)));
+    }
+    configured.addAll(loadClasses(conf.getParsers()));
+  }
+
+  /**
+   * Singleton getter.
+   */
+  public static ParserFactory getInstance()
+  {
+    return INSTANCE;
+  }
+
+  /**
+   * Parses given input by trying all parsers of the specified profile and returns the result of the first
+   * parser which can parse the input.
+   */
+  public static Object parse(InputStream ins, String profileName) throws IOException
+  {
+    for ( var parser : ParserFactory.getInstance().getAvailableParsers(profileName) )
+    {
+      parser.setInput(ins);
+      if (parser.canParse())
+      {
+        return parser.parse();
+      }
+    }
+    return null; // unreachable: each content is at least application/octet-stream
+  }
+
+  @SuppressWarnings("unchecked")
+  private List<Class<Parser<?>>> loadClasses(List<ParserType> parsers)
+  {
+    List<Class<Parser<?>>> result = new ArrayList<>();
+    for ( var parser : parsers )
+    {
+      try
+      {
+        result.add((Class<Parser<?>>)Class.forName(parser.getClassName()));
+      }
+      catch (ClassNotFoundException e)
+      {
+        LOG.error("ignoring configured class " + parser.getClassName(), e);
+      }
+    }
+    return result;
+  }
+
+
+  /**
+   * Returns all configured parsers which are available for a given profile name and all predefined parsers.
+   * Parsers which have been configured come first.
+   */
+  public Iterable<Parser<?>> getAvailableParsers(String profileName)
+  {
+    List<Supplier<Parser<?>>> internal = new ArrayList<>();
+    if (parsersByProfile.containsKey(profileName))
+    {
+      internal.addAll(parsersByProfile.get(profileName));
+    }
+    else
+    {
+      internal.addAll(parsersByProfile.get(Configurator.getInstance().getDefaultProfileName()));
+    }
+    internal.addAll(parsersByProfile.get(ALL_PROFILE_KEY));
+    List<Class<Parser<?>>> fromConf = new ArrayList<>();
+    Optional.ofNullable(configuredByProfile.get(profileName)).ifPresent(fromConf::addAll);
+    fromConf.addAll(configured);
+    return () -> new Parsers(internal, fromConf);
+  }
+
 
   private static class Parsers implements Iterator<Parser<?>>
   {
@@ -68,10 +161,6 @@ public final class ParserFactory
 
     private final List<Class<Parser<?>>> configured;
 
-    /**
-     * @param internal
-     * @param configured
-     */
     Parsers(List<Supplier<Parser<?>>> internal, List<Class<Parser<?>>> configured)
     {
       this.internal = internal;
@@ -105,88 +194,6 @@ public final class ParserFactory
       throw new NoSuchElementException();
     }
 
-  }
-
-  private static final ParserFactory INSTANCE = new ParserFactory();
-
-  /**
-   * Singleton getter.
-   */
-  public static ParserFactory getInstance()
-  {
-    return INSTANCE;
-  }
-
-
-  private ParserFactory()
-  {
-    generic.add(EvidenceRecordTypeParser::new);
-    generic.add(XaipParser::new);
-    generic.add(ASN1EvidenceRecordParser::new);
-    generic.add(CmsSignatureParser::new);
-    generic.add(BinaryParser::new); // Make sure this is the last one!
-    Configurator conf = Configurator.getInstance();
-    for ( String name : conf.getSupportedProfileNames() )
-    {
-      configuredForProfile.put(name, loadClasses(conf.getParsers(name)));
-    }
-    configured.addAll(loadClasses(conf.getParsers()));
-  }
-
-
-  @SuppressWarnings("unchecked")
-  private List<Class<Parser<?>>> loadClasses(List<ParserType> parsers)
-  {
-    List<Class<Parser<?>>> result = new ArrayList<>();
-    for ( ParserType parser : parsers )
-    {
-      try
-      {
-        result.add((Class<Parser<?>>)Class.forName(parser.getClassName()));
-      }
-      catch (ClassNotFoundException e)
-      {
-        LOG.error("ignoring configured class " + parser.getClassName(), e);
-      }
-    }
-    return result;
-  }
-
-
-  /**
-   * Returns all configured parsers which are available for a given profile name and all predefined parsers.
-   * Parsers which have been configured come first.
-   *
-   * @param profileName
-   */
-  public Iterable<Parser<?>> getAvailableParsers(String profileName)
-  {
-    List<Supplier<Parser<?>>> internal = new ArrayList<>(generic);
-    List<Class<Parser<?>>> fromConf = new ArrayList<>();
-    Optional.ofNullable(configuredForProfile.get(profileName)).ifPresent(fromConf::addAll);
-    fromConf.addAll(configured);
-    return () -> new Parsers(internal, fromConf);
-  }
-
-  /**
-   * Parses given input by trying all parsers of the specified profile and returns the result of the first
-   * parser which can parse the input.
-   *
-   * @param ins
-   * @param profileName
-   * @throws IOException
-   */
-  public static Object parse(InputStream ins, String profileName) throws IOException
-  {
-    for ( Parser<?> parser : ParserFactory.getInstance().getAvailableParsers(profileName) )
-    {
-      parser.setInput(ins);
-      if (parser.canParse())
-      {
-        return parser.parse();
-      }
-    }
-    return null; // unreachable: each content is at least application/octet-stream
   }
 
   // In case of too many implemented parsers, rewrite the factory to filter the parsers for requested types.

@@ -21,21 +21,23 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.bouncycastle.tsp.TimeStampToken;
+import org.bouncycastle.util.encoders.Hex;
 
+import de.bund.bsi.tr_esor.checktool.conf.HashSortingMode;
 import de.bund.bsi.tr_esor.checktool.data.AlgorithmUsage;
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStamp;
 import de.bund.bsi.tr_esor.checktool.data.DataGroup;
+import de.bund.bsi.tr_esor.checktool.data.DigestsToCover;
+import de.bund.bsi.tr_esor.checktool.hash.Concatenation;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.AlgorithmValidityReport;
@@ -46,13 +48,17 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType.ReducedHashTree;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType.ReducedHashTree.PartialHashTree;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.HashValueType;
 
 
 /**
- * Validator for ArchiveTimeStamp objects.
+ * Validator for ArchiveTimeStamp objects. Throught the DigestsToCover-object, the validator can be
+ * parametrized to check for the occurrence of additional hashes. If this is set to true, the validation will
+ * fail in case there are more hash values present in the ArchiveTimeStamp than given through
+ * setDigestsToCover. If no digests are given, no check is done. If checkForAdditionalHashes is set to false,
+ * validation will fail if one of the given digests to cover is not present, but additional hashes in the
+ * ArchiveTimeStamp will be accepted. This functionality is required for the check of subsequent timestamps of
+ * an ArchiveTimeStampChain, as the subsequent timestamps will contain the hashes of other timestamps in the
+ * first entry inside the partial hash tree.
  *
  * @author MO
  */
@@ -60,19 +66,28 @@ public class ArchiveTimeStampValidator
   extends BaseValidator<ArchiveTimeStamp, ErValidationContext, ArchiveTimeStampReport>
 {
 
+  private byte[] lastTimestampsContent;
+
+  private byte[] archiveTimestampSequenceHashSoFar;
+
+  private boolean isFirstChain;
+
+  private boolean isFirstInChain;
+
   /**
-   * Taken from BSI TR-ESOR-VR V 1.2 p.10 + "Algo Mismatch" because no defined Minor covers that case.
+   * Taken from BSI TR-ESOR-VR V 1.3 p.12 + "Algo Mismatch" because no defined Minor covers that case.
    */
   private enum ValidationResultMinor
   {
-    INVALID_FORMAT("http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/invalidFormat"),
-    HASH_VALUE_MISMATCH("http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/hashValueMismatch"),
+
+    INVALID_FORMAT("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"),
+    HASH_VALUE_MISMATCH("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"),
     SIGNATURE_FORMAT_NOT_SUITABLE("http://www.bsi.bund.de/ecard/api/1.1/resultminor//il/algorithm#signatureAlgorithmNotSuitable"),
     PARAMETER_ERROR("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"),
     SIGNATURE_FORMAT_NOT_SUPPORTED("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/signature#signatureFormatNotSupported"),
     SIGNATURE_ALGORITHM_NOT_SUPPORTED("http://www.bsi.bund.de/ecard/api/1.1/resultminor//il/algorithm#signatureAlgorithmNotSupported"),
     UNKNOWN_ATTRIBUTE("http://www.bsi.bund.de/tr-esor/api/1.1/resultminor/unknownAttribute"),
-    NOT_SUPPORTED("http://www.bsi.bund.de/tr-esor/api/1.2/resultminor/arl/notSupported");
+    NOT_SUPPORTED("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported");
 
     private final String value;
 
@@ -95,7 +110,7 @@ public class ArchiveTimeStampValidator
 
   private String hashOID;
 
-  private Map<Reference, byte[]> requiredCoveredDigestValues;
+  private DigestsToCover requiredCoveredDigestValues;
 
   private String hashOIDInPrevATS;
 
@@ -104,13 +119,13 @@ public class ArchiveTimeStampValidator
   {
     atsReport = new ArchiveTimeStampReport(ref);
     formatOk = new FormatOkReport(ref);
-    Date secureDate = ctx.getSecureDate(ats);
+    var secureDate = ctx.getSecureDate(ats);
 
     checkAscendingSecureDate(ats.getSignDateFromTimeStamp(), secureDate, ref);
     atsReport.addChild(checkDigestAlgorithm(ats, ref, secureDate));
     fillInReducedHashTree(ats);
     checkHashTree(ats);
-    checkTimeStampToken(ref, ats.getTimeStampToken());
+    checkTimeStampToken(ref, ats);
     atsReport.setFormatOk(formatOk);
     return atsReport;
   }
@@ -124,7 +139,7 @@ public class ArchiveTimeStampValidator
    */
   private AlgorithmValidityReport checkDigestAlgorithm(ArchiveTimeStamp ats, Reference ref, Date secureDate)
   {
-    String oidFromTsp = ats.getOidFromTimeStamp();
+    var oidFromTsp = ats.getOidFromTimeStamp();
     hashOID = oidFromTsp;
     ctx.setPossibleAlgorithmUsage(oidFromTsp, secureDate);
     Reference oidRef;
@@ -135,7 +150,7 @@ public class ArchiveTimeStampValidator
     }
     else
     {
-      String oidFromAtsAttribute = ats.getDigestAlgorithm().getAlgorithm().getId();
+      var oidFromAtsAttribute = ats.getDigestAlgorithm().getAlgorithm().getId();
       oidRef = ref.newChild("attributeDigestAlgorithm");
       hashOID = oidFromAtsAttribute;
       if (!oidFromTsp.equals(oidFromAtsAttribute))
@@ -157,7 +172,7 @@ public class ArchiveTimeStampValidator
                        "Digest algorithm does not match digest of previous ATs in same chain");
     }
 
-    AlgorithmUsage usage = AlgorithmUsage.createHashed(hashOID, secureDate);
+    var usage = AlgorithmUsage.createHashed(hashOID, secureDate);
     return callValidator(usage,
                          oidRef,
                          null,
@@ -176,9 +191,9 @@ public class ArchiveTimeStampValidator
   {
     if (!signDateFromTimeStamp.before(secureDate))
     {
-      ctx.getFormatOk().invalidate(
-                                   "The time of ArchiveTimeStamp is before the time of the previous ArchiveTimeStamp!",
-                                   ref);
+      ctx.getFormatOk()
+         .invalidate("The time of ArchiveTimeStamp is before the time of the previous ArchiveTimeStamp!",
+                     ref);
     }
   }
 
@@ -191,10 +206,60 @@ public class ArchiveTimeStampValidator
                        ref);
   }
 
-  private void checkTimeStampToken(Reference atsID, TimeStampToken timeStampToken)
+  private void checkTimeStampToken(Reference atsID, ArchiveTimeStamp ats)
   {
-    Reference tsp = atsID.newChild("tsp");
-    atsReport.addChild(callValidator(timeStampToken, tsp, TimeStampReport.class));
+    var tsp = atsID.newChild("tsp");
+    // CHECKSTYLE:OFF
+    atsReport.addChild(callValidator(ats.getTimeStampToken(), tsp, v -> {
+      if (v instanceof ECardTimeStampValidator)
+      {
+        var validator = (ECardTimeStampValidator)v;
+        validator.setSourceOfRootHash(sourceOfRootHash(ats, atsID));
+      }
+    }, TimeStampReport.class));
+    // CHECKSTYLE:ON
+  }
+
+  /**
+   * This determines the source value of the root hash. The source value is required for an eIDAS compliant
+   * timestamp validation.
+   */
+  private byte[] sourceOfRootHash(ArchiveTimeStamp ats, Reference atsID)
+  {
+    // if a previous hash tree level exists, that is the source of the root hash
+    if (ats.numberOfPartialHashtrees() > 1
+        || ats.numberOfPartialHashtrees() == 1 && ats.getPartialHashtree(0).size() > 1)
+    {
+      var dataGroup = rootDataGroupOfReducedHashTree(ats);
+      if (dataGroup != null)
+      {
+        return dataGroup.sortedAndConcatenatedHashes();
+      }
+      else
+      {
+        return null;
+      }
+    }
+    else // if there is only a single leaf in the hash tree, the root's hash source depends on the single data
+         // object or a previous timestamp
+    {
+      if (isFirstChain && isFirstInChain)
+      {
+        return ctx.singleProtectedData();
+      }
+      else if (!isFirstChain && isFirstInChain)
+      {
+        return Concatenation.concat(computeHash(() -> ctx.singleProtectedData(),
+                                                ats.getOidFromTimeStamp(),
+                                                atsID,
+                                                atsReport),
+                                    archiveTimestampSequenceHashSoFar);
+      }
+      else
+      {
+        return lastTimestampsContent;
+      }
+    }
   }
 
   /**
@@ -210,11 +275,12 @@ public class ArchiveTimeStampValidator
    *          used in the chain so far. Validation will fail if this ATS uses other digest algorithm in same
    *          chain.
    */
-  void setDigestsToCover(Map<Reference, byte[]> digests, String hashOIDInPreviousATS)
+  void setDigestsToCover(DigestsToCover digests, String hashOIDInPreviousATS)
   {
     requiredCoveredDigestValues = digests;
     this.hashOIDInPrevATS = hashOIDInPreviousATS;
   }
+
 
   /**
    * Asserts that required document hash(es) are found in the partial hash tree or tsp and that the partial
@@ -224,7 +290,7 @@ public class ArchiveTimeStampValidator
    */
   private void checkHashTree(ArchiveTimeStamp ats)
   {
-    List<byte[]> actuallyCoveredDigests = ats.numberOfPartialHashtrees() == 0
+    var actuallyCoveredDigests = ats.numberOfPartialHashtrees() == 0
       ? Collections.singletonList(ats.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest())
       : ats.getPartialHashtree(0);
 
@@ -237,41 +303,53 @@ public class ArchiveTimeStampValidator
 
   private void checkHashes(ArchiveTimeStamp ats)
   {
-    byte[] timeStampMessageHash = ats.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest();
-
-    List<Function<DataGroup, byte[]>> hashFunctions = new ArrayList<>();
-    hashFunctions.add(DataGroup::getHash);
-    hashFunctions.add(DataGroup::getDoubleHash);
-
-    for ( Function<DataGroup, byte[]> hashFunction : hashFunctions )
+    if (rootDataGroupOfReducedHashTree(ats) == null)
     {
-      for ( boolean computeMissing : new boolean[]{true, false} )
+      formatOk.updateCodes(ValidationResultMajor.INVALID,
+                           ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
+                           MinorPriority.MOST_IMPORTANT,
+                           "hash tree root hash does not match timestamp",
+                           atsReport.getReference().newChild("hashTree"));
+    }
+  }
+
+  /**
+   * Returns the root data group of the reduced hash tree whose hash is ensured to match the actual timestamp
+   * message hash. Various methods to compute the hash from a data groups are considered. Returns null
+   * otherwise.
+   */
+  private DataGroup rootDataGroupOfReducedHashTree(ArchiveTimeStamp ats)
+  {
+    var timeStampMessageHash = ats.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest();
+    // find out which is the actual hash construction method for the root hash and return the last data group
+    // if any
+    List<Function<DataGroup, byte[]>> hashFunctions = List.of(DataGroup::getHash, DataGroup::getDoubleHash);
+    for ( var hashFunction : hashFunctions )
+    {
+      for ( var computeMissing : new boolean[]{true, false} )
       {
-        byte[] lastGroupHash = getHashOfReducedHashTree(ats, hashFunction, hashOID, computeMissing);
-        if (Arrays.equals(lastGroupHash, timeStampMessageHash))
+        var lastGroup = rootDataGroup(ats, hashFunction, hashOID, computeMissing);
+        var lastGroupsHash = hashFunction.apply(lastGroup);
+        if (Arrays.equals(lastGroupsHash, timeStampMessageHash))
         {
-          return;
+          return lastGroup;
         }
       }
     }
-    formatOk.updateCodes(ValidationResultMajor.INVALID,
-                         ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
-                         MinorPriority.MOST_IMPORTANT,
-                         "hash tree root hash does not match timestamp",
-                         atsReport.getReference().newChild("hashTree"));
+    return null;
   }
 
   private void fillInReducedHashTree(ArchiveTimeStamp ats)
   {
     // Attributes left out deliberately, because official dss-x schema type vr:AttributeType is insufficient
     // to carry useful information, as no OID can be specified.
-    ReducedHashTree rht = XmlHelper.FACTORY_OASIS_VR.createArchiveTimeStampValidityTypeReducedHashTree();
-    for ( int i = 0 ; i < ats.numberOfPartialHashtrees() ; i++ )
+    var rht = XmlHelper.FACTORY_OASIS_VR.createArchiveTimeStampValidityTypeReducedHashTree();
+    for ( var i = 0 ; i < ats.numberOfPartialHashtrees() ; i++ )
     {
-      PartialHashTree pht = XmlHelper.FACTORY_OASIS_VR.createArchiveTimeStampValidityTypeReducedHashTreePartialHashTree();
-      for ( byte[] v : ats.getPartialHashtree(i) )
+      var pht = XmlHelper.FACTORY_OASIS_VR.createArchiveTimeStampValidityTypeReducedHashTreePartialHashTree();
+      for ( var v : ats.getPartialHashtree(i) )
       {
-        HashValueType value = XmlHelper.FACTORY_OASIS_VR.createHashValueType();
+        var value = XmlHelper.FACTORY_OASIS_VR.createHashValueType();
         value.setHashValue(v);
         pht.getHashValue().add(value);
       }
@@ -285,52 +363,174 @@ public class ArchiveTimeStampValidator
 
   private void checkProtectedElements(List<byte[]> atsHashes)
   {
-    List<Reference> missingDigestIds = requiredCoveredDigestValues.entrySet()
-                                                                  .stream()
-                                                                  .filter(entry -> atsHashes.stream()
-                                                                                             .noneMatch(hash -> Arrays.equals(hash,
-                                                                                                                             entry.getValue())))
-                                                                  .map(Entry::getKey)
-                                                                  .collect(Collectors.toList());
-    if (!missingDigestIds.isEmpty())
+    var hashSortingMode = requiredCoveredDigestValues.getHashSortingMode();
+
+    if (!requiredCoveredDigestValues.isEmpty() && hashSortingMode == HashSortingMode.BOTH)
     {
-      missingDigestIds.forEach(atsReport::addIdOfMissingHash);
-      formatOk.updateCodes(ValidationResultMajor.INVALID,
-                           ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
-                           MinorPriority.MOST_IMPORTANT,
-                           "Missing digest(s) for: " + missingDigestIds,
-                           atsReport.getReference().newChild("protectedElements"));
+      var missingDigestIds = missingDigestsForHashmodeBoth(atsHashes);
+      if (!missingDigestIds.isEmpty())
+      {
+        handleMissingDigests(missingDigestIds);
+      }
+    }
+    else if (!requiredCoveredDigestValues.isEmpty())
+    {
+      var missingDigestIds = missingDigestsForDefaultHashMode(atsHashes);
+      if (!missingDigestIds.isEmpty())
+      {
+        missingDigestIds.forEach(atsReport::addIdOfMissingHash);
+        if (wouldAlternativeHashModeBeCorrect(atsHashes, hashSortingMode))
+        {
+          // do not check additional hashes if the mode was mistaken
+          return;
+        }
+        handleMissingDigests(missingDigestIds);
+      }
+    }
+
+    if (requiredCoveredDigestValues.isCheckForAdditionalHashes())
+    {
+      checkForAdditionalHashes(atsHashes);
     }
   }
 
+  private boolean wouldAlternativeHashModeBeCorrect(List<byte[]> atsHashes, HashSortingMode hashSortingMode)
+  {
+    if (requiredCoveredDigestValues.hasAlternativeHashes()
+        && missingDigestsForAlternativeHashMode(atsHashes).isEmpty())
+    {
+      // Name of the detected mode is opposite of the configured mode
+      var detectedHashMode = HashSortingMode.SORTED.equals(hashSortingMode) ? "unsorted (RFC 4998)"
+        : "sorted";
+      formatOk.updateCodes(ValidationResultMajor.INDETERMINED,
+                           ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
+                           MinorPriority.NORMAL,
+                           String.format("The hashes present in the evidence record do not match the mode (sorted/unsorted) given by the configuration. The hashes present seem to conform to the %s hash mode.",
+                                         detectedHashMode),
+                           atsReport.getReference().newChild("protectedElements"));
+      return true;
+    }
+    return false;
+  }
+
+  private Set<Reference> missingDigestsForHashmodeBoth(List<byte[]> atsHashes)
+  {
+    var missingDigestIds = missingDigestsForDefaultHashMode(atsHashes);
+    if (requiredCoveredDigestValues.hasAlternativeHashes())
+    {
+      var missingDigestIdsAlternativeSortMode = missingDigestsForAlternativeHashMode(atsHashes);
+      // Only the intersection is not represented through any sorting mode
+      missingDigestIds.retainAll(missingDigestIdsAlternativeSortMode);
+    }
+    return missingDigestIds;
+  }
+
+  private Set<Reference> missingDigestsForDefaultHashMode(List<byte[]> atsHashes)
+  {
+    return requiredCoveredDigestValues.streamEntries()
+                                      .filter(entry -> atsHashes.stream()
+                                                                .noneMatch(hash -> Arrays.equals(hash,
+                                                                                                 entry.getValue())))
+                                      .map(Entry::getKey)
+                                      .collect(Collectors.toSet());
+  }
+
+  private Set<Reference> missingDigestsForAlternativeHashMode(List<byte[]> atsHashes)
+  {
+    return requiredCoveredDigestValues.streamAlternativeEntries()
+                                      .filter(entry -> atsHashes.stream()
+                                                                .noneMatch(hash -> Arrays.equals(hash,
+                                                                                                 entry.getValue())))
+                                      .map(Entry::getKey)
+                                      .collect(Collectors.toSet());
+  }
+
+  private void checkForAdditionalHashes(List<byte[]> atsHashes)
+  {
+    var additionalHashes = getAdditionalHashes(atsHashes);
+    if (!additionalHashes.isEmpty())
+    {
+      handleAdditionalHashes(additionalHashes);
+    }
+  }
+
+  private List<byte[]> getAdditionalHashes(List<byte[]> atsHashes)
+  {
+    return atsHashes.stream()
+                    .filter(existent -> requiredCoveredDigestValues.streamAllHashes()
+                                                                   .noneMatch(required -> Arrays.equals(existent,
+                                                                                                        required)))
+                    .collect(Collectors.toList());
+  }
+
+  private void handleAdditionalHashes(List<byte[]> additionalHashes)
+  {
+    var hexHashes = additionalHashes.stream().map(Hex::encode).map(String::new).collect(Collectors.toList());
+    var expectedReferences = requiredCoveredDigestValues.streamReferences()
+                                                        .map(Reference::toString)
+                                                        .collect(Collectors.toList());
+    formatOk.updateCodes(ValidationResultMajor.INVALID,
+                         ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
+                         MinorPriority.IMPORTANT,
+                         "The evidence record contains additional protected hash values. Expected hashes for: "
+                                                  + expectedReferences + ". Additional hashes:" + hexHashes,
+                         atsReport.getReference().newChild("protectedElements"));
+  }
+
+  private void handleMissingDigests(Set<Reference> missingDigestIds)
+  {
+    missingDigestIds.forEach(atsReport::addIdOfMissingHash);
+    formatOk.updateCodes(ValidationResultMajor.INVALID,
+                         ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
+                         MinorPriority.MOST_IMPORTANT,
+                         "Missing digest(s) for: " + missingDigestIds,
+                         atsReport.getReference().newChild("protectedElements"));
+  }
+
   /**
-   * Returns the root hash of a reduced hash tree. This method works both in the case that the computed hash
-   * of one group must be added to the next group and in the case that it is already present in that group.
+   * Returns the root data group of a reduced hash tree. This method works both in the case that the computed
+   * hash of one group must be added to the next group and in the case that it is already present in that
+   * group.
    *
-   * @param ats
    * @param hashFunction Defines how to compute a hash value of a data group. This method can handle different
    *          cases of handling data groups with exactly one contained hash value.
    * @param digestOID specifies digest algorithm
    * @param handleHashesAsSet handles hashes in data groups as set (thus only considering one hash of multiple
    *          equal hashes for the group hash)
    */
-  private byte[] getHashOfReducedHashTree(ArchiveTimeStamp ats,
-                                          Function<DataGroup, byte[]> hashFunction,
-                                          String digestOID,
-                                          boolean handleHashesAsSet)
+  private DataGroup rootDataGroup(ArchiveTimeStamp ats,
+                                  Function<DataGroup, byte[]> hashFunction,
+                                  String digestOID,
+                                  boolean handleHashesAsSet)
   {
-    byte[] lastGroupsHash = null;
-    for ( int i = 0 ; i < ats.numberOfPartialHashtrees() ; i++ )
+    DataGroup lastGroup = null;
+    for ( var i = 0 ; i < ats.numberOfPartialHashtrees() ; i++ )
     {
-      DataGroup group = new DataGroup(ats.getPartialHashtree(i), digestOID);
+      var group = new DataGroup(ats.getPartialHashtree(i), digestOID);
       group.setHandleHashesAsSet(handleHashesAsSet);
-      if (lastGroupsHash != null)
+      if (lastGroup != null)
       {
-        group.addHash(lastGroupsHash);
+        group.addHash(hashFunction.apply(lastGroup));
       }
-      lastGroupsHash = hashFunction.apply(group);
+      lastGroup = group;
     }
-    return lastGroupsHash;
+    return lastGroup;
+  }
+
+  void setLastTimestampsContent(byte[] lastTimestampsContent)
+  {
+    this.lastTimestampsContent = lastTimestampsContent;
+  }
+
+  void setArchiveTimestampSequenceHashSoFar(byte[] archiveTimestampSequenceHashSoFar)
+  {
+    this.archiveTimestampSequenceHashSoFar = archiveTimestampSequenceHashSoFar;
+  }
+
+  void setPositionInChains(boolean isFirstChain, boolean isFirstInChain)
+  {
+    this.isFirstChain = isFirstChain;
+    this.isFirstInChain = isFirstInChain;
   }
 
   @Override

@@ -1,0 +1,95 @@
+<esor:XAIP xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:dss="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" XAIPVersion="1.3.0">
+	<esor:packageHeader packageID="x373f4e59-69dc-4a77-9ea6-75e91a74bfc4">
+		<esor:AOID>xaip_ok_xmlsig_xmldata</esor:AOID>
+		<esor:versionManifest VersionID="V001">
+			<esor:preservationInfo>
+				<esor:retentionPeriod>2100-01-01+01:00</esor:retentionPeriod>
+			</esor:preservationInfo>
+			<esor:submissionInfo>
+				<esor:clientID>remotebean_esor12</esor:clientID>
+				<esor:submissionTime>2017-02-10T14:43:26.898+01:00</esor:submissionTime>
+			</esor:submissionInfo>
+			<esor:packageInfoUnit packageUnitID="_idx_DO-01_V001">
+				<esor:protectedObjectPointer>DO-01</esor:protectedObjectPointer>
+				<esor:protectedObjectPointer>CR-01</esor:protectedObjectPointer>
+			</esor:packageInfoUnit>
+		</esor:versionManifest>
+		<ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+	</esor:packageHeader>
+	<esor:dataObjectsSection>
+		<esor:dataObject dataObjectID="DO-01">
+			<esor:xmlData><ns1:Document xmlns:ns1="http://www.fokus.fraunhofer.de/dps/tr-esor/document">
+	<ns2:Title xmlns:ns2="http://www.fokus.fraunhofer.de/dps/tr-esor/title">Das ist ein Testdokument.</ns2:Title>
+	<ns1:ISBN>DE8976434525</ns1:ISBN>
+	<ns1:Zusammenfassung>1234567890ßqwertzuiopü +#äölkjhgfdsa yxcvbnm,.-</ns1:Zusammenfassung>
+</ns1:Document>
+</esor:xmlData>
+		</esor:dataObject>
+	</esor:dataObjectsSection>
+	<esor:credentialsSection>
+		<esor:credential credentialID="CR-01" relatedObjects="DO-01">
+			<dss:SignatureObject>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="Signature-6defa8de-ea02-43e9-bb02-a5ee6e7163ed">
+<ds:SignedInfo Id="SignedInfo-469b1288-b9a8-4b58-8c9e-73b08bc38cf1">
+<ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+<ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/>
+<ds:Reference Id="refObjectToSign-97bec6d1-de2c-414b-985e-4f62061fb8f1" URI="fraunhofer_doc_restored.xml">
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>CdVnKzgoo/t2/XYruNzVHqfAhubysnOIgJfQJ6c1fdk=</ds:DigestValue>
+</ds:Reference>
+<ds:Reference Type="http://uri.etsi.org/01903#SignedProperties" URI="#SignedProperties-ffcf38d7-5d3f-4016-9509-a3dc65d3df2b">
+<ds:Transforms>
+<ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+</ds:Transforms>
+<ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+<ds:DigestValue>XmM/cTnenkFpvRoSOBiV3+bHd/28hOqUHt0CFcvhbpc=</ds:DigestValue>
+</ds:Reference>
+</ds:SignedInfo>
+<ds:SignatureValue>
+Qv0bG0zba1ncdmrpxJ74Av7L8ZTOfJfGBY1gj8sGx32LohKTMDx1C2U49BEc2daq6BYSNRRUjf08&#13;
+Ik7kt5KYVTVlPOq/cllaCYc0OdWdOaDJ9PhZpqqyOpYYJAYVjyVwvMw2rObXTSAB7JNoKxJSl1K7&#13;
+51kJ/RYjz0hG7HJpyHDyxdt+xY0puxd3ZX5XQJe/jcBXcgukb/jbO+jJyC1kN67riLPxMrogiMzC&#13;
+JhWFgHceLctY3Kr9uGS49yYcIzwXDSbPS2vwI1qf3yb0ybef8Ee+AWmeRl6hkMLJAX8Ty5lvEFqB&#13;
+2DKLRpn3WUmnBa4cE80V6bf6pcTEUT0pQ3V2Kg==
+</ds:SignatureValue>
+
+<ds:KeyInfo Id="KeyInfo-0955604a-17e6-4960-a236-b0209e5228d5">
+
+<ds:X509Data>
+<ds:X509Certificate>
+MIIE3zCCA8egAwIBAgIDAhY4MA0GCSqGSIb3DQEBDQUAMF8xCzAJBgNVBAYTAkRFMTMwMQYDVQQK&#13;
+DCpER04gRGV1dHNjaGVzIEdlc3VuZGhlaXRzbmV0eiBTZXJ2aWNlIEdtYkgxGzAZBgNVBAMMEmRn&#13;
+bnNlcnZpY2UgQ0EgOTpQTjAeFw0xNzEyMTExMzQ5MDVaFw0yMjEyMTExMzQ5MDVaMEUxCzAJBgNV&#13;
+BAYTAkRFMRcwFQYDVQQFEw4xNTAwMDAwMDA1NTE3MjEdMBsGA1UEAwwUVG9iaWFzIE1hcmN1cyBO&#13;
+aWNrZWwwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDCsUzTHM97XAy+DA6uVYO+2yhK&#13;
+HKDPoN9apBXkewlSxj/sec8Ra/LYa9OseoDT3oQ8JxuNL2Qt83a2U/BJkP4P8ZhpuYZAHYfrcg81&#13;
+BzIF+y/LoFZNyGtHy65JNK5xmgbIygYv8q9G/Vn3YbdXJ/HQTm7qQi5pzkYA9g+ec/CGKYEJLzix&#13;
+c94EUiE2dRDCAMd6Ap1uTOoIvBYqXxgKEOhbwPQj1Q/hP/QLvMyKo17PiCkjjlPQuMMSeGqP5HhA&#13;
+ll3LYuFxRnLnQYVF/tJ4StLMhQ8Q58tl7tGFb0zzdf+Rc5Z1ZZM0jwotjjbfr8YCYh1d4Ar6CPZ1&#13;
+eIc+N+HeRkw9AgMBAAGjggG8MIIBuDAMBgNVHRMBAf8EAjAAMB8GA1UdIwQYMBaAFAPGD+au1Mah&#13;
+Vei/tVzsN0guo2RzMIGVBggrBgEFBQcBAQSBiDCBhTBNBggrBgEFBQcwAoZBaHR0cDovL3d3dy5k&#13;
+Z25zZXJ2aWNlLmRlL3RydXN0Y2VudGVyL3B1YmxpYy9kZ25zZXJ2aWNlL2luZGV4Lmh0bWwwNAYI&#13;
+KwYBBQUHMAGGKGh0dHA6Ly9xb2NzcC1kZ24uZGduc2VydmljZS5kZTo4MDgwL29jc3AwagYDVR0g&#13;
+BGMwYTBfBgwrBgEEAfsrAgEEAgEwTzBNBggrBgEFBQcCARZBaHR0cDovL3d3dy5kZ25zZXJ2aWNl&#13;
+LmRlL3RydXN0Y2VudGVyL3B1YmxpYy9kZ25zZXJ2aWNlL2luZGV4Lmh0bWwwHQYDVR0OBBYEFJYQ&#13;
+CWQkf68lhI3K82kRjFMRJgDPMA4GA1UdDwEB/wQEAwIGQDA3BggrBgEFBQcBAwQrMCkwCAYGBACO&#13;
+RgEBMAgGBgQAjkYBBDATBgYEAI5GAQYwCQYHBACORgEGATAbBgkrBgEEAcBtAwUEDjAMBgorBgEE&#13;
+AcBtAwUBMA0GCSqGSIb3DQEBDQUAA4IBAQA/nihHeitDiIGgMqTWRJo75F1xhKeGk4ultOMTQK24&#13;
+kr3TUX2PHzFjD7ztNAC5GKxRETNxukCqMlIUyC0mwtQ/fEknU4Q1lGNpOQL/ZwcQlUnYYBJo6APo&#13;
+873ud7nIw3hHCsHAsFzzDLXKNoFtJWTExQtb8fYHiluNAHyOHXOB0hYLrBOq1Oi8RJ1CAOz6FBpF&#13;
+cgT6fFNp2Yyxyfi7YdAmJ8RnNXrOzkiSnn+Qvgot5i/IiaziyRyXSOvXbREijhkrlnQHhZQcejgS&#13;
+z8A1EYv9Tu21gAkadHn3q0BZdR57eD95NfqoQYlDYXRfl6K4oQ4nv6wOIl7IwhQP+OcmLR8h
+</ds:X509Certificate>
+<ds:X509IssuerSerial>
+<ds:X509IssuerName>CN=dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz Service GmbH,C=DE</ds:X509IssuerName>
+<ds:X509SerialNumber>136760</ds:X509SerialNumber>
+</ds:X509IssuerSerial>
+<ds:X509SubjectName>CN=Tobias Marcus Nickel,2.5.4.5=#130e3135303030303030303535313732,C=DE</ds:X509SubjectName>
+<ds:X509SKI>
+lhAJZCR/ryWEjcrzaRGMUxEmAM8=
+</ds:X509SKI>
+</ds:X509Data></ds:KeyInfo><ds:Object xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" xmlns:xadesv141="http://uri.etsi.org/01903/v1.4.1#"><xades:QualifyingProperties Id="QualifyingProperties-9f737f61-55a4-49d9-8352-d10a19a9bf4c" Target="#Signature-6defa8de-ea02-43e9-bb02-a5ee6e7163ed"><xades:SignedProperties Id="SignedProperties-ffcf38d7-5d3f-4016-9509-a3dc65d3df2b"><xades:SignedSignatureProperties Id="SignedSignatureProperties-c5415567-db7b-4c94-9f7d-fa6d49039fd2"><xades:SigningTime>2020-12-08T21:03:00.000+01:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>NiF2fK6IdUtFkeHU0n570Eto0qp9ZsFrFfER0nov21Q=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>dgnservice CA 9:PN,O=DGN Deutsches Gesundheitsnetz Service GmbH,C=DE</ds:X509IssuerName><ds:X509SerialNumber>136760</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#refObjectToSign-97bec6d1-de2c-414b-985e-4f62061fb8f1"><xades:MimeType>application/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature>
+			</dss:SignatureObject>
+		</esor:credential>
+	</esor:credentialsSection>
+</esor:XAIP>

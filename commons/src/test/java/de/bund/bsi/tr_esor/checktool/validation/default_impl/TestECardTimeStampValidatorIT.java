@@ -21,141 +21,122 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 import org.bouncycastle.cms.CMSSignedData;
-import org.bouncycastle.cms.SignerInformation;
-import org.bouncycastle.cms.SignerInformationStore;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.hamcrest.CoreMatchers;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.Mockito;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
-import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
+import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 
 
 /**
- * Tests the online validation capabilities for time stamps using the eCard protocol.
- *
- * @author MO
+ * Tests the online validation capabilities for timestamps using the eCard. This isolated test cannot
+ * reproduce the actual behaviour, where the timestamp's hash source is determined when all validators work
+ * together. This is why we here can test for indetermined at best for a valid timestamp. Other tests ensure
+ * online validation can result in valid results.
  */
 public class TestECardTimeStampValidatorIT
 {
 
   private static String eCardURL;
 
-  /**
-   * Get the eCard url from the test config
-   *
-   * @throws Exception
-   */
   @BeforeClass
   public static void setUpClass() throws Exception
   {
     TestUtils.loadDefaultConfig();
-    eCardURL = Configurator.getInstance()
-                           .getValidators("online_profile")
-                           .stream()
-                           .filter(parser -> "de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator".equals(parser.getClassName()))
-                           .findAny()
-                           .orElseThrow(() -> new IllegalStateException("No profile online_profile with configured ECardTimeStampValidator found!"))
-                           .getParameter()
-                           .stream()
-                           .filter(param -> "eCardURL".equals(param.getName()))
-                           .findAny()
-                           .orElseThrow(() -> new IllegalStateException("ECardTimeStampValidator does not have an eCardURL parameter configured!"))
-                           .getValue();
+    eCardURL = Configurator.getInstance().getVerificationServiceURL("TR-ESOR");
+    assumeTrue(canConnectTo(eCardURL));
   }
 
   /**
-   * Asserts that a valid time stamp is checked as valid.
-   *
-   * @throws Exception
+   * Asserts that a valid time stamp is checked as indetermined at best because the source data is missing.
    */
   @Test
   public void testValidTimeStamp() throws Exception
   {
-    assumeTrue("ecard webservice", canConnectTo(eCardURL));
-    String[] erToTest = {"/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
-    for ( String erName : erToTest )
+    var erToTest = new String[]{"/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
+    for ( var erName : erToTest )
     {
-      byte[] erBytes = TestUtils.decodeTestResource(erName);
-      EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-      ECardTimeStampValidator ectsv = new ECardTimeStampValidator(Collections.singletonMap("eCardURL",
-                                                                                           eCardURL));
-      ectsv.setContext(new ErValidationContext(new Reference("test timestamp"), "", ""));
-      ReportPart report = ectsv.validate(new Reference("test timestamp"),
-                                         er.getAtss().get(0).get(0).getTimeStampToken());
-      assertThat("validation result for " + erName,
-                 report.getOverallResult().getResultMajor(),
-                 is(ValidationResultMajor.VALID.toString()));
+      TimeStampReport report = validateErFromRessources(erName, "custom");
+      assertThat(report.getOverallResult().getResultMajor(),
+                 is(ValidationResultMajor.INDETERMINED.toString()));
+      assertThat(report.getSummarizedMessage(), containsString("detached_content_file_missing"));
     }
   }
 
   /**
-   * Asserts that a verification error (not failure!) inside the eCard web service is treated as indetermined
-   * result.
-   *
-   * @throws Exception
+   * Asserts that a test time stamp is checked as invalid if the TR-ESOR profile requiring qualified
+   * timestamps is selected
    */
   @Test
-  public void testErrorFromEcard() throws Exception
+  public void refusesNonQualifiedTimestamp() throws Exception
   {
-    assumeTrue("ecard webservice", canConnectTo(eCardURL));
-    ECardTimeStampValidator ectsv = new ECardTimeStampValidator(Collections.singletonMap("eCardURL",
-                                                                                         eCardURL));
-    TimeStampToken token = Mockito.mock(TimeStampToken.class);
-    Mockito.when(token.getEncoded()).thenReturn(new byte[0]);
-    byte[] erBytes = TestUtils.decodeTestResource("/xaip/xaip_ok.ers.b64");
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-    Mockito.when(token.toCMSSignedData())
-           .thenReturn(er.getAtss().get(0).get(0).getTimeStampToken().toCMSSignedData());
-    ectsv.setContext(new ErValidationContext(new Reference("invalid timestamp"), "", ""));
-    ReportPart report = ectsv.validate(new Reference("invalid timestamp"), token);
-    assertThat("validation result for invalid timestamp",
-               report.getOverallResult().getResultMajor(),
-               is(ValidationResultMajor.INDETERMINED.toString()));
-    assertThat("validation message for invalid timestamp",
-               report.getOverallResult().getResultMessage().getValue(),
-               containsString("eCard request failed."));
+    TimeStampReport report = validateErFromRessources("/xaip/xaip_ok.ers.b64", "TR-ESOR");
+    assertThat(report.getOverallResult().getResultMajor(), is(ValidationResultMajor.INVALID.toString()));
+    assertThat(TestECardTimeStampValidator.extractChainingOkMessage(report),
+               CoreMatchers.containsString("The quality of the certificate chain for the timestamp was determined as: "));
+    assertThat(report.getSummarizedMessage(),
+               containsString("A checked timestamp should be qualified, but the quality of the timestamp was determined as: "));
+  }
+
+  private TimeStampReport validateErFromRessources(String testResource, String profileName) throws IOException
+  {
+    var erBytes = TestUtils.decodeTestResource(testResource);
+    var er = new ASN1EvidenceRecordParser().parse(erBytes);
+    var sut = new ECardTimeStampValidator();
+    sut.setContext(new ErValidationContext(new Reference("timestamp"), "", profileName));
+    return sut.validate(new Reference("timestamp"), er.getAtss().get(0).get(0).getTimeStampToken());
+  }
+
+  /**
+   * Asserts that a qualified time stamp is checked as indetermined if the TR-ESOR profile requiring qualified
+   * timestamps is selected, but no data is given. Also asserts quality information is added to the report.
+   */
+  @Test
+  public void acceptsQualifiedTimestamp() throws Exception
+  {
+    TimeStampReport report = validateErFromRessources("/xaip/xaip_ok_qualified.ers.b64", "TR-ESOR");
+    assertThat(report.getOverallResult().getResultMajor(), is(ValidationResultMajor.INDETERMINED.toString()));
+    assertThat(report.getSummarizedMessage(), containsString("detached_content_file_missing"));
+    assertThat(TestECardTimeStampValidator.extractChainingOkMessage(report),
+               allOf(CoreMatchers.containsString("The quality of the certificate chain for the timestamp was determined as: "),
+                     CoreMatchers.containsString("QTST_EUMS_TL")));
   }
 
   /**
    * Asserts that a time stamp with missing revocation information is checked as invalid.
-   *
-   * @throws Exception
    */
   @Test
   public void testMissingRevocationInformation() throws Exception
   {
-    assumeTrue("ecard webservice", canConnectTo(eCardURL));
-    String erToTest = "/xaip/xaip_ok.ers.b64";
-    byte[] erBytes = TestUtils.decodeTestResource(erToTest);
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(erBytes);
-    TimeStampToken timeStampToken = er.getAtss().get(0).get(0).getTimeStampToken();
-    SignerInformationStore sts = stripUnsignedContents(timeStampToken.toCMSSignedData().getSignerInfos());
-    CMSSignedData stripped = CMSSignedData.replaceSigners(timeStampToken.toCMSSignedData(), sts);
-    ECardTimeStampValidator ectsv = new ECardTimeStampValidator(Collections.singletonMap("eCardURL",
-                                                                                         eCardURL));
-    ectsv.setContext(new ErValidationContext(new Reference("test timestamp"), "", ""));
-    ReportPart report = ectsv.validate(new Reference("test timestamp"), new TimeStampToken(stripped));
+    var erToTest = "/xaip/xaip_ok.ers.b64";
+    var erBytes = TestUtils.decodeTestResource(erToTest);
+    var er = new ASN1EvidenceRecordParser().parse(erBytes);
+    var timeStampToken = er.getAtss().get(0).get(0).getTimeStampToken();
+    var stripped = CMSSignedData.replaceCertificatesAndCRLs(timeStampToken.toCMSSignedData(),
+                                                            null,
+                                                            timeStampToken.getAttributeCertificates(),
+                                                            null);
+    var sut = new ECardTimeStampValidator();
+    sut.setContext(new ErValidationContext(new Reference("test timestamp"), "", "custom"));
+    var report = sut.validate(new Reference("test timestamp"), new TimeStampToken(stripped));
     assertThat("validation result major for tsp with missing revocation",
                report.getOverallResult().getResultMajor(),
                is(ValidationResultMajor.INVALID.toString()));
@@ -167,24 +148,12 @@ public class TestECardTimeStampValidatorIT
                containsString("Missing revocation info in time stamp"));
   }
 
-  private SignerInformationStore stripUnsignedContents(SignerInformationStore signerInfos)
-  {
-    List<SignerInformation> sigInfo = new ArrayList<>();
-    for ( SignerInformation signer : signerInfos.getSigners() )
-    {
-      sigInfo.add(SignerInformation.replaceUnsignedAttributes(signer, null));
-    }
-    return new SignerInformationStore(sigInfo);
-  }
-
-  private boolean canConnectTo(String url)
+  private static boolean canConnectTo(String url)
   {
     try
     {
-      HttpURLConnection connection = null;
-      URL lzaURL = new URL(url);
-      connection = (HttpURLConnection)lzaURL.openConnection();
-      final int timeout = 10_000;
+      var connection = (HttpURLConnection)new URL(url).openConnection();
+      var timeout = 10_000;
       connection.setConnectTimeout(timeout);
       connection.setReadTimeout(timeout);
       connection.connect();

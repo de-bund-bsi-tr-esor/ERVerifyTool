@@ -26,6 +26,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import oasis.names.tc.dss._1_0.core.schema.SignatureObject;
+
 import org.bouncycastle.tsp.TimeStampToken;
 
 import de.bund.bsi.tr_esor.checktool._1.ConfigurableObjectType;
@@ -38,6 +40,7 @@ import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStamp;
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStampChain;
 import de.bund.bsi.tr_esor.checktool.data.ArchiveTimeStampSequence;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
+import de.bund.bsi.tr_esor.checktool.data.InlineSignedData;
 import de.bund.bsi.tr_esor.checktool.hash.HashCreator;
 import de.bund.bsi.tr_esor.checktool.hash.LocalHashCreator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.AlgorithmUsageValidator;
@@ -45,6 +48,7 @@ import de.bund.bsi.tr_esor.checktool.validation.default_impl.ArchiveTimeStampCha
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.ArchiveTimeStampSequenceValidator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.ArchiveTimeStampValidator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.DummyTimeStampValidator;
+import de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.EvidenceRecordValidator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.NoVerificationValidator;
 import de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsAlgorithmUsageValidator;
@@ -59,7 +63,12 @@ import de.bund.bsi.tr_esor.checktool.validation.report.AlgorithmValidityReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.ArchiveTimeStampReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
+import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.DetachedSignatureValidationContext;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardDetachedSignatureValidator;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardInlineSignatureValidator;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.InlineSignatureValidationContext;
 
 
 /**
@@ -98,12 +107,31 @@ public final class ValidatorFactory
                         TimeStampToken.class,
                         ValidationContext.class,
                         TimeStampReport.class);
+    // check for alternatives to ECard
+    BUILT_IN.addGeneral(ECardInlineSignatureValidator::new,
+                        InlineSignedData.class,
+                        InlineSignatureValidationContext.class,
+                        SignatureReportPart.class);
+    BUILT_IN.addGeneral(ECardDetachedSignatureValidator::new,
+                        SignatureObject.class,
+                        DetachedSignatureValidationContext.class,
+                        SignatureReportPart.class);
     BUILT_IN.addGeneral(NoVerificationValidator::new,
                         Object.class,
                         NoVerificationContext.class,
                         ReportPart.class);
 
+    /* The RFC4998 profile contains the default validators, so no others are configured here */
     BUILT_IN.addProfile(ProfileNames.RFC4998);
+
+    /* The TR-ESOR profile requires an online check for timestamps to be done. */
+    BUILT_IN.addProfile(ProfileNames.TR_ESOR);
+    BUILT_IN.addToProfile(ECardTimeStampValidator::new,
+                          TimeStampToken.class,
+                          ValidationContext.class,
+                          TimeStampReport.class,
+                          ProfileNames.TR_ESOR);
+
     BUILT_IN.addToProfile(BasisErsAlgorithmUsageValidator::new,
                           AlgorithmUsage.class,
                           ValidationContext.class,
@@ -167,18 +195,15 @@ public final class ValidatorFactory
                                                                                                 C context)
   {
 
-    String profileName = context.getProfileName();
-    Supplier<Object> sup = Optional.ofNullable(Configurator.getInstance().getValidators())
-                                   .map(r -> r.get(targetClass, context.getClass(), reportClass, profileName))
-                                   .orElse(BUILT_IN.get(targetClass,
-                                                        context.getClass(),
-                                                        reportClass,
-                                                        profileName));
-    Validator<T, C, R> result = (Validator<T, C, R>)Optional.ofNullable(sup)
-                                                            .map(Supplier::get)
-                                                            .orElseThrow(() -> new NoValidatorException(targetClass.getName(),
-                                                                                                        context,
-                                                                                                        reportClass.getName()));
+    var profileName = context.getProfileName();
+    var sup = Optional.ofNullable(Configurator.getInstance().getValidators())
+                      .map(r -> r.get(targetClass, context.getClass(), reportClass, profileName))
+                      .orElse(BUILT_IN.get(targetClass, context.getClass(), reportClass, profileName));
+    var result = (Validator<T, C, R>)Optional.ofNullable(sup)
+                                             .map(Supplier::get)
+                                             .orElseThrow(() -> new NoValidatorException(targetClass.getName(),
+                                                                                         context,
+                                                                                         reportClass.getName()));
     result.setContext(context);
     return result;
   }
@@ -190,8 +215,8 @@ public final class ValidatorFactory
    */
   public HashCreator getHashCreator() throws ReflectiveOperationException
   {
-    Configurator config = Configurator.getInstance();
-    ConfigurableObjectType cnf = config.getHashCreator();
+    var config = Configurator.getInstance();
+    var cnf = config.getHashCreator();
     if (cnf == null)
     {
       return new LocalHashCreator();
@@ -213,10 +238,9 @@ public final class ValidatorFactory
   private static <T> T createInstance(ConfigurableObjectType cnf, Class<T> clazz)
     throws ReflectiveOperationException
   {
-    Map<String, String> params = cnf.getParameter()
-                                    .stream()
-                                    .collect(Collectors.toMap(ParameterType::getName,
-                                                              ParameterType::getValue));
+    var params = cnf.getParameter()
+                    .stream()
+                    .collect(Collectors.toMap(ParameterType::getName, ParameterType::getValue));
     try
     {
       return clazz.getConstructor(Map.class).newInstance(params);
@@ -227,7 +251,7 @@ public final class ValidatorFactory
       {
         throw e;
       }
-      return clazz.newInstance();
+      return clazz.getDeclaredConstructor().newInstance();
     }
   }
 }

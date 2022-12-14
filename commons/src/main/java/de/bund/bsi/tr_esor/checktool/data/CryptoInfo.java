@@ -57,14 +57,14 @@ public class CryptoInfo implements ASN1Encodable
     {
       throw new IOException("Element is not an ASN1Sequence");
     }
-    ASN1Sequence s = (ASN1Sequence)obj;
+    var s = (ASN1Sequence)obj;
     if (s.size() == 0)
     {
       throw new IOException("ASN1Sequence is empty");
     }
-    for ( int i = 0 ; i < s.size() ; i++ )
+    for ( var i = 0 ; i < s.size() ; i++ )
     {
-      ASN1Encodable e = s.getObjectAt(i);
+      var e = s.getObjectAt(i);
       if (!(e instanceof ASN1Sequence) && !(e instanceof Attribute))
       {
         throw new IOException("Element is not an Attribute");
@@ -84,6 +84,14 @@ public class CryptoInfo implements ASN1Encodable
   }
 
   /**
+   * Returns the attributes list
+   */
+  public List<Attribute> getAttributes()
+  {
+    return attributes;
+  }
+
+  /**
    * Gets the number of attributes in list.
    *
    * @return number of attributes
@@ -96,7 +104,7 @@ public class CryptoInfo implements ASN1Encodable
   @Override
   public ASN1Primitive toASN1Primitive()
   {
-    ASN1EncodableVector attrs = new ASN1EncodableVector();
+    var attrs = new ASN1EncodableVector();
     attributes.forEach(attrs::add);
     return new DERSequence(attrs);
   }

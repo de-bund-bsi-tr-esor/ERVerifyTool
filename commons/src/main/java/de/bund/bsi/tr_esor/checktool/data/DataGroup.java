@@ -27,7 +27,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -73,6 +72,7 @@ public class DataGroup
   /**
    * Adds the given hash to the data group.
    */
+  @SuppressWarnings("PMD.NullAssignment")
   public void addHash(byte[] hash)
   {
     groupHash = null;
@@ -116,10 +116,11 @@ public class DataGroup
     if (groupHash == null)
     {
       ensureHashListIsSet();
-      byte[] concat = sortAndConcat();
       try
       {
-        groupHash = ValidatorFactory.getInstance().getHashCreator().calculateHash(concat, oid);
+        groupHash = ValidatorFactory.getInstance()
+                                    .getHashCreator()
+                                    .calculateHash(sortedAndConcatenatedHashes(), oid);
       }
       catch (NoSuchAlgorithmException | ReflectiveOperationException e)
       {
@@ -130,13 +131,16 @@ public class DataGroup
     return Arrays.copyOf(groupHash, groupHash.length);
   }
 
-  private byte[] sortAndConcat()
+  /**
+   * The sorted and concatenated hashes of this group, source for the hash of the next partial hashtree level
+   */
+  public byte[] sortedAndConcatenatedHashes()
   {
     List<byte[]> hashList = new ArrayList<>(hashes);
-    Collections.sort(hashList, this::compare);
-    try (ByteArrayOutputStream concatenated = new ByteArrayOutputStream())
+    hashList.sort(this::compare);
+    try (var concatenated = new ByteArrayOutputStream())
     {
-      for ( byte[] hash : hashList )
+      for ( var hash : hashList )
       {
         concatenated.write(hash);
       }
@@ -150,7 +154,7 @@ public class DataGroup
 
   private int compare(byte[] b1, byte[] b2)
   {
-    for ( int i = 0 ; i < Math.min(b1.length, b2.length) ; i++ )
+    for ( var i = 0 ; i < Math.min(b1.length, b2.length) ; i++ )
     {
       if (b1[i] != b2[i])
       {

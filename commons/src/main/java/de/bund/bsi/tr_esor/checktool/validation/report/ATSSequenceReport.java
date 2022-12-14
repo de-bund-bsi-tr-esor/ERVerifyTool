@@ -23,8 +23,8 @@ package de.bund.bsi.tr_esor.checktool.validation.report;
 
 import de.bund.bsi.tr_esor.checktool.xml.VRCreator;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import de.bund.bsi.tr_esor.vr._1.EvidenceRecordValidityType.ArchiveTimeStampSequence;
-import de.bund.bsi.tr_esor.vr._1.EvidenceRecordValidityType.ArchiveTimeStampSequence.ArchiveTimeStampChain;
+import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequence;
+import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequence.ArchiveTimeStampChain;
 
 
 /**

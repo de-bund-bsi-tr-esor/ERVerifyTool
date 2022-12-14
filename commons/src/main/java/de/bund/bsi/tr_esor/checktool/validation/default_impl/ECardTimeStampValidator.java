@@ -22,25 +22,43 @@
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
-import java.util.Objects;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.Supplier;
 
-import javax.xml.bind.JAXBElement;
-import javax.xml.bind.JAXBException;
-import javax.xml.ws.WebServiceException;
+import oasis.names.tc.dss._1_0.core.schema.AnyType;
+import oasis.names.tc.dss._1_0.core.schema.Base64Data;
+import oasis.names.tc.dss._1_0.core.schema.DocumentHash;
+import oasis.names.tc.dss._1_0.core.schema.DocumentType;
+import oasis.names.tc.dss._1_0.core.schema.InputDocuments;
+import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
+import oasis.names.tc.dss._1_0.core.schema.SignaturePtr;
+import oasis.names.tc.dss._1_0.core.schema.Timestamp;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityVerificationDetailType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificateValidityType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.ws.BindingProvider;
+import jakarta.xml.ws.WebServiceException;
 
 import org.bouncycastle.tsp.TimeStampToken;
+import org.etsi.uri._19102.v1_2.SignatureQualityType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.w3c.dom.Element;
+import org.w3._2000._09.xmldsig_.DigestMethodType;
 
 import de.bund.bsi.ecard.api._1.ECard;
 import de.bund.bsi.ecard.api._1.ECard_Service;
 import de.bund.bsi.ecard.api._1.SignatureObject;
 import de.bund.bsi.ecard.api._1.VerifyRequest;
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
+import de.bund.bsi.tr_esor.checktool.data.TspQuality;
 import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
@@ -49,57 +67,50 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import oasis.names.tc.dss._1_0.core.schema.AnyType;
-import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
-import oasis.names.tc.dss._1_0.core.schema.Timestamp;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
 
 /**
  * Validator for TimeStampToken objects. It issues an eCard VerifyRequest to the configured eCard-compliant
  * web service and embeds the returned TimeStampVerifyReport to the report.
- *
- * @author MO
  */
 public class ECardTimeStampValidator extends BaseTimeStampValidator
 {
 
   private static final Logger LOG = LoggerFactory.getLogger(ECardTimeStampValidator.class);
 
-  private static final String URL_PARAMETER_NAME = "eCardURL";
-
   private static final String MINOR_INTERNAL_ERROR = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError";
 
   private static final String MINOR_PARAMETER_ERROR = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError";
 
-  private URL eCardURL;
+  private static final String MINOR_NOT_SUPPORTED = "http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported";
 
-  ECard_Service eCardWebService;
+  private final Supplier<ECard> eCard;
+
+  private byte[] sourceOfRootHash;
 
   /**
-   * Creates a new eCard based time stamp validator.
-   *
-   * @param parameters
+   * Constructor.
    */
-  public ECardTimeStampValidator(Map<String, String> parameters)
+  public ECardTimeStampValidator()
   {
-    Objects.requireNonNull(parameters);
-    if (parameters.isEmpty() || !parameters.containsKey(URL_PARAMETER_NAME))
-    {
-      throw new IllegalArgumentException("A valid URL to an eCard webservice must be passed as parameter 'eCardURL'");
-    }
-    try
-    {
-      eCardURL = new URL(parameters.get(URL_PARAMETER_NAME));
-    }
-    catch (MalformedURLException e)
-    {
-      throw new IllegalArgumentException("Malformed URL " + parameters.get(URL_PARAMETER_NAME)
-                                         + " given as parameter 'eCardURL'", e);
-    }
+    this.eCard = () -> eCardPort(Configurator.getInstance()
+                                             .getVerificationServiceOrFail(ctx.getProfileName()));
+  }
 
+  /**
+   * for tests only
+   */
+  public ECardTimeStampValidator(ECard_Service eCardWebService)
+  {
+    this.eCard = eCardWebService::getECard;
+  }
+
+  private static ECard eCardPort(URL url)
+  {
+    var port = new ECard_Service(url).getECard();
+    ((BindingProvider)port).getRequestContext()
+                           .put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url.toString());
+    return port;
   }
 
   @Override
@@ -111,28 +122,36 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
   @Override
   public TimeStampReport validateInternal(Reference ref, TimeStampToken toCheck)
   {
-    TimeStampReport tsr = new TimeStampReport(ref);
+    var tsr = new TimeStampReport(ref);
     try
     {
-      ResponseBaseType response = getECard().verifyRequest(verifyRequestFromTimeStamp(toCheck));
-      if ("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok".equals(response.getResult().getResultMajor()))
+      var request = sourceOfRootHash == null ? verifyRequest(toCheck, ctx)
+        : verifyRequest(toCheck, sourceOfRootHash, ctx);
+      var response = eCard.get().verifyRequest(request);
+      if ("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error".equals(response.getResult()
+                                                                                  .getResultMajor()))
       {
-        tsr = getTSReportFromAny(response.getOptionalOutputs(), ref, tsr);
-      }
-      else
-      {
-        String err = response.getResult().getResultMessage() == null ? ""
-          : response.getResult().getResultMessage().getValue();
+        var err = response.getResult().getResultMessage() == null ? ""
+          : "Response error was: " + response.getResult().getResultMessage().getValue();
         tsr.updateCodes(ValidationResultMajor.INDETERMINED,
                         response.getResult().getResultMinor(),
                         MinorPriority.NORMAL,
-                        "eCard request failed. Response error was: " + err,
+                        "eCard request failed. " + err,
                         ref);
+      }
+      else
+      {
+        var irt = extractTimestampIndividualReportFromAny(response.getOptionalOutputs(), ref, tsr);
+        if (irt != null)
+        {
+          tsr = createTimestampReportFromIndividualReport(irt, ref, tsr);
+          checkSignatureQuality(irt, tsr, ref);
+        }
       }
     }
     catch (WebServiceException e)
     {
-      LOG.error("eCard webservice unreachable", e);
+      LOG.error("eCard webservice unreachable: {}", e.getMessage());
       tsr.updateCodes(ValidationResultMajor.INDETERMINED,
                       MINOR_INTERNAL_ERROR,
                       MinorPriority.NORMAL,
@@ -152,15 +171,17 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
                       "eCard request failed. Error was: " + e.getMessage(),
                       ref);
     }
-    FormatOkReport formatOk = Optional.ofNullable(tsr.getParsedFormatOk()).orElse(new FormatOkReport(ref));
+    var formatOk = Optional.ofNullable(tsr.getParsedFormatOk()).orElse(new FormatOkReport(ref));
     checkUnsignedAttributes(toCheck, formatOk);
     tsr.setFormatOk(formatOk);
     return tsr;
   }
 
-  TimeStampReport getTSReportFromAny(AnyType any, Reference ref, TimeStampReport tsr)
+  IndividualReportType extractTimestampIndividualReportFromAny(AnyType any,
+                                                               Reference ref,
+                                                               TimeStampReport tsr)
   {
-    String message = null;
+    String message;
     if (any == null || any.getAny().size() != 1)
     {
       message = "Illegal eCard response. Did not get exactly one OptionalOutput element as expected.";
@@ -171,20 +192,22 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
     }
     else
     {
-      JAXBElement<?> elem = (JAXBElement<?>)any.getAny().get(0);
+      var elem = (JAXBElement<?>)any.getAny().get(0);
       if (elem.getValue() instanceof VerificationReportType)
       {
-        return getTSReportFromVR((VerificationReportType)elem.getValue(), ref, tsr);
+        return extractTimestampIndividualReportFromVR((VerificationReportType)elem.getValue(), ref, tsr);
       }
       message = "Illegal eCard response. OptionalOutput element is not a VerificationReportType.";
     }
     setParameterError(ref, tsr, message);
-    return tsr;
+    return null;
   }
 
-  private TimeStampReport getTSReportFromVR(VerificationReportType vr, Reference ref, TimeStampReport tsr)
+  private IndividualReportType extractTimestampIndividualReportFromVR(VerificationReportType vr,
+                                                                      Reference ref,
+                                                                      TimeStampReport tsr)
   {
-    String message = null;
+    String message;
     if (vr.getIndividualReport().size() != 1)
     {
       message = "Illegal eCard response. Did not get exactly one IndividualReport element as expected.";
@@ -193,24 +216,54 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
     {
       message = "Illegal eCard response. IndividualReport element does not contain details.";
     }
-    else if (vr.getIndividualReport().get(0).getDetails().getAny().size() != 1)
+    else
     {
-      message = "Illegal eCard response. Details of IndividualReport element does not contain exactly one element as expected.";
+      for ( var irt : vr.getIndividualReport() )
+      {
+        if (isIndividualReportForTimestamp(irt))
+        {
+          return irt;
+        }
+      }
+      message = "Illegal eCard response. Details of IndividualReport element does not contain exactly one TimeStampValidityType.";
     }
-    else if (!(vr.getIndividualReport().get(0).getDetails().getAny().get(0) instanceof JAXBElement<?>))
+    setParameterError(ref, tsr, message);
+    return null;
+  }
+
+  private boolean isIndividualReportForTimestamp(IndividualReportType irt)
+  {
+    return irt.getDetails()
+              .getAny()
+              .stream()
+              .filter(ir -> ir instanceof JAXBElement<?>)
+              .map(ir -> ((JAXBElement<?>)ir).getValue())
+              .anyMatch(TimeStampValidityType.class::isInstance);
+  }
+
+  TimeStampReport createTimestampReportFromIndividualReport(IndividualReportType irt,
+                                                            Reference ref,
+                                                            TimeStampReport tsr)
+  {
+    String message;
+
+    var tvt = irt.getDetails()
+                 .getAny()
+                 .stream()
+                 .filter(ir -> ir instanceof JAXBElement<?>)
+                 .map(ir -> ((JAXBElement<?>)ir).getValue())
+                 .filter(TimeStampValidityType.class::isInstance)
+                 .map(TimeStampValidityType.class::cast)
+                 .findFirst();
+    if (tvt.isEmpty())
     {
-      message = "Illegal eCard response. Details of IndividualReport element OptionalOutput element could not be parsed.";
+      message = "Illegal eCard response. Details of IndividualReport element does not contain exactly one TimeStampValidityType.";
     }
     else
     {
-      JAXBElement<?> elem = (JAXBElement<?>)vr.getIndividualReport().get(0).getDetails().getAny().get(0);
-      if (elem.getValue() instanceof TimeStampValidityType)
-      {
-        return new TimeStampReport(ref, (TimeStampValidityType)(elem.getValue()),
-                                   vr.getIndividualReport().get(0).getResult());
-      }
-      message = "Illegal eCard response. Details of IndividualReport element is not a TimeStampValidityType.";
+      return new TimeStampReport(ref, tvt.get(), irt.getResult());
     }
+
     setParameterError(ref, tsr, message);
     return tsr;
   }
@@ -224,42 +277,180 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
                     ref);
   }
 
-  private ECard getECard()
+  private static VerifyRequest verifyRequest(ErValidationContext ctx) throws JAXBException
   {
-    if (eCardWebService == null)
-    {
-      eCardWebService = new ECard_Service(eCardURL);
-    }
-    return eCardWebService.getECard();
+    var request = new VerifyRequest();
+    request.setRequestID("id#" + System.currentTimeMillis());
+    request.setOptionalInputs(returnVerificationReportOI(ctx));
+    request.setInputDocuments(new InputDocuments());
+    return request;
   }
 
-  private VerifyRequest verifyRequestFromTimeStamp(TimeStampToken tst) throws IOException, JAXBException
+  private static VerifyRequest verifyRequest(TimeStampToken tsp, ErValidationContext ctx)
+    throws IOException, JAXBException
   {
-    VerifyRequest request = new VerifyRequest();
-    request.setRequestID("id#" + System.currentTimeMillis());
-    request.setOptionalInputs(createReturnVerificationReportOI());
-    Timestamp timestamp = new Timestamp();
-    timestamp.setRFC3161TimeStampToken(tst.getEncoded());
-    SignatureObject sigObject = new SignatureObject();
+    var request = verifyRequest(ctx);
+    var timestamp = new Timestamp();
+    timestamp.setRFC3161TimeStampToken(tsp.getEncoded());
+    // We pass the timestamp's hash in the verify request in order to verify without the hash's source value
+    var documentHash = new DocumentHash();
+    documentHash.setDigestValue(tsp.getTimeStampInfo().getMessageImprintDigest());
+    var dmt = new DigestMethodType();
+    dmt.setAlgorithm(tsp.getTimeStampInfo().getMessageImprintAlgOID().getId());
+    documentHash.setDigestMethod(dmt);
+    request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash().add(documentHash);
+    var sigObject = new SignatureObject();
     sigObject.setTimestamp(timestamp);
     request.getSignatureObject().add(sigObject);
     return request;
   }
 
-  private AnyType createReturnVerificationReportOI() throws JAXBException
+  private static VerifyRequest verifyRequest(TimeStampToken tst,
+                                             byte[] sourceOfRootHash,
+                                             ErValidationContext ctx)
+    throws IOException, JAXBException
   {
-    AnyType optional = new AnyType();
-    ReturnVerificationReport returnVr = ctx.getReturnVerificationReport();
+    var request = verifyRequest(ctx);
+    var tspDoc = document(tst.getEncoded(), "tsp");
+    request.getInputDocuments()
+           .getDocumentOrTransformedDataOrDocumentHash()
+           .add(document(sourceOfRootHash, "signed"));
+    request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash().add(tspDoc);
+    var sigObject = new SignatureObject();
+    var pointer = new SignaturePtr();
+    pointer.setWhichDocument(tspDoc);
+    sigObject.setSignaturePtr(pointer);
+    request.getSignatureObject().add(sigObject);
+    return request;
+  }
+
+  private static Object document(byte[] data, String id)
+  {
+    var doc = new DocumentType();
+    doc.setID(id);
+    var base64 = new Base64Data();
+    base64.setValue(data);
+    doc.setBase64Data(base64);
+    return doc;
+  }
+
+  private static AnyType returnVerificationReportOI(ErValidationContext ctx) throws JAXBException
+  {
+    var optional = new AnyType();
+    var returnVr = ctx.getReturnVerificationReport();
     if (returnVr == null)
     {
       returnVr = XmlHelper.FACTORY_OASIS_VR.createReturnVerificationReport();
       returnVr.setReportDetailLevel(ReportDetailLevel.ALL_DETAILS.toString());
     }
-    Element element = XmlHelper.toElement(returnVr,
-                                          XmlHelper.FACTORY_OASIS_VR.getClass().getPackage().getName(),
-                                          null);
+    var element = XmlHelper.toElement(returnVr,
+                                      XmlHelper.FACTORY_OASIS_VR.getClass().getPackage().getName(),
+                                      null);
     optional.getAny().add(element);
     return optional;
+  }
+
+  void setSourceOfRootHash(byte[] sourceOfRootHash)
+  {
+    this.sourceOfRootHash = sourceOfRootHash;
+  }
+
+  void checkSignatureQuality(IndividualReportType irt, TimeStampReport tsr, Reference ref)
+  {
+    var signatureQualityType = getSignatureQuality(irt);
+    var requireQualified = Configurator.getInstance().requiresQualifiedTimestamps(ctx.getProfileName());
+
+    if (signatureQualityType == null && !requireQualified)
+    {
+      tsr.addMessageOnly("The signature quality could not be determined from the eCard response.", ref);
+      return;
+    }
+
+    if (signatureQualityType == null && requireQualified)
+    {
+      tsr.updateCodes(ValidationResultMajor.INDETERMINED,
+                      MINOR_NOT_SUPPORTED,
+                      MinorPriority.NORMAL,
+                      "A quality check for a timestamp was requested, but the signature quality could not be determined from the eCard response.",
+                      ref);
+      return;
+    }
+
+    var tspQuality = TspQuality.from(signatureQualityType.getSignatureQualityInformation().get(0));
+    enrichTspQualityMessage(tsr, tspQuality);
+
+    if (!tspQuality.isQualified()
+        && Configurator.getInstance().requiresQualifiedTimestamps(ctx.getProfileName()))
+    {
+      generateErrorForLowQuality(tsr, tspQuality, ref);
+    }
+  }
+
+  private void generateErrorForLowQuality(TimeStampReport tsr, TspQuality quality, Reference ref)
+  {
+    var certificateValidityTypes = extractCertificateValidityTypes(tsr);
+    for ( var cvt : certificateValidityTypes )
+    {
+      final var resultMajor = ValidationResultMajor.INVALID;
+      final var resultMinor = "urn:oasis:names:tc:dss:1.0:detail:IssuerTrust";
+      cvt.getChainingOK().setResultMajor(resultMajor.toString());
+      cvt.getChainingOK().setResultMinor(resultMinor);
+    }
+    tsr.updateCodes(ValidationResultMajor.INVALID,
+                    MINOR_PARAMETER_ERROR,
+                    MinorPriority.NORMAL,
+                    "A checked timestamp should be qualified, but the quality of the timestamp was determined as: "
+                                          + quality.uri(),
+                    ref);
+  }
+
+  private void enrichTspQualityMessage(TimeStampReport tsr, TspQuality quality)
+  {
+    var message = "The quality of the certificate chain for the timestamp was determined as: "
+                  + quality.uri();
+    var certificateValidityTypes = extractCertificateValidityTypes(tsr);
+    for ( var cvt : certificateValidityTypes )
+    {
+      var oldMessage = cvt.getChainingOK().getResultMessage();
+      if (oldMessage != null)
+      {
+        message = oldMessage.getValue() + "|" + message;
+      }
+      var internationalString = new InternationalStringType();
+      internationalString.setLang("en");
+      internationalString.setValue(message);
+      cvt.getChainingOK().setResultMessage(internationalString);
+    }
+  }
+
+  private List<CertificateValidityType> extractCertificateValidityTypes(TimeStampReport tsr)
+  {
+    return Optional.of(tsr)
+                   .map(TimeStampReport::getFormatted)
+                   .map(TimeStampValidityType::getCertificatePathValidity)
+                   .map(CertificatePathValidityType::getPathValidityDetail)
+                   .map(CertificatePathValidityVerificationDetailType::getCertificateValidity)
+                   .orElse(List.of());
+  }
+
+  private SignatureQualityType getSignatureQuality(IndividualReportType irt)
+  {
+    for ( var detail : irt.getDetails().getAny() )
+    {
+      if (detail instanceof JAXBElement)
+      {
+        var element = (JAXBElement)detail;
+        if (SignatureQualityType.class.equals(element.getDeclaredType()))
+        {
+          return (SignatureQualityType)element.getValue();
+        }
+      }
+      if (detail instanceof SignatureQualityType)
+      {
+        return (SignatureQualityType)detail;
+      }
+    }
+    return null;
   }
 
 }

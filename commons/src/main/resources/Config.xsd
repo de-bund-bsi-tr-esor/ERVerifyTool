@@ -99,7 +99,7 @@
         The XML name space prefixes to use for hashing meta data, credentials and
         version manifests. As the prefixes get lost during web service transport, this has to be
         configured beforehand. Define an empty prefix to use as the target (prefix-less) name space.
-        Default namespaces are as defined in TR-ESOR XAIP V1.2 schema.
+        Default namespaces are as defined in TR-ESOR XAIP V1.3 schema.
       </xs:documentation>
     </xs:annotation>
     <xs:simpleContent>
@@ -119,6 +119,39 @@
     <xs:complexContent>
       <xs:extension base="tns:ConfiguredObjectsCollection">
         <xs:attribute name="name" type="xs:anyURI" use="required" />
+        <xs:attribute name="hashMode" type="xs:string" default="unsorted">
+          <xs:annotation>
+            <xs:documentation>
+              hashMode defines the way hashes are concatenated during ArchiveTimestamp validation.
+              Setting hashMode=unsorted (default) will hash according to RFC 4998 (section 5.2, point 4) without sorting the hashes.
+              Setting hashMode=sorted will sort the hashes binary ascending according to RFC 6283 (section 4.2.2, point 6).
+              Setting hashMode=both will allow both variants to pass.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="validationService" type="xs:anyURI" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              URL to the WSDL of an eCard-compatible validation service. Will be used for signature and timestamp check if configured.
+              Can be left out to disable online checking.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="requireQualifiedTimestamps" type="xs:boolean" default="false">
+          <xs:annotation>
+            <xs:documentation>
+              Set to true to require the online timestamp verification to only accept qualified timestamps issued in a EU member state.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="lxaipDataDirectory" type="xs:anyURI" default=".">
+          <xs:annotation>
+            <xs:documentation>
+              Path to the directory LXAIP data object references should resolved to. The data object reference's URI is then
+              resolved relative to the given directory.
+            </xs:documentation>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

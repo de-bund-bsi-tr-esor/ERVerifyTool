@@ -21,10 +21,11 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
+
 import de.bund.bsi.tr_esor.checktool.validation.report.OutputCreator;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
 
 
 /**

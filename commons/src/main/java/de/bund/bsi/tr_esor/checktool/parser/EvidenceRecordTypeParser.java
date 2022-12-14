@@ -23,11 +23,12 @@ package de.bund.bsi.tr_esor.checktool.parser;
 
 import java.io.IOException;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.transform.stream.StreamSource;
 
+import jakarta.xml.bind.JAXBException;
+
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-import de.bund.bsi.tr_esor.xaip._1.EvidenceRecordType;
+import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
 
 
 /**
@@ -43,7 +44,7 @@ public class EvidenceRecordTypeParser extends RegexBasedParser<EvidenceRecordTyp
    */
   public EvidenceRecordTypeParser()
   {
-    super(regexForMainTag("evidenceRecord", "http://www.bsi.bund.de/tr-esor/xaip/1.2"));
+    super(regexForMainTag("evidenceRecord", "http://www.bsi.bund.de/tr-esor/xaip"));
   }
 
   @Override

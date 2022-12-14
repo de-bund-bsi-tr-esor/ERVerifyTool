@@ -39,68 +39,6 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 public class ValidatorRepository
 {
 
-  private static class ProfileRepo
-  {
-
-    private static class ValidatorSource
-    {
-
-      Supplier<Object> supplier;
-
-      Class<?> contextClass;
-
-      Class<?> reportClass;
-
-      ValidatorSource(Supplier<Object> supplier, Class<?> contextClass, Class<?> reportClass)
-      {
-        this.supplier = supplier;
-        this.contextClass = contextClass;
-        this.reportClass = reportClass;
-      }
-    }
-
-    private final Map<Class<?>, ValidatorSource> byTarget = new HashMap<>();
-
-    ProfileRepo()
-    {
-      // just for visibility
-    }
-
-    @SuppressWarnings("rawtypes") // ValidationContext
-    Supplier<Object> get(Class<?> target,
-                         Class<? extends ValidationContext> contextClass,
-                         Class<? extends ReportPart> reportClass)
-    {
-      return byTarget.entrySet()
-                     .stream()
-                     .filter(e -> e.getKey().isAssignableFrom(target))
-                     .filter(e -> e.getValue().contextClass.isAssignableFrom(contextClass))
-                     .filter(e -> reportClass.isAssignableFrom(e.getValue().reportClass))
-                     .sorted((a, b) -> countInheritanceSteps(b.getKey(), target)
-                                       - countInheritanceSteps(a.getKey(), target))
-                     .map(e -> e.getValue().supplier)
-                     .findFirst()
-                     .orElse(null);
-    }
-
-    void add(Supplier<Object> supplier, Class<?> target, Class<?> contextClass, Class<?> reportClass)
-    {
-      byTarget.put(target, new ValidatorSource(supplier, contextClass, reportClass));
-    }
-
-    private int countInheritanceSteps(Class<?> a, Class<?> b)
-    {
-      int result = 0;
-      Class<?> intermed = a;
-      while (intermed != null && intermed.isAssignableFrom(b))
-      {
-        result++;
-        intermed = intermed.getSuperclass();
-      }
-      return result - 1;
-    }
-  }
-
   private final ProfileRepo general = new ProfileRepo();
 
   private final Map<String, ProfileRepo> byProfile = new HashMap<>();
@@ -186,6 +124,72 @@ public class ValidatorRepository
   public boolean containsProfile(String profile)
   {
     return byProfile.containsKey(profile);
+  }
+
+
+  private static class ProfileRepo
+  {
+
+    private final Map<Class<?>, ValidatorSource> byTarget = new HashMap<>();
+
+
+    ProfileRepo()
+    {
+      // just for visibility
+    }
+
+    @SuppressWarnings("rawtypes")
+    // ValidationContext
+    Supplier<Object> get(Class<?> target,
+                         Class<? extends ValidationContext> contextClass,
+                         Class<? extends ReportPart> reportClass)
+    {
+      return byTarget.entrySet()
+                     .stream()
+                     .filter(e -> e.getKey().isAssignableFrom(target))
+                     .filter(e -> e.getValue().contextClass.isAssignableFrom(contextClass))
+                     .filter(e -> reportClass.isAssignableFrom(e.getValue().reportClass))
+                     .sorted((a, b) -> countInheritanceSteps(b.getKey(), target)
+                                       - countInheritanceSteps(a.getKey(), target))
+                     .map(e -> e.getValue().supplier)
+                     .findFirst()
+                     .orElse(null);
+    }
+
+    void add(Supplier<Object> supplier, Class<?> target, Class<?> contextClass, Class<?> reportClass)
+    {
+      byTarget.put(target, new ValidatorSource(supplier, contextClass, reportClass));
+    }
+
+    private int countInheritanceSteps(Class<?> a, Class<?> b)
+    {
+      var result = 0;
+      var intermed = a;
+      while (intermed != null && intermed.isAssignableFrom(b))
+      {
+        result++;
+        intermed = intermed.getSuperclass();
+      }
+      return result - 1;
+    }
+
+
+    private static class ValidatorSource
+    {
+
+      Supplier<Object> supplier;
+
+      Class<?> contextClass;
+
+      Class<?> reportClass;
+
+      ValidatorSource(Supplier<Object> supplier, Class<?> contextClass, Class<?> reportClass)
+      {
+        this.supplier = supplier;
+        this.contextClass = contextClass;
+        this.reportClass = reportClass;
+      }
+    }
   }
 
 

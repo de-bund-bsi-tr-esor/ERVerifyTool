@@ -56,6 +56,8 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestBasisErsArchiveTimeStampChainValidator
 {
 
+  private FormatOkReport ersFormatOk;
+
   /**
    * Loads test configuration.
    *
@@ -66,8 +68,6 @@ public class TestBasisErsArchiveTimeStampChainValidator
   {
     TestUtils.loadDefaultConfig();
   }
-
-  private FormatOkReport ersFormatOk;
 
   /**
    * Asserts that {@link BasisErsArchiveTimeStampChainValidator} invalidates formatOk if
@@ -95,7 +95,7 @@ public class TestBasisErsArchiveTimeStampChainValidator
   @Test
   public void someArchiveTimeStamps() throws Exception
   {
-    ATSChainReport report = validate(er -> er.getAtss().get(0));
+    var report = validate(er -> er.getAtss().get(0));
     assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
     assertThat("summarized Message",
                report.getSummarizedMessage(),
@@ -109,21 +109,21 @@ public class TestBasisErsArchiveTimeStampChainValidator
   private ATSChainReport validate(Function<EvidenceRecord, ArchiveTimeStampChain> getChainFor)
     throws Exception
   {
-    EvidenceRecord er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
-    ArchiveTimeStampChain chain = getChainFor.apply(er);
-    BasisErsArchiveTimeStampChainValidator validator = new BasisErsArchiveTimeStampChainValidator();
-    Reference ref = new Reference("er");
-    ErValidationContext ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS,
-                                                      TestUtils.createReturnVerificationReport());
+    var er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
+    var chain = getChainFor.apply(er);
+    var validator = new BasisErsArchiveTimeStampChainValidator();
+    var ref = new Reference("er");
+    var ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS,
+                                      TestUtils.createReturnVerificationReport(), false);
     if (!chain.isEmpty())
     {
-      Date dateFromTimeStamp = new Date(chain.get(0).getSignDateFromTimeStamp().getTime());
+      var dateFromTimeStamp = new Date(chain.get(0).getSignDateFromTimeStamp().getTime());
       dateFromTimeStamp.setTime(dateFromTimeStamp.getTime() + 1);
       ctx.setSecureData(chain.get(0), dateFromTimeStamp);
     }
     ctx.setDeclaredDigestOIDs(Collections.singletonList("2.16.840.1.101.3.4.2.1"));
     validator.setContext(ctx);
-    ATSChainReport report = validator.validate(ref.newChild("test"), chain);
+    var report = validator.validate(ref.newChild("test"), chain);
     ersFormatOk = ctx.getFormatOk();
     return report;
   }

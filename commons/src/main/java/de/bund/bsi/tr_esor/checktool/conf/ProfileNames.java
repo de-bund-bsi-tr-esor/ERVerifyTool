@@ -34,22 +34,21 @@ public final class ProfileNames
 {
 
   /**
-   * Default profile: RFC4998.
+   * Default profile: RFC4998. This profile does check Evidence Records according to the specifiation given in
+   * RFC4998.
    */
   public static final String RFC4998 = "https://tools.ietf.org/html/rfc4998";
 
   /**
-   * Common base name of both TR-ESOR-ERS profiles (BASIS-ERS and BASIS-XERS) specified in the same document.
+   * Profile: TR-ESOR This profile is similar to RFC4998 but requires online validation of timestamps to be
+   * executed.
    */
-  private static final String TR_03125_BASE_NAME = "http://www.bsi.bund.de/SharedDocs/Downloads/DE/BSI/Publikationen/TechnischeRichtlinien/TR03125/BSI_TR_03125_Anlage_ERS_V1_2.html";
+  public static final String TR_ESOR = "TR-ESOR";
 
   /**
-   * Profile: Basis-ERS-Profil.
-   * <p>
-   * This profile name uses an anchor which does not exist at the defined URL to distinguish Basis-ERS-Profil
-   * from Basis-XERS-Profil.
+   * Profile: Basis-ERS-Profil. Uses the requirements from the BSI TR-03125 Annex TR-ESOR-ERS.
    */
-  public static final String BASIS_ERS = TR_03125_BASE_NAME + "#Basis-ERS-Profil";
+  public static final String BASIS_ERS = "Basis-ERS";
 
   private ProfileNames()
   {
@@ -61,7 +60,7 @@ public final class ProfileNames
    */
   public static List<String> getPredefinedProfileNames()
   {
-    return Arrays.asList(RFC4998, BASIS_ERS);
+    return Arrays.asList(RFC4998, TR_ESOR, BASIS_ERS);
   }
 
 }

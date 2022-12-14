@@ -24,7 +24,6 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.function.Function;
 
@@ -43,7 +42,6 @@ import org.bouncycastle.asn1.cms.SignedData;
 import org.bouncycastle.asn1.cms.SignerInfo;
 import org.bouncycastle.asn1.ess.SigningCertificateV2;
 import org.bouncycastle.asn1.ocsp.BasicOCSPResponse;
-import org.bouncycastle.asn1.ocsp.SingleResponse;
 import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 import org.bouncycastle.asn1.x509.Certificate;
 import org.bouncycastle.asn1.x509.CertificateList;
@@ -74,9 +72,18 @@ public class ContentInfoChecker
 
   static final String OID_PKCS7_SIGNEDDATA = "1.2.840.113549.1.7.2";
 
+  /** Invalid old version of signing certificate */
+  static final String OID_SIGNING_CERTIFICATE_V1 = "1.2.840.113549.1.9.16.2.12";
+
   static final String OID_SIGNING_CERTIFICATTE_V2 = "1.2.840.113549.1.9.16.2.47";
 
   static final String OID_TST_INFO = "1.2.840.113549.1.9.16.1.4";
+
+  /** Addtionally to the TstInfo, the signing time might be included in the signed attributes */
+  static final String OID_PKCS9_SIGNING_TIME = "1.2.840.113549.1.9.5";
+
+
+  public static final ASN1Integer SUPPORTED_CMS_VERSION = new ASN1Integer(3L);
 
   private final List<AlgorithmIdentifier> digestIdentifiers = new ArrayList<>();
 
@@ -101,8 +108,8 @@ public class ContentInfoChecker
   public void checkContentInfo(Reference ref, ContentInfo contentInfo)
   {
     checkContentType(ref.newChild("contentType"), contentInfo.getContentType());
-    Reference content = ref.newChild("content");
-    SignedData sd = getInstanceOrFail(SignedData::getInstance, contentInfo.getContent(), content);
+    var content = ref.newChild("content");
+    var sd = getInstanceOrFail(SignedData::getInstance, contentInfo.getContent(), content);
     if (sd != null)
     {
       checkSignedData(content, sd);
@@ -126,19 +133,23 @@ public class ContentInfoChecker
    */
   void checkSignedData(Reference ref, SignedData signedData)
   {
-    if (!new ASN1Integer(3L).equals(signedData.getVersion()))
+    if (!SUPPORTED_CMS_VERSION.equals(signedData.getVersion()))
     {
-      formatOk.invalidate("version must be 3", ref.newChild("version"));
+      var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
+                                  signedData.getVersion().getValue().intValue(),
+                                  SUPPORTED_CMS_VERSION.getValue().intValue());
+      formatOk.invalidate(message, ref.newChild("version"));
     }
-    Reference digestAlgos = ref.newChild("digestAlgorithms");
+
+    var digestAlgos = ref.newChild("digestAlgorithms");
     if (signedData.getDigestAlgorithms() == null || signedData.getDigestAlgorithms().size() == 0)
     {
       formatOk.invalidate("digestAlgorithms must be filled", digestAlgos);
     }
     else
     {
-      int algoCount = 0;
-      for ( ASN1Encodable algorithm : signedData.getDigestAlgorithms() )
+      var algoCount = 0;
+      for ( var algorithm : signedData.getDigestAlgorithms() )
       {
         digestIdentifiers.add(getInstanceOrFail(AlgorithmIdentifier::getInstance,
                                                 algorithm,
@@ -146,7 +157,7 @@ public class ContentInfoChecker
       }
     }
     checkEContentType(ref.newChild("encapContentInfo"), signedData.getEncapContentInfo());
-    Reference certs = ref.newChild("certificates");
+    var certs = ref.newChild("certificates");
     if (signedData.getCertificates() == null || signedData.getCertificates().size() == 0)
     {
       formatOk.invalidate("certificates must be filled", certs);
@@ -155,7 +166,7 @@ public class ContentInfoChecker
     {
       checkCertificateSet(certs, signedData.getCertificates());
     }
-    Reference crlRef = ref.newChild("crls");
+    var crlRef = ref.newChild("crls");
     if (signedData.getCRLs() == null || signedData.getCRLs().size() == 0)
     {
       formatOk.invalidate("CRLs must be filled", crlRef);
@@ -164,7 +175,7 @@ public class ContentInfoChecker
     {
       checkRevocationInfoChoices(crlRef, signedData.getCRLs());
     }
-    Reference siRef = ref.newChild("signerInfos");
+    var siRef = ref.newChild("signerInfos");
     if (signedData.getSignerInfos() == null || signedData.getSignerInfos().size() != 1)
     {
       formatOk.invalidate("signerInfos must contain exactly one element", siRef);
@@ -207,10 +218,10 @@ public class ContentInfoChecker
    */
   private void checkCertificateSet(Reference ref, ASN1Set certificateChoices)
   {
-    Iterator<ASN1Encodable> choices = certificateChoices.iterator();
-    for ( int certCount = 0 ; choices.hasNext() ; certCount++ )
+    var choices = certificateChoices.iterator();
+    for ( var certCount = 0 ; choices.hasNext() ; certCount++ )
     {
-      Certificate cert = getInstance(Certificate::getInstance, choices.next());
+      var cert = getInstance(Certificate::getInstance, choices.next());
       if (cert == null)
       {
         formatOk.invalidate("certificates must only contain elements of type Certificate",
@@ -228,13 +239,13 @@ public class ContentInfoChecker
    */
   void checkRevocationInfoChoices(Reference ref, ASN1Set revocationInfoChoices)
   {
-    Iterator<ASN1Encodable> choices = revocationInfoChoices.iterator();
+    var choices = revocationInfoChoices.iterator();
 
-    for ( int revCount = 0 ; choices.hasNext() ; revCount++ )
+    for ( var revCount = 0 ; choices.hasNext() ; revCount++ )
     {
-      ASN1Encodable ric = choices.next();
-      Reference revChoice = ref.newChild(Integer.toString(revCount));
-      OtherRevocationInfoFormat orif = getInstance(this::extractOrif, ric);
+      var ric = choices.next();
+      var revChoice = ref.newChild(Integer.toString(revCount));
+      var orif = getInstance(this::extractOrif, ric);
       if (orif == null)
       {
         if (getInstance(CertificateList::getInstance, ric) == null)
@@ -252,7 +263,7 @@ public class ContentInfoChecker
 
   private void checkOrif(OtherRevocationInfoFormat orif, Reference revChoice)
   {
-    BasicOCSPResponse resp = getInstance(BasicOCSPResponse::getInstance, orif.getInfo());
+    var resp = getInstance(BasicOCSPResponse::getInstance, orif.getInfo());
     if (resp == null || !OID_BASIC_OSCP_RESPONSE.equals(orif.getInfoFormat().getId()))
     {
       formatOk.invalidate("OtherRevocationInfoFormat must contain a BasicOCSPResponse", revChoice);
@@ -267,21 +278,6 @@ public class ContentInfoChecker
     {
       formatOk.invalidate("ResponderID from BasicOCSPResponse must use byName choice",
                           revChoice.newChild("ResponseData").newChild("ResponderID"));
-    }
-    int respCount = 0;
-    Iterator<ASN1Encodable> resps = resp.getTbsResponseData().getResponses().iterator();
-    for ( SingleResponse singleResp ; resps.hasNext() ; respCount++ )
-    {
-      Reference singleRespRev = revChoice.newChild("ResponseData")
-                                         .newChild("responses")
-                                         .newChild(Integer.toString(respCount));
-      singleResp = getInstanceOrFail(SingleResponse::getInstance, resps.next(), singleRespRev);
-      if (singleResp != null && (singleResp.getSingleExtensions() == null
-                                 || singleResp.getSingleExtensions()
-                                              .getExtension(new ASN1ObjectIdentifier(OID_CERT_HASH)) == null))
-      {
-        formatOk.invalidate("SingleResponse must contain CertHash extension", singleRespRev);
-      }
     }
   }
 
@@ -299,7 +295,7 @@ public class ContentInfoChecker
    */
   private void checkSignerInfo(Reference ref, ASN1Encodable asn1si)
   {
-    SignerInfo si = getInstanceOrFail(SignerInfo::getInstance, asn1si, ref);
+    var si = getInstanceOrFail(SignerInfo::getInstance, asn1si, ref);
     if (si == null)
     {
       return;
@@ -342,14 +338,13 @@ public class ContentInfoChecker
   private void checkSignedAttributes(Reference ref, ASN1Set attrs)
   {
     checkAttributesIsDERSet(ref, attrs);
-    final int requiredAttributeCount = 3;
-    if (attrs.size() != requiredAttributeCount)
-    {
-      formatOk.invalidate("attribute set must contain exactly one content-type, message-digest and SigningCertificateV2 attribute",
-                          ref.newChild("content"));
-    }
-    Iterator<ASN1Encodable> attributes = attrs.iterator();
-    int attrCount = 0;
+
+    var isContentTypePresent = false;
+    var isMessageDigestPresent = false;
+    var isSigningCertificateV2Present = false;
+
+    var attributes = attrs.iterator();
+    var attrCount = 0;
     for ( Attribute attr ; attributes.hasNext() ; attrCount++ )
     {
       attr = getInstance(Attribute::getInstance, attributes.next());
@@ -368,19 +363,43 @@ public class ContentInfoChecker
         {
           case OID_CONTENT_TYPE:
             checkContentTypeAttribute(ref.newChild("content-type"), attr);
+            isContentTypePresent = true;
             break;
           case OID_MESSAGE_DIGEST:
+            isMessageDigestPresent = true;
             checkMessageDigestAttribute(ref.newChild("message-digest"), attr);
             break;
           case OID_SIGNING_CERTIFICATTE_V2:
+            isSigningCertificateV2Present = true;
             checkSigningCertificateAttribute(ref.newChild("signing-certificate-v2"), attr);
             break;
-          default:
-            formatOk.invalidate("attribute with OID " + attr.getAttrType().getId() + " is not allowed",
+          case OID_SIGNING_CERTIFICATE_V1:
+            formatOk.invalidate("The legacy signing certificate attribute with OID "
+                                + attr.getAttrType().getId()
+                                + " is not allowed. A SigningCertivicate v2 is required.",
                                 ref.newChild(Integer.toString(attrCount)));
             break;
+          default:
         }
       }
+    }
+
+    if (!isContentTypePresent)
+    {
+      formatOk.invalidate("The content type is missing in the signed attributes.",
+                          ref.newChild("content-type"));
+    }
+
+    if (!isMessageDigestPresent)
+    {
+      formatOk.invalidate("The message digest is missing in the signed attributes.",
+                          ref.newChild("message-digest"));
+    }
+
+    if (!isSigningCertificateV2Present)
+    {
+      formatOk.invalidate("The signing certificate v2 is missing in the signed attributes.",
+                          ref.newChild("signing-certificate-v2"));
     }
   }
 
@@ -394,7 +413,7 @@ public class ContentInfoChecker
   {
     if (!(attrs instanceof DERSet))
     {
-      boolean isEqualToDERSet = false;
+      var isEqualToDERSet = false;
       try
       {
         isEqualToDERSet = Arrays.equals(attrs.getEncoded(ASN1Encoding.DL),
@@ -424,8 +443,7 @@ public class ContentInfoChecker
       formatOk.invalidate("attribute must have a value set", ref);
       return;
     }
-    ASN1ObjectIdentifier oid = getInstance(ASN1ObjectIdentifier::getInstance,
-                                           contentType.getAttrValues().iterator().next());
+    var oid = getInstance(ASN1ObjectIdentifier::getInstance, contentType.getAttrValues().iterator().next());
     if (oid == null || !OID_TST_INFO.equals(oid.getId()))
     {
       formatOk.invalidate("content-type must be " + OID_TST_INFO, ref);
@@ -460,8 +478,8 @@ public class ContentInfoChecker
       formatOk.invalidate("attribute must have a value set", ref);
       return;
     }
-    SigningCertificateV2 sigCertInstance = getInstance(SigningCertificateV2::getInstance,
-                                                       sigCert.getAttrValues().iterator().next());
+    var sigCertInstance = getInstance(SigningCertificateV2::getInstance,
+                                      sigCert.getAttrValues().iterator().next());
     if (sigCertInstance == null)
     {
       formatOk.invalidate("attribute must be SigningCertificateV2", ref);
@@ -507,10 +525,10 @@ public class ContentInfoChecker
    */
   private <T> T getInstanceOrFail(Function<Object, T> instanceFunc, Object input, Reference ref)
   {
-    String errorMsg = "";
+    var errorMsg = "";
     try
     {
-      T result = instanceFunc.apply(input);
+      var result = instanceFunc.apply(input);
       if (result != null)
       {
         return result;
