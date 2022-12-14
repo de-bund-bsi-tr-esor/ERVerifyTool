@@ -3,6 +3,8 @@
 The _ER Verify Tool_ is used to check the conformity of an evidence record against requirements 
 of TR-ESOR-ERS in version 1.3.
 
+The former version of _ER Verify Tool_, which is working with the version 1.2.1 of TR-ESOR-ERS, can be obtained from branch _V1.2.2_ in this repository.
+
 More information about the _ER Verify Tool_ can be found in the product documentation (cf. `doc/ErVerifyTool.pdf`).
 
 ## License
