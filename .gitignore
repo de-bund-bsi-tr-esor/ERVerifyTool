@@ -17,7 +17,6 @@ installer/gov-install.log4j
 jacoco?exec
 !gradle-wrapper?jar
 tools/governikus_sc/gov_sc_protocol?txt
-out
 ?DS_Store
 [/]+/build
 [/]+/bin
