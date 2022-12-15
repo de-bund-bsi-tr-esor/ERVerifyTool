@@ -23,9 +23,8 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
 
 import java.util.Collections;
 
-import org.junit.Rule;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 
@@ -39,12 +38,6 @@ public class TestDetachedSignatureValidationContext
 {
 
   /**
-   * How JUnit checks exception cases.
-   */
-  @Rule
-  public ExpectedException expected = ExpectedException.none();
-
-  /**
    * Assert that adding file extensions for unknown objects in the context fails.
    */
   @Test
@@ -53,8 +46,8 @@ public class TestDetachedSignatureValidationContext
     DetachedSignatureValidationContext contextUnderTest = new DetachedSignatureValidationContext(null, null,
                                                                                                  Collections.emptyMap(),
                                                                                                  "");
-    expected.expectMessage("Not a reference of protected data: falsch");
-    contextUnderTest.setPreferredExtension(new Reference("falsch"), "*.docx");
+    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+              .isThrownBy(() -> contextUnderTest.setPreferredExtension(new Reference("falsch"), "*.docx"))
+              .withMessage("Not a reference of protected data: falsch");
   }
-
 }

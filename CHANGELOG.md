@@ -1,5 +1,21 @@
 # Changelog
 
+## v1.3.4
+
+**Changes:**
+
+- All ResultMajor codes provided by the tool have been reworked to suit the technical standards.
+- Individual Reports now have a ResultMajor as defined in OASIS DSS Core (Success, InsufficientInformation, RequesterError or ResponderError)
+- Requests through S4 now have ResultMajor codes as defined in BSI eCard specification (ok, warning or error)
+
+**Enhancements:**
+
+- The embedded server can now be bound to addresses other than localhost using the host parameter.
+
+**Closed Issues:**
+
+- A validation failure during the validation of a binary data object with a provided output folder has been resolved.
+
 ## v1.3.3
 
 **Changes:**

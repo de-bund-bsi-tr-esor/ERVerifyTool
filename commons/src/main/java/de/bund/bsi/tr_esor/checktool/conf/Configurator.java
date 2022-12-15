@@ -189,7 +189,7 @@ public final class Configurator
       {
         throw e;
       }
-      return clazz.newInstance();
+      return clazz.getDeclaredConstructor().newInstance();
     }
   }
 

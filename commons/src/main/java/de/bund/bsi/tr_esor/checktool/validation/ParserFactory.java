@@ -23,6 +23,7 @@ package de.bund.bsi.tr_esor.checktool.validation;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -180,9 +181,10 @@ public final class ParserFactory
       {
         try
         {
-          return configured.remove(0).newInstance();
+          return configured.remove(0).getDeclaredConstructor().newInstance();
         }
-        catch (InstantiationException | IllegalAccessException e)
+        catch (InstantiationException | IllegalAccessException | NoSuchMethodException
+          | InvocationTargetException e)
         {
           throw new IllegalStateException(e);
         }

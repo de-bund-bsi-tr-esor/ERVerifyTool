@@ -226,7 +226,10 @@ public final class Main
   {
     var outputFolder = new OutputFolder(Paths.get(destination));
     var dumpHandler = new DumpHandler(outputFolder);
-    dumpHandler.dumpXaip(xaip, (ComprehensiveXaipSerializer)serializer);
+    if (xaip != null && serializer != null)
+    {
+      dumpHandler.dumpXaip(xaip, (ComprehensiveXaipSerializer)serializer);
+    }
     dumpHandler.dumpReport(report);
   }
 

@@ -27,6 +27,7 @@ import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
+import static org.hamcrest.io.FileMatchers.anExistingFile;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
@@ -38,6 +39,9 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.net.SocketFactory;
 
@@ -544,6 +548,50 @@ public class TestMain extends TestBase
   }
 
   /**
+   * Asserts that a report is written into the output folder when the output folder is specified and a single
+   * binary input file is provided.
+   */
+  @Test
+  public void writesReportForBinIntoFolder() throws IOException
+  {
+    Path reportFile = null;
+    try
+    {
+      var data = createDecodedTempFile("/bin/example.tif.b64").getAbsolutePath();
+      var ers = createDecodedTempFile("/bin/example.ers.b64").getAbsolutePath();
+      var destination = Paths.get(System.getProperty("java.io.tmpdir"), getClass().getSimpleName());
+
+      callMain("-conf",
+               RES_DIR + "config.xml",
+               "-data",
+               data,
+               "-er",
+               ers,
+               "-out",
+               destination.toAbsolutePath().toString());
+
+      reportFile = destination.resolve("report.xml");
+      assertThat(reportFile.toFile(), anExistingFile());
+
+      var report = Files.readString(reportFile);
+      assertNumberElements(report, "IndividualReport", 1);
+      assertNumberElements(report, "ArchiveTimeStamp", 1);
+      assertFirstMajor(report, "InsufficientInformation");
+    }
+    finally
+    {
+      if (reportFile != null)
+      {
+        reportFile.toFile().delete();
+      }
+      if (destination != null)
+      {
+        destination.toFile().delete();
+      }
+    }
+  }
+
+  /**
    * Asserts that S4 web server can be started using the command line parameters "-server" and "-port".
    */
   @Test(timeout = 30_000)
@@ -593,7 +641,7 @@ public class TestMain extends TestBase
       connection.setReadTimeout(timeout);
       connection.connect();
       assertEquals(HttpURLConnection.HTTP_OK, connection.getResponseCode());
-      try (var is = connection.getInputStream(); var isr = new InputStreamReader(is, StandardCharsets.UTF_8);)
+      try (var is = connection.getInputStream(); var isr = new InputStreamReader(is, StandardCharsets.UTF_8))
       {
         final var bufSize = 1024;
         var cbuf = new char[bufSize];

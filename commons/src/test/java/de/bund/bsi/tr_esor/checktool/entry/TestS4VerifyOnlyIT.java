@@ -86,9 +86,9 @@ public class TestS4VerifyOnlyIT
     assertThat(response.body(), containsString(MAJOR_VALID));
     assertThat(response.body(), containsString(VERIFICATION_REPORT_NAMESPACE));
     assertThat(response.body(),
-               containsString("<SignedObjectIdentifier XPath=\"VerifyRequest/InputDocuments/Document[@id='g']/InlineXML/credentialSection/credential[@credentialID='ER_2.16.840.1.101.3.4.2.1_V001']/evidenceRecord/asn1EvidenceRecord\"/>"));
-    assertThat(response.body(), containsString("<SignedObjectIdentifier FieldName=\"CT_V001\""));
-    assertThat(response.body(), containsString("<SignedObjectIdentifier FieldName=\"MDO_V001\""));
+               containsString("SignedObjectIdentifier XPath=\"VerifyRequest/InputDocuments/Document[@id='g']/InlineXML/credentialSection/credential[@credentialID='ER_2.16.840.1.101.3.4.2.1_V001']/evidenceRecord/asn1EvidenceRecord\"/>"));
+    assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"CT_V001\""));
+    assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"MDO_V001\""));
     assertThat(response.body(), not(containsString(PARAMETER_ERROR)));
     assertThat(response.body(), not(containsString(MAJOR_INVALID)));
     assertThat(response.body(), not(containsString(MAJOR_INDETERMINED)));
@@ -102,8 +102,8 @@ public class TestS4VerifyOnlyIT
     assertThat(response.statusCode(), is(STATUS_CODE_OK));
     assertThat(response.body(), containsString(MAJOR_VALID));
     assertThat(response.body(), containsString(VERIFICATION_REPORT_NAMESPACE));
-    assertThat(response.body(), containsString("<SignedObjectIdentifier FieldName=\"MD_01\""));
-    assertThat(response.body(), containsString("<SignedObjectIdentifier FieldName=\"DO_01\""));
+    assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"MD_01\""));
+    assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"DO_01\""));
     assertThat(response.body(), not(containsString(PARAMETER_ERROR)));
     assertThat(response.body(), not(containsString(MAJOR_INVALID)));
     assertThat(response.body(), not(containsString(MAJOR_INDETERMINED)));
@@ -117,8 +117,8 @@ public class TestS4VerifyOnlyIT
     assertThat(response.statusCode(), is(STATUS_CODE_OK));
     assertThat(response.body(), containsString(MAJOR_VALID));
     assertThat(response.body(), containsString(VERIFICATION_REPORT_NAMESPACE));
-    assertThat(response.body(), containsString("<SignedObjectIdentifier FieldName=\"MD_01\""));
-    assertThat(response.body(), containsString("<SignedObjectIdentifier FieldName=\"DO_01\""));
+    assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"MD_01\""));
+    assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"DO_01\""));
     assertThat(response.body(), not(containsString(PARAMETER_ERROR)));
     assertThat(response.body(), not(containsString(MAJOR_INVALID)));
     assertThat(response.body(), not(containsString(MAJOR_INDETERMINED)));
@@ -135,7 +135,7 @@ public class TestS4VerifyOnlyIT
     assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"fileSize_V001\""));
     assertThat(response.body(), containsString("SignedObjectIdentifier FieldName=\"Hundename_V001\""));
     assertThat(response.body(),
-               containsString("<SignedObjectIdentifier XPath=\"VerifyRequest/InputDocuments/Document[@id='g']/InlineXML/credentialSection/credential[@credentialID='ER_2.16.840.1.101.3.4.2.1_V001']/evidenceRecord/asn1EvidenceRecord\"/>"));
+               containsString("SignedObjectIdentifier XPath=\"VerifyRequest/InputDocuments/Document[@id='g']/InlineXML/credentialSection/credential[@credentialID='ER_2.16.840.1.101.3.4.2.1_V001']/evidenceRecord/asn1EvidenceRecord\"/>"));
     assertThat(response.body(),
                containsString("SignedObjectIdentifier FieldName=\"HundesteuerAnmeldung_V001\""));
     assertThat(response.body(), not(containsString(PARAMETER_ERROR)));

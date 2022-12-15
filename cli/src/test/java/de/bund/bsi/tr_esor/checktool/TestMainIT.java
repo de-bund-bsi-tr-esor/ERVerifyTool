@@ -123,6 +123,7 @@ public class TestMainIT extends TestBase
   }
 
   @Test
+  @SuppressWarnings("unchecked")
   public void checksQualifiedTimestamp() throws Exception
   {
     var individualReports = verify("xaip/xaip_ok.xml",

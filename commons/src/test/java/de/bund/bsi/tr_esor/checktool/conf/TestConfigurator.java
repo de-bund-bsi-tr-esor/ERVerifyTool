@@ -35,10 +35,9 @@ import java.util.Scanner;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.UnmarshalException;
 
+import org.assertj.core.api.Assertions;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.entry.IsValidXML;
@@ -55,9 +54,6 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 @SuppressWarnings({"PMD.CommentRequired", "checkstyle:JavadocMethod"})
 public class TestConfigurator
 {
-
-  @Rule
-  public ExpectedException expected = ExpectedException.none();
 
   private Configurator sut;
 
@@ -88,8 +84,7 @@ public class TestConfigurator
   {
     try (var ins = TestConfigurator.class.getResourceAsStream("/xaip/xaip_ok_ers.xml"))
     {
-      expected.expect(UnmarshalException.class);
-      sut.load(ins);
+      Assertions.assertThatExceptionOfType(UnmarshalException.class).isThrownBy(() -> sut.load(ins));
     }
   }
 
@@ -202,10 +197,9 @@ public class TestConfigurator
                                                                "<ConfiguredObjects>" + valTag
                                                                                         + "</ConfiguredObjects>");
 
-    expected.expect(ReflectiveOperationException.class);
-    expected.expectMessage(expectedMessage);
-
-    load(sut, xml);
+    Assertions.assertThatExceptionOfType(ReflectiveOperationException.class)
+              .isThrownBy(() -> load(sut, xml))
+              .withMessageContaining(expectedMessage);
   }
 
   private static String readFile(String path) throws IOException

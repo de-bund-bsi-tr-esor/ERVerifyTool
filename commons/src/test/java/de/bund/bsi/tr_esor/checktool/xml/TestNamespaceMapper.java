@@ -37,9 +37,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
-import org.junit.Rule;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -51,10 +50,6 @@ import org.w3c.dom.Element;
  */
 public class TestNamespaceMapper
 {
-
-  /** Expected exception in test execution */
-  @Rule
-  public ExpectedException expExc = ExpectedException.none();
 
   /**
    * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
@@ -109,12 +104,12 @@ public class TestNamespaceMapper
   @Test
   public void testInvalidConfiguration() throws Exception
   {
-    expExc.expect(IllegalArgumentException.class);
-    expExc.expectMessage("Only one targetNamespace");
     Map<String, String> configuredPrefix = new HashMap<>();
     configuredPrefix.put("http://uri.etsi.org/01903/v1.3.2#", ""); // target namespace
     configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip/1.2", ""); // duplicate target namespace
-    new NamespaceMapper(configuredPrefix);
+    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+              .isThrownBy(() -> new NamespaceMapper(configuredPrefix))
+              .withMessageContaining("Only one targetNamespace");
   }
 
   private Element buildElementsWithWrongPrefix(Document doc)

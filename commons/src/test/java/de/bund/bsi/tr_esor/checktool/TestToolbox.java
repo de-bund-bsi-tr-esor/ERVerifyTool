@@ -25,9 +25,8 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 
-import org.junit.Rule;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import de.bund.bsi.tr_esor.xaip.CredentialType;
 import de.bund.bsi.tr_esor.xaip.VersionManifestType;
@@ -40,9 +39,6 @@ import de.bund.bsi.tr_esor.xaip.VersionManifestType;
  */
 public class TestToolbox extends FileOutputChecker
 {
-
-  @Rule
-  public ExpectedException expected = ExpectedException.none();
 
   /**
    * Check if version manifest id is determined correctly.
@@ -72,8 +68,9 @@ public class TestToolbox extends FileOutputChecker
   @Test
   public void testGetIdWithUnsopportedType()
   {
-    expected.expectMessage("Unsupported type java.lang.String");
-    Toolbox.getId("dummy");
+    Assertions.assertThatException()
+              .isThrownBy(() -> Toolbox.getId("dummy"))
+              .withMessageContaining("Unsupported type java.lang.String");
   }
 
   /**

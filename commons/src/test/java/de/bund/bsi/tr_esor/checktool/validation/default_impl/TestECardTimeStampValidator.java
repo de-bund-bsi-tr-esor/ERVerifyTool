@@ -45,12 +45,11 @@ import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.Verificatio
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.ws.WebServiceException;
 
+import org.assertj.core.api.Assertions;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.etsi.uri._19102.v1_2.SignatureQualityType;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 import de.bund.bsi.ecard.api._1.ECard;
 import de.bund.bsi.ecard.api._1.ECard_Service;
@@ -71,19 +70,16 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class TestECardTimeStampValidator
 {
 
-  @Rule
-  public ExpectedException exp = ExpectedException.none();
-
   /**
    * Tests for errors with illegal URL values.
    */
   @Test
   public void testInvalidURL() throws Exception
   {
-    exp.expect(IllegalArgumentException.class);
     var sut = sut("invalid");
     sut.setContext(new ErValidationContext(new Reference("dummy"), "", ""));
-    sut.validate(new Reference("dummy"), someTimeStampToken());
+    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+              .isThrownBy(() -> sut.validate(new Reference("dummy"), someTimeStampToken()));
   }
 
   /**

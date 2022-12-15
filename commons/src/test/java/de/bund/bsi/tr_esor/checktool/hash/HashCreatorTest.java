@@ -28,9 +28,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 
-import org.junit.Rule;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 
 /**
@@ -40,12 +39,6 @@ import org.junit.rules.ExpectedException;
  */
 public class HashCreatorTest
 {
-
-  /**
-   * Expected exception rule.
-   */
-  @Rule
-  public ExpectedException exp = ExpectedException.none();
 
   /**
    * Tests local hash creator with SHA-1, SHA-256 and SHA-512, with hash values calculated by OpenSSL.
@@ -77,10 +70,10 @@ public class HashCreatorTest
   @Test
   public void testUnsupportedOID() throws Exception
   {
-    exp.expect(NoSuchAlgorithmException.class);
-    exp.expectMessage("1.3.3.7.1 MessageDigest not available");
     var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
     HashCreator hashCreator = new LocalHashCreator();
-    hashCreator.calculateHash(testData, "1.3.3.7.1");
+    Assertions.assertThatExceptionOfType(NoSuchAlgorithmException.class)
+              .isThrownBy(() -> hashCreator.calculateHash(testData, "1.3.3.7.1"))
+              .withMessage("1.3.3.7.1 MessageDigest not available");
   }
 }
