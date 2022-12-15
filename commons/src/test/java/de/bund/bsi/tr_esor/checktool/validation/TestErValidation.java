@@ -89,7 +89,7 @@ public class TestErValidation
     var report = validate(params);
     assertThat(report.getIndividualReport(), hasSize(1));
     var result = report.getIndividualReport().get(0).getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     assertThat(result.getResultMessage().getValue(),
                is("atss/0: no protected data to check\natss/0/0/tsp: no online validation of time stamp done"));
   }
@@ -121,7 +121,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     assertThat(result.getResultMinor(), endsWith("#parameterError"));
     assertThat(result.getResultMessage().getValue(), is("unsupported profile: foo"));
   }
@@ -141,7 +141,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     assertThat(result.getResultMessage().getValue(),
                containsString("Cannot read LXAIP's data object (id: HundesteuerAnmeldung_V001) from file"));
     assertThat(result.getResultMinor(), containsString("parameterError"));
@@ -162,7 +162,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMessage().getValue(),
                containsString("The calculated digest value of the LXAIP data object (id: HundesteuerAnmeldung_V001) does not match the embedded digest"));
     assertThat(result.getResultMinor(), containsString("hashValueMismatch"));
@@ -183,7 +183,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     var erValidity = getErValidity(report.getIndividualReport().get(0));
     var chain = erValidity.getArchiveTimeStampSequence().getArchiveTimeStampChain();
     assertThat(chain, hasSize(1));
@@ -206,7 +206,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     var erValidity = getErValidity(report.getIndividualReport().get(0));
     assertThat(erValidity.getArchiveTimeStampSequence().getArchiveTimeStampChain(), hasSize(2));
   }
@@ -230,7 +230,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMessage().getValue(),
                allOf(containsString("Missing digest"),
                      containsString("metaDataID:Hundename_V001"),
@@ -268,7 +268,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMessage().getValue(),
                allOf(containsString("additional protected hash values"),
                      containsString("Additional hashes:[814d78962b0f8ac2bd63daf9f013ed0c07fe67fbfbfbc152b30a476304a0535d, b976eab293a608a09b13accf570b4fa227ffaf3a10d306ae378248466d057fe3]"),
@@ -292,7 +292,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
   }
 
   /**
@@ -311,7 +311,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMessage().getValue(),
                allOf(containsString("Cannot find the secured data version referenced by the evidence record:"),
                      containsString("The requested version V003 could not be found in the XAIP."),
@@ -336,7 +336,7 @@ public class TestErValidation
     assertThat(erReports, hasSize(2));
     for ( var indivRep : erReports )
     {
-      assertThat(indivRep.getResult().getResultMajor(), endsWith(":indetermined"));
+      assertThat(indivRep.getResult().getResultMajor(), endsWith(":InsufficientInformation"));
     }
   }
 
@@ -365,7 +365,7 @@ public class TestErValidation
                        .findAny()
                        .get()
                        .getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMinor(), containsString("parameterError"));
     assertThat(result.getResultMessage().getValue(),
                containsString("There is more than one VersionManifest in the Xaip. The EvidenceRecord needs to specify which version it relates to."));
@@ -387,7 +387,7 @@ public class TestErValidation
     var report = validate(params);
     for ( var indivRep : report.getIndividualReport() )
     {
-      assertThat(indivRep.getResult().getResultMajor(), endsWith(":indetermined"));
+      assertThat(indivRep.getResult().getResultMajor(), endsWith(":InsufficientInformation"));
     }
   }
 
@@ -418,7 +418,7 @@ public class TestErValidation
                        .findAny()
                        .get()
                        .getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMinor(), containsString("parameterError"));
     assertThat(result.getResultMessage().getValue(),
                containsString("An EvidenceRecord can only refer to one VersionManifest."));
@@ -438,7 +438,7 @@ public class TestErValidation
     erCred.getRelatedObjects().add(params.getXaip().getDataObjectsSection().getDataObject().get(0));
     var report = validate(params);
     var result = report.getIndividualReport().get(0).getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMinor(), containsString("parameterError"));
     assertThat(result.getResultMessage().getValue(),
                containsString("None of the relatedObjects of the given EvidenceRecord are referring to a VersionManifest"));
@@ -468,7 +468,7 @@ public class TestErValidation
     assertThat(erReports, hasSize(1));
     for ( var indivRep : erReports )
     {
-      assertThat(indivRep.getResult().getResultMajor(), endsWith(":indetermined"));
+      assertThat(indivRep.getResult().getResultMajor(), endsWith(":InsufficientInformation"));
     }
   }
 
@@ -498,7 +498,7 @@ public class TestErValidation
                     .findAny()
                     .get()
                     .getResult();
-    assertThat(result.getResultMajor(), endsWith(":invalid"));
+    assertThat(result.getResultMajor(), endsWith(":RequesterError"));
     assertThat(result.getResultMinor(), containsString("parameterError"));
     assertThat(result.getResultMessage().getValue(),
                containsString("Version ID for EvidenceRecord and relatedObjects reference in enveloping credential do not match"));
@@ -520,7 +520,7 @@ public class TestErValidation
                          .findAny()
                          .get();
     var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
   }
 
   private VerificationReportType validate(ParameterFinder params)

@@ -100,4 +100,22 @@ public final class VerificationResultCreator
     }
     return result;
   }
+
+  /**
+   * Returns a result with specified codes and message.
+   */
+  public static Result createECardResult(String major, String minor, String message)
+  {
+    var result = XmlHelper.FACTORY_DSS.createResult();
+    result.setResultMajor(major);
+    result.setResultMinor(minor);
+    if (message != null)
+    {
+      var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
+      is.setLang("en");
+      is.setValue(message);
+      result.setResultMessage(is);
+    }
+    return result;
+  }
 }

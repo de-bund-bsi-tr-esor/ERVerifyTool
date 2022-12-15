@@ -76,15 +76,14 @@ public class TestECardResponseUtil
    * Assures that a warning which indicates no check could be executed is understood
    */
   @Test
-  public void erorsOnECardWarning()
+  public void indeterminedOnECardWarning()
   {
     ResponseBaseType response = buildResponse(ECardResultMajor.WARNING,
-                                              ECardResultMinor.SIGNATURE_ALGORITHM_NOT_SUPPORTED,
+                                              ECardResultMinor.PARAMETER_ERROR,
                                               null,
                                               null);
-    assertFalse("Signature algorithm not supported is detected technical error.",
-                ECardResponseUtil.isAcceptableECardResult(response));
-    assertFalse("Signature algorithm not supported is not detected as no signature found.",
+    assertTrue("ParameterError warning is accepted", ECardResponseUtil.isAcceptableECardResult(response));
+    assertFalse("ParameterError is not detected as no signature found.",
                 ECardResponseUtil.isNoSignatureFound(response));
   }
 

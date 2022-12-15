@@ -12,7 +12,7 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
  * @author HMH
  * @author ETR
  */
-final class ECardResultMinor
+public final class ECardResultMinor
 {
 
   /**

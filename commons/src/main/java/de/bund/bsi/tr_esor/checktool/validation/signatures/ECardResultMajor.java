@@ -7,7 +7,7 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
  *
  * @author ETR
  */
-final class ECardResultMajor
+public final class ECardResultMajor
 {
 
   /**

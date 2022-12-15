@@ -117,7 +117,7 @@ public class ReportPart
   {
     var result = new ReportPart(ref);
     result.detailsPresent = false;
-    result.major = ValidationResultMajor.INDETERMINED;
+    result.major = ValidationResultMajor.INVALID;
     result.minor = BsiResultMinor.INVALID_FORMAT.getUri();
     result.message = "illegal or unsupported data format";
     return result;

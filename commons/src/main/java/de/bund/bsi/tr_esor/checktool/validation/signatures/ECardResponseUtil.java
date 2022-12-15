@@ -10,12 +10,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 
+
 /**
  * Utility methods to handle responses provided by an eCard-Service.
  *
  * @author ETR
  */
-final class ECardResponseUtil
+public final class ECardResponseUtil
 {
 
   private static final Logger LOG = LoggerFactory.getLogger(ECardResponseUtil.class);
@@ -95,6 +96,12 @@ final class ECardResponseUtil
       LOG.error("Received non-ok result major {} from eCard service, but no ResultMinor was received.",
                 resultMajor);
       return false;
+    }
+
+    // A warning should always have a report attached.
+    if (ECardResultMajor.WARNING.equals(resultMajor))
+    {
+      return true;
     }
 
     switch (resultMinor)

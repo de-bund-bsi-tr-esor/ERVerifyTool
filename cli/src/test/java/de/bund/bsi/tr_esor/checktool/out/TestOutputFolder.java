@@ -26,9 +26,8 @@ import static org.hamcrest.io.FileMatchers.anExistingDirectory;
 
 import java.io.IOException;
 
-import org.junit.Rule;
+import org.assertj.core.api.Assertions;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 
 /**
@@ -38,12 +37,6 @@ import org.junit.rules.ExpectedException;
  */
 public class TestOutputFolder extends FileOutputChecker
 {
-
-  /**
-   * How JUnit checks exception cases.
-   */
-  @Rule
-  public ExpectedException expected = ExpectedException.none();
 
   /**
    * Check if aoid folder is created correctly.
@@ -107,8 +100,9 @@ public class TestOutputFolder extends FileOutputChecker
   @Test
   public void testCreateAoidSubFolderWithoutAoidFolder() throws IOException
   {
-    expected.expectMessage("aoid folder must be created before");
-    new OutputFolder(destination).createAoidSubFolder("awesome sub.folder");
+    Assertions.assertThatExceptionOfType(IOException.class)
+              .isThrownBy(() -> new OutputFolder(destination).createAoidSubFolder("awesome sub.folder"))
+              .withMessage("aoid folder must be created before");
   }
 
   /**

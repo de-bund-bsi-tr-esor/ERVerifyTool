@@ -373,7 +373,14 @@ public abstract class BaseECardSignatureValidator<T, C extends ValidationContext
 
   private static ValidationResultMajor verificationResultMajor(ResponseBaseType response)
   {
-    return response.getResult().getResultMajor().equals(ECardResultMajor.ERROR)
-      ? ValidationResultMajor.INVALID : ValidationResultMajor.VALID;
+    if (ECardResultMajor.OK.equals(response.getResult().getResultMajor()))
+    {
+      return ValidationResultMajor.VALID;
+    }
+    if (ECardResultMajor.ERROR.equals(response.getResult().getResultMajor()))
+    {
+      return ValidationResultMajor.INVALID;
+    }
+    return ValidationResultMajor.INDETERMINED;
   }
 }

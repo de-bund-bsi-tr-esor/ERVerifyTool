@@ -45,7 +45,8 @@ import jakarta.xml.bind.JAXBException;
 import org.junit.Before;
 import org.junit.Test;
 
-import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMinor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType;
 
@@ -78,12 +79,12 @@ public class TestMainIT extends TestBase
                                    "Hundename_V002",
                                    "Impfausweissignature_V001");
 
-    SignatureValidationTestHelper.assertValidResult(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001")
-                                                                     .getResult());
-    SignatureValidationTestHelper.assertValidResult(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V002")
-                                                                     .getResult());
+    SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001")
+                                                                      .getResult());
+    SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V002")
+                                                                      .getResult());
     SignatureValidationTestHelper.assertResult(individualReports.get("Impfausweissignature_V001").getResult(),
-                                               ValidationResultMajor.VALID.toString(),
+                                               OasisDssResultMajor.SUCCESS.toString(),
                                                SignatureValidationTestHelper.ON_ALL_DOCUMENTS);
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("HundesteuerAnmeldung_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("Hundename_V001"));
@@ -99,8 +100,8 @@ public class TestMainIT extends TestBase
                                    "command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.3_V001",
                                    "data_V001");
 
-    SignatureValidationTestHelper.assertValidResult(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.3_V001")
-                                                                     .getResult());
+    SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.3_V001")
+                                                                      .getResult());
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("data_V001"));
   }
 
@@ -116,8 +117,8 @@ public class TestMainIT extends TestBase
                                    "fileSize_V001");
     var erReport = individualReports.get("command line parameter er");
     SignatureValidationTestHelper.assertResult(erReport.getResult(),
-                                               "urn:oasis:names:tc:dss:1.0:detail:invalid",
-                                               "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError",
+                                               OasisDssResultMajor.REQUESTER_ERROR.toString(),
+                                               SignatureValidationTestHelper.PARAMETER_ERROR,
                                                "atss/0/0/tsp: A checked timestamp should be qualified, but the quality of the timestamp was determined as: https://www.governikus.de/val-uri/timestamp-level-types/DTST");
   }
 
@@ -132,7 +133,7 @@ public class TestMainIT extends TestBase
                                    "HundesteuerAnmeldung_V001",
                                    "fileSize_V001");
     var erReport = individualReports.get("command line parameter er");
-    SignatureValidationTestHelper.assertValidResult(erReport.getResult());
+    SignatureValidationTestHelper.assertMajorSuccess(erReport.getResult());
     var evidenceRecordValidityType = ((JAXBElement<EvidenceRecordValidityType>)erReport.getDetails()
                                                                                        .getAny()
                                                                                        .get(0)).getValue();
@@ -156,7 +157,8 @@ public class TestMainIT extends TestBase
     var individualReports = verify("xaip/signature/xaip_ok_sig.xml", true, "DO-02", "detachedSignature");
 
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-02"));
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("detachedSignature"));
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("detachedSignature"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.toString());
 
     assertFileExistsAndContains("xaip_ok_sig/detachedSignature/DO_01.bin", "compliance test data");
     assertFileExistsAndContains("xaip_ok_sig/DO_01/DO_01.bin", "compliance test data");
@@ -164,6 +166,9 @@ public class TestMainIT extends TestBase
     assertFileExistsAndContains("xaip_ok_sig/detachedSignature/signature.dat");
   }
 
+  /**
+   * FIXME exchange Test Data for valid result
+   */
   @Test
   public void signatureInMeta() throws Exception
   {
@@ -172,7 +177,8 @@ public class TestMainIT extends TestBase
                                    "DO_01",
                                    "detachedSignature");
 
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("detachedSignature"));
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("detachedSignature"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.toString());
 
     assertFileExistsAndContains("singed_det_meta/detachedSignature/MD_01.xml", "compliance test data");
     assertFileExistsAndContains("singed_det_meta/DO_01/DO_01.bin", "content");
@@ -184,10 +190,13 @@ public class TestMainIT extends TestBase
   {
     var individualReports = verify("xaip/signature/xaip_ok_meta_env_sig.xml", false, "DO_01", "MD_01");
 
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("MD_01"));
+    SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("MD_01"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO_01"));
   }
 
+  /**
+   * FIXME Exchange test data for valid result
+   */
   @Test
   public void lxaipWithCredential() throws Exception
   {
@@ -199,7 +208,8 @@ public class TestMainIT extends TestBase
                                    "Hundename_V001",
                                    "fileSize_V001");
 
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("Impfausweissignature_V001"));
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("Impfausweissignature_V001"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("HundesteuerAnmeldung_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("Hundename_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("fileSize_V001"));
@@ -215,9 +225,9 @@ public class TestMainIT extends TestBase
                                    "CT_V001",
                                    "command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001");
 
-    SignatureValidationTestHelper.assertValidResult(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001")
-                                                                     .getResult());
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("CT_V001"));
+    SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001")
+                                                                      .getResult());
+    SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CT_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("MDO_V001"));
   }
 
@@ -232,8 +242,8 @@ public class TestMainIT extends TestBase
                                    "fileSize_V001",
                                    "/evidenceRecord/asn1EvidenceRecord");
 
-    SignatureValidationTestHelper.assertValidResult(individualReports.get("/evidenceRecord/asn1EvidenceRecord")
-                                                                     .getResult());
+    SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("/evidenceRecord/asn1EvidenceRecord")
+                                                                      .getResult());
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("Hundename_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("HundesteuerAnmeldung_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("fileSize_V001"));
@@ -257,7 +267,7 @@ public class TestMainIT extends TestBase
   {
     var individualReports = verify("lxaip/lxaip_ok_meta_env_sig.xml", null, "custom", "MD_01", "DO_01");
 
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("MD_01"));
+    SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("MD_01"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO_01"));
   }
 
@@ -266,7 +276,7 @@ public class TestMainIT extends TestBase
   {
     var individualReports = verify("lxaip/lxaip_ok_env_sig.xml", null, "custom", "MD_01", "DO_01");
 
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("DO_01"));
+    SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("DO_01"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("MD_01"));
   }
 
@@ -281,18 +291,24 @@ public class TestMainIT extends TestBase
                                    "fileSize_V001",
                                    "command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001");
 
-    SignatureValidationTestHelper.assertValidResult(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001")
-                                                                     .getResult());
+    SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("command line parameter data/evidenceRecord:ER_2.16.840.1.101.3.4.2.1_V001")
+                                                                      .getResult());
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("HundesteuerAnmeldung_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("Hundename_V001"));
   }
 
+  /**
+   * FIXME Exchange test data for valid result
+   */
   @Test
   public void validateDoubleDetachedSignature() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_xades_det_double.xml", true, "CR-01", "CR-01 (2)");
 
-    SignatureValidationTestHelper.assertValidResultsInAllIndividualReports(individualReports);
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01 (2)"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
 
     assertFileExistsAndContains("xaip_ok_xades_det_double/DO_01/DO_01.bin");
     assertFileExistsAndContains("xaip_ok_xades_det_double/CR_01/DO_01.bin");
@@ -314,10 +330,10 @@ public class TestMainIT extends TestBase
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-02"));
     var reportDetachedSignature = individualReports.get("detachedSignature");
     SignatureValidationTestHelper.assertResult(reportDetachedSignature.getResult(),
-                                               ValidationResultMajor.INVALID.toString(),
+                                               OasisDssResultMajor.REQUESTER_ERROR.toString(),
                                                SignatureValidationTestHelper.INCORRECT_SIGNATURE);
     var detailedSignatureReport = SignatureValidationTestHelper.assertContainsDetailedSignatureReportType(reportDetachedSignature);
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getFormatOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getFormatOK());
     SignatureValidationTestHelper.assertInvalidSigMathResult(detailedSignatureReport.getSignatureOK()
                                                                                     .getSigMathOK());
 
@@ -338,11 +354,13 @@ public class TestMainIT extends TestBase
     var individualReports = verify("xaip/signature/xaip_nok_xmlsig.xml", true, "detachedSignature");
 
     var reportDetachedSignature = individualReports.get("detachedSignature");
-    SignatureValidationTestHelper.assertResult(reportDetachedSignature.getResult(),
-                                               ValidationResultMajor.INVALID.toString(),
-                                               SignatureValidationTestHelper.INCORRECT_SIGNATURE);
+    var result = reportDetachedSignature.getResult();
+    assertThat(result.getResultMajor()).isEqualTo(OasisDssResultMajor.RESPONDER_ERROR.toString());
+    assertThat(result.getResultMinor()).satisfiesAnyOf(x -> assertThat(x).isEqualTo(OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri()),
+                                                       x -> assertThat(x).isEqualTo(OasisDssResultMinor.SUCCESS_INVALID_SIGNATURE.getUri()));
+
     var detailedSignatureReport = SignatureValidationTestHelper.assertContainsDetailedSignatureReportType(reportDetachedSignature);
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getFormatOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getFormatOK());
     SignatureValidationTestHelper.assertInvalidSigMathResult(detailedSignatureReport.getSignatureOK()
                                                                                     .getSigMathOK());
 
@@ -363,11 +381,11 @@ public class TestMainIT extends TestBase
     // (im XSV gab wird derselbe Fehler angezeigt aber im Test nicht darauf geprüft)
     var individualReport = individualReports.get("detachedSignature");
     SignatureValidationTestHelper.assertResult(individualReport.getResult(),
-                                               ValidationResultMajor.INVALID.toString(),
+                                               OasisDssResultMajor.RESPONDER_ERROR.toString(),
                                                SignatureValidationTestHelper.GENERAL_ERROR);
     var detailedSignatureReport = SignatureValidationTestHelper.assertContainsDetailedSignatureReportType(individualReport);
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getFormatOK());
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getSignatureOK().getSigMathOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getFormatOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getSignatureOK().getSigMathOK());
     var pathValiditySummary = detailedSignatureReport.getCertificatePathValidity().getPathValiditySummary();
     assertThat(pathValiditySummary.getResultMajor()).isEqualTo("urn:oasis:names:tc:dss:1.0:detail:indetermined");
     assertThat(pathValiditySummary.getResultMinor()).isEqualTo("GENERIC");
@@ -385,7 +403,9 @@ public class TestMainIT extends TestBase
   public void validateXmlSig() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_xmlsig_xmldata.xml", true, "CR-01");
-    SignatureValidationTestHelper.assertValidResultsInAllIndividualReports(individualReports);
+    var cr01Report = individualReports.get("CR-01");
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(cr01Report,
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.toString());
 
     assertFileExistsAndContains("xaip_ok_xmlsig_xmldata/DO_01/DO_01.xml",
                                 "<ns1:Zusammenfassung>1234567890ßqwertzuiopü +#äölkjhgfdsa yxcvbnm,.-</ns1:Zusammenfassung>");
@@ -396,13 +416,15 @@ public class TestMainIT extends TestBase
 
   /**
    * Assert that a XAIP containing a plain XAdES signature embedded as XML and binary signed data (which is
-   * XML, but not canonicalized) can be validated successfully.
+   * XML, but not canonicalized) can be validated successfully. FIXME exchange test data for valid result
    */
   @Test
   public void validateXaipOkXadesDetXmlSingle() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_xades_det_xml_single.xml", true, "CR-01");
-    SignatureValidationTestHelper.assertValidResultsInAllIndividualReports(individualReports);
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+
 
     assertFileExistsAndContains("xaip_ok_xades_det_xml_single/DO_01/DO_01.bin",
                                 "<ns1:Zusammenfassung>1234567890ßqwertzuiopü +#äölkjhgfdsa yxcvbnm,.-</ns1:Zusammenfassung>");
@@ -412,21 +434,28 @@ public class TestMainIT extends TestBase
   }
 
   /**
-   * Ensures XAdES enveloping are validated
+   * Ensures XAdES enveloping are validated FIXME exchange test data for valid result
    */
   @Test
   public void validatesEnvelopingXmlSig() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_xmlsig_enveloping.xml", false, "CR-01");
-    SignatureValidationTestHelper.assertValidResultsInAllIndividualReports(individualReports);
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
   }
 
+  /**
+   * FIXME exchange test data for valid result
+   */
   @Test
   public void validatesTwoCadesSigs() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_pdf_two_sigs.xml", false, "CR-01", "CR-01 (2)");
 
-    SignatureValidationTestHelper.assertValidResultsInAllIndividualReports(individualReports);
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01 (2)"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
   }
 
   /**
@@ -453,10 +482,10 @@ public class TestMainIT extends TestBase
     var individualReport = individualReports.get("CR-01");
     var individualReportResult = individualReport.getResult();
     SignatureValidationTestHelper.assertResult(individualReportResult,
-                                               ValidationResultMajor.INVALID.toString(),
+                                               OasisDssResultMajor.REQUESTER_ERROR.toString(),
                                                SignatureValidationTestHelper.INCORRECT_SIGNATURE);
     var detailedSignatureReport = SignatureValidationTestHelper.assertContainsDetailedSignatureReportType(individualReport);
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getFormatOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getFormatOK());
     SignatureValidationTestHelper.assertInvalidSigMathResult(detailedSignatureReport.getSignatureOK()
                                                                                     .getSigMathOK());
 
@@ -464,53 +493,62 @@ public class TestMainIT extends TestBase
   }
 
   /**
-   * Validates a signature that was generated over canonicalized XML metadata.
+   * Validates a signature that was generated over canonicalized XML metadata. FIXME exchange test data for
+   * valid result
    */
   @Test
   public void validateValidCAdESMetadata() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_xmlmeta_cades.xml", true, "DO-01", "CR-01");
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-01"));
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("CR-01"));
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
 
     assertFileExistsAndContains("xaip_ok_xmlmeta_cades/CR_01/MDO_01.xml", "uri:bsi.bund.de.tr03125.test.cr");
   }
 
   /**
-   * Validates a XAdES signature that was generated over canonicalized XML metadata.
+   * Validates a XAdES signature that was generated over canonicalized XML metadata. FIXME exchange test data
+   * for valid result
    */
   @Test
   public void validateValidXAdESMetadata() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_xmlmeta_xades.xml", true, "DO-01", "CR-01");
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-01"));
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("CR-01"));
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
 
     assertFileExistsAndContains("xaip_ok_xmlmeta_xades/CR_01/MDO_01.xml", "uri:bsi.bund.de.tr03125.test.cr");
   }
 
   /**
-   * Validates a CAdES signature that was generated over simple text metadata content (no tags).
+   * Validates a CAdES signature that was generated over simple text metadata content (no tags). <br>
+   * FIXME exchange test data for valid result
    */
   @Test
   public void validateValidTextMetadata() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_textmeta_cades.xml", true, "DO-01", "CR-01");
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-01"));
-    SignatureValidationTestHelper.assertValidResultsInIndividualReport(individualReports.get("CR-01"));
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
 
     assertFileExistsAndContains("xaip_ok_textmeta_cades/CR_01/MDO_01.xml", "metadata_content");
   }
 
   /**
    * Reads an XAIP containing an XML signature as binary. Thus, there are no embedding problems and it should
-   * be checked as valid.
+   * be checked as valid. FIXME exchange test data for valid result
    */
   @Test
   public void validatePdfSig() throws Exception
   {
     var individualReports = verify("xaip/signature/xaip_ok_pdfsig.xml", true, "DO-01", "DO-01 (2)");
-    SignatureValidationTestHelper.assertValidResultsInAllIndividualReports(individualReports);
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("DO-01"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("DO-01 (2)"),
+                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
 
     assertFileExistsAndContains("xaip_ok_pdfsig/DO_01/DO_01.bin");
   }
@@ -526,11 +564,11 @@ public class TestMainIT extends TestBase
 
     var individualReport = individualReports.get("CR-01");
     SignatureValidationTestHelper.assertResult(individualReport.getResult(),
-                                               ValidationResultMajor.VALID.toString(),
+                                               OasisDssResultMajor.SUCCESS.toString(),
                                                SignatureValidationTestHelper.ON_ALL_DOCUMENTS);
     var detailedSignatureReport = SignatureValidationTestHelper.assertContainsTimeStampValidityType(individualReport);
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getFormatOK());
-    SignatureValidationTestHelper.assertValidResult(detailedSignatureReport.getSignatureOK().getSigMathOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getFormatOK());
+    SignatureValidationTestHelper.assertMajorSuccess(detailedSignatureReport.getSignatureOK().getSigMathOK());
 
     assertFileExistsAndContains("xaip_ok_tsp/CR_01/DO_01.bin");
   }
@@ -546,10 +584,10 @@ public class TestMainIT extends TestBase
 
     var individualReport = individualReports.get("CR-01");
     SignatureValidationTestHelper.assertResult(individualReport.getResult(),
-                                               ValidationResultMajor.INVALID.toString(),
+                                               OasisDssResultMajor.REQUESTER_ERROR.toString(),
                                                SignatureValidationTestHelper.INCORRECT_SIGNATURE);
     var timeStampReport = SignatureValidationTestHelper.assertContainsTimeStampValidityType(individualReport);
-    SignatureValidationTestHelper.assertValidResult(timeStampReport.getFormatOK());
+    SignatureValidationTestHelper.assertMajorSuccess(timeStampReport.getFormatOK());
     SignatureValidationTestHelper.assertInvalidSigMathResult(timeStampReport.getSignatureOK().getSigMathOK());
 
     assertFileExistsAndContains("xaip_nok_tsp/CR_01/DO_01.bin");

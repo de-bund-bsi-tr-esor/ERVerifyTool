@@ -22,7 +22,11 @@
 package de.bund.bsi.tr_esor.checktool.entry;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
+import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
 import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
@@ -56,10 +60,11 @@ import de.bund.bsi.tr_esor.api._1.RetrieveInfoRequest;
 import de.bund.bsi.tr_esor.api._1.RetrieveInfoResponse;
 import de.bund.bsi.tr_esor.api._1.S4;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
-import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationScheduler;
 import de.bund.bsi.tr_esor.checktool.validation.VerificationResultCreator;
 import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardResultMinor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
@@ -74,7 +79,7 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class S4VerifyOnly implements S4
 {
 
-  private static final String OPERATION_NOT_SUPPORTED_MSG = "only archiveVerify operation is supported by this tool";
+  private static final String OPERATION_NOT_SUPPORTED_MSG = "only verify operation is supported by this tool";
 
   private static final Logger LOG = LoggerFactory.getLogger(S4VerifyOnly.class);
 
@@ -198,27 +203,83 @@ public class S4VerifyOnly implements S4
   {
     if (resp.getResult() == null)
     {
-      resp.setResult(VerificationResultCreator.createDssResult(OasisDssResultMajor.SUCCESS, null, null));
+      resp.setResult(VerificationResultCreator.createECardResult(ECardResultMajor.OK, null, null));
     }
 
-    var vrm = ValidationResultMajor.forValue(resp.getResult().getResultMajor());
+    var allOasisMajors = allResultMajors(report);
 
-    for ( var irt : report.getIndividualReport() )
+    if (allOasisMajors.stream().allMatch(OasisDssResultMajor.SUCCESS::equals))
     {
-      var newValue = ValidationResultMajor.forValue(irt.getResult().getResultMajor()).worse(vrm);
-      if (!newValue.equals(vrm))
-      {
-        resp.setResult(irt.getResult());
-        vrm = newValue;
-      }
+      resp.getResult().setResultMajor(ECardResultMajor.OK);
+    }
+    else if (allOasisMajors.stream().anyMatch(OasisDssResultMajor.REQUESTER_ERROR::equals))
+    {
+      resp.getResult().setResultMajor(ECardResultMajor.ERROR);
+      resp.getResult()
+          .setResultMinor(extractFirstResultMinorForMajor(report, OasisDssResultMajor.REQUESTER_ERROR));
+    }
+    else if (allOasisMajors.stream().anyMatch(OasisDssResultMajor.RESPONDER_ERROR::equals))
+    {
+      resp.getResult().setResultMajor(ECardResultMajor.ERROR);
+      resp.getResult()
+          .setResultMinor(extractFirstResultMinorForMajor(report, OasisDssResultMajor.RESPONDER_ERROR));
+    }
+    else
+    {
+      resp.getResult().setResultMajor(ECardResultMajor.WARNING);
+      resp.getResult()
+          .setResultMinor(extractFirstResultMinorForMajor(report,
+                                                          OasisDssResultMajor.INSUFFICIENT_INFORMATION));
+    }
+
+    resp.getResult().setResultMessage(collectResultString(report));
+  }
+
+  private InternationalStringType collectResultString(VerificationReportType report)
+  {
+    var allMessages = report.getIndividualReport()
+                            .stream()
+                            .map(irt -> irt.getResult().getResultMessage())
+                            .filter(Objects::nonNull)
+                            .map(ist -> ist.getValue())
+                            .collect(Collectors.toList());
+    var internationalString = new InternationalStringType();
+    internationalString.setLang("en");
+    internationalString.setValue(String.join("|", allMessages));
+    return internationalString;
+  }
+
+  private List<OasisDssResultMajor> allResultMajors(VerificationReportType report)
+  {
+    return report.getIndividualReport()
+                 .stream()
+                 .map(irt -> OasisDssResultMajor.fromURI(irt.getResult().getResultMajor()))
+                 .collect(Collectors.toList());
+  }
+
+  private String extractFirstResultMinorForMajor(VerificationReportType report,
+                                                 OasisDssResultMajor resultMajor)
+  {
+    var cause = report.getIndividualReport()
+                      .stream()
+                      .filter(irt -> resultMajor.toString().equals(irt.getResult().getResultMajor()))
+                      .findFirst();
+    if (cause.isPresent())
+    {
+      return cause.get().getResult().getResultMinor();
+    }
+    else
+    {
+      return ECardResultMinor.INTERNAL_ERROR;
     }
   }
 
   private void makeInternalError(ResponseBaseType resp, String msg, Exception e)
   {
     LOG.error(msg, e);
-    resp.setResult(VerificationResultCreator.createDssResult(OasisDssResultMajor.REQUESTER_ERROR,
-                                                             "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError",
-                                                             msg + (e == null ? "" : ": " + e.getMessage())));
+    resp.setResult(VerificationResultCreator.createECardResult(ECardResultMajor.ERROR,
+                                                               "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError",
+                                                               msg + (e == null ? ""
+                                                                 : ": " + e.getMessage())));
   }
 }

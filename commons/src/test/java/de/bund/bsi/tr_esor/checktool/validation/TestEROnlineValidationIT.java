@@ -113,7 +113,7 @@ public class TestEROnlineValidationIT
 
     var report = validate(fileParams);
     var result = report.getIndividualReport().get(0).getResult();
-    assertThat(result.getResultMajor(), endsWith(":indetermined"));
+    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     assertThat(result.getResultMessage().getValue(),
                allOf(containsString("atss/0: no protected data to check"),
                      containsString("detached_content_file_missing")));
@@ -134,7 +134,7 @@ public class TestEROnlineValidationIT
                                .findAny()
                                .get();
     var result = evidenceReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":valid"));
+    assertThat(result.getResultMajor(), endsWith(":Success"));
     assertThat(result.getResultMessage(), nullValue());
   }
 

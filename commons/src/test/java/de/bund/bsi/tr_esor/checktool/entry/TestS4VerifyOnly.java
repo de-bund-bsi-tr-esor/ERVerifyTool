@@ -65,6 +65,8 @@ import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
 import de.bund.bsi.tr_esor.checktool.parser.EvidenceRecordTypeParser;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardResultMajor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
@@ -107,9 +109,9 @@ public class TestS4VerifyOnly
     var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.NO_DETAILS);
       addXaip(r, "xaip_ok_ers.xml");
-    }, "indetermined");
+    }, ECardResultMajor.WARNING);
     var xPath = "VerifyRequest/InputDocuments/Document[1]/InlineXML/credentialSection/credential[@credentialID='ER_2.16.840.1.101.3.4.2.1_V001']/evidenceRecord/asn1EvidenceRecord";
-    checkReportFor(report, xPath, "indetermined", false);
+    checkReportFor(report, xPath, OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri(), false);
   }
 
   /**
@@ -123,7 +125,7 @@ public class TestS4VerifyOnly
   {
     var verificationReport = callVerify(r -> {
       addXaip(r, "xaip_ok_ers.xml");
-    }, "indetermined");
+    }, ECardResultMajor.WARNING);
     assertThat("VerificationReport exists", verificationReport, is(nullValue()));
   }
 
@@ -139,8 +141,8 @@ public class TestS4VerifyOnly
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       addXaip(r, "xaip_ok.xml");
       setBase64SignatureObject("/xaip/xaip_ok.ers.b64", r);
-    }, "indetermined");
-    checkReportForBase64Signature(report, "indetermined", false);
+    }, ECardResultMajor.WARNING);
+    checkReportForBase64Signature(report, OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri(), false);
   }
 
   /**
@@ -152,7 +154,7 @@ public class TestS4VerifyOnly
     var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       addBase64Xml(r, "xaip_ok_ers_namespace.xml");
-    }, "indetermined");
+    }, ECardResultMajor.WARNING);
     assertThat(report.getIndividualReport(), hasSize(4));
   }
 
@@ -168,7 +170,7 @@ public class TestS4VerifyOnly
     var report = callVerify(r -> {
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       addXaip(r, "xaip_ok_ers_namespace.xml");
-    }, "indetermined");
+    }, ECardResultMajor.WARNING);
     TestUtils.loadDefaultConfig();
   }
 
@@ -184,8 +186,11 @@ public class TestS4VerifyOnly
       addReturnVR(r, null, ReportDetailLevel.ALL_DETAILS);
       addXaip(r, "xaip_ok.xml");
       setXmlSignatureObject("/xaip/xaip_ok.er.xml", r);
-    }, "indetermined");
-    checkReportFor(report, "SignatureObject/Other/evidenceRecord/asn1EvidenceRecord", "indetermined", true);
+    }, ECardResultMajor.WARNING);
+    checkReportFor(report,
+                   "SignatureObject/Other/evidenceRecord/asn1EvidenceRecord",
+                   OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri(),
+                   true);
   }
 
   /**
@@ -202,12 +207,12 @@ public class TestS4VerifyOnly
     var xaipErs = (Element)request.getSignatureObject().getOther().getAny().get(0);
     xaipErs.setAttribute("VersionID", "V003");
     var resp = new S4VerifyOnly().verify(request);
-    assertThat(resp.getResult().getResultMajor(), is("urn:oasis:names:tc:dss:1.0:detail:invalid"));
+    assertThat(resp.getResult().getResultMajor(), is(ECardResultMajor.ERROR));
     assertThat(resp.getResult().getResultMessage().getValue(),
                is("Given XAIP does not contain version V003 addressed in xaip:evidenceRecord."));
     xaipErs.setAttribute("AOID", "wrongAOID");
     resp = new S4VerifyOnly().verify(request);
-    assertThat(resp.getResult().getResultMajor(), is("urn:oasis:names:tc:dss:1.0:detail:invalid"));
+    assertThat(resp.getResult().getResultMajor(), is(ECardResultMajor.ERROR));
     assertThat(resp.getResult().getResultMessage().getValue(),
                is("Given XAIP does not match AOID wrongAOID addressed in xaip:evidenceRecord."));
   }
@@ -222,10 +227,15 @@ public class TestS4VerifyOnly
   @Test
   public void verifyErForEncapsulatedCms() throws Exception
   {
-    checkForBinaryData("/cms/encapsulated_with_er.p7s.b64", null, "indetermined", "CmsSignature");
+    checkForBinaryData("/cms/encapsulated_with_er.p7s.b64",
+                       null,
+                       ECardResultMajor.WARNING,
+                       OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri(),
+                       "CmsSignature");
     checkForBinaryData("/cms/encapsulated_with_er.p7s.b64",
                        "/cms/TestDataLogo.png.b64",
-                       "invalid",
+                       ECardResultMajor.ERROR,
+                       OasisDssResultMajor.REQUESTER_ERROR.getUri(),
                        "CmsSignature");
   }
 
@@ -240,12 +250,14 @@ public class TestS4VerifyOnly
   {
     checkForBinaryData("/cms/TestDataLogo.png_er.p7s.b64",
                        "/cms/TestDataLogo.png.b64",
-                       "indetermined",
+                       ECardResultMajor.WARNING,
+                       OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri(),
                        "CmsSignature");
     // now with some data file not containing signed data
     checkForBinaryData("/cms/TestDataLogo.png_er.p7s.b64",
                        "/cms/TestDataLogo.png_er.p7s.b64",
-                       "invalid",
+                       ECardResultMajor.ERROR,
+                       OasisDssResultMajor.REQUESTER_ERROR.getUri(),
                        "CmsSignature");
   }
 
@@ -259,7 +271,8 @@ public class TestS4VerifyOnly
   {
     checkForBinaryData("/bin/example.ers.b64",
                        "/bin/example.tif.b64",
-                       "indetermined",
+                       ECardResultMajor.WARNING,
+                       OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri(),
                        "SignatureObject/Base64Signature/Value");
   }
 
@@ -275,8 +288,11 @@ public class TestS4VerifyOnly
       addReturnVR(r, ProfileNames.RFC4998, ReportDetailLevel.ALL_DETAILS);
       setBase64SignatureObject("/bin/example.tif.b64", r);
       addBinaryData("/bin/example.tif.b64", r);
-    }, "indetermined");
-    checkReportFor(report, "SignatureObject/Base64Signature/Value", "indetermined", false);
+    }, ECardResultMajor.ERROR);
+    checkReportFor(report,
+                   "SignatureObject/Base64Signature/Value",
+                   OasisDssResultMajor.RESPONDER_ERROR.getUri(),
+                   false);
     assertThat("message",
                report.getIndividualReport().get(0).getResult().getResultMessage().getValue(),
                is("illegal or unsupported data format"));
@@ -309,7 +325,7 @@ public class TestS4VerifyOnly
 
       var resp = new S4VerifyOnly().verify(request);
       var result = resp.getResult();
-      assertThat(result.getResultMajor(), is("urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError"));
+      assertThat(result.getResultMajor(), is(ECardResultMajor.ERROR));
       assertThat(result.getResultMinor(),
                  is("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError"));
       assertThat(result.getResultMessage().getValue(), is("system has not been configured correctly"));
@@ -345,7 +361,8 @@ public class TestS4VerifyOnly
    */
   private VerificationReportType checkForBinaryData(String sigObjectPath,
                                                     String dataPath,
-                                                    String expectedMajor,
+                                                    String expectedECardMajor,
+                                                    String expectedOasisMajor,
                                                     String fieldName)
     throws Exception
   {
@@ -356,8 +373,8 @@ public class TestS4VerifyOnly
       {
         addBinaryData(dataPath, r);
       }
-    }, expectedMajor);
-    checkReportFor(report, fieldName, expectedMajor, true);
+    }, expectedECardMajor);
+    checkReportFor(report, fieldName, expectedOasisMajor, true);
     return report;
   }
 
@@ -409,7 +426,7 @@ public class TestS4VerifyOnly
                  ((JAXBElement<?>)detail).getValue(),
                  instanceOf(EvidenceRecordValidityType.class));
     }
-    assertThat("major", evidenceReport.get(0).getResult().getResultMajor(), endsWith(":" + expectedMajor));
+    assertThat("major", evidenceReport.get(0).getResult().getResultMajor(), is(expectedMajor));
   }
 
   private boolean matchesFieldOrXPath(IndividualReportType irt, String field)
@@ -434,7 +451,7 @@ public class TestS4VerifyOnly
     }
     catch (UnsupportedOperationException e)
     {
-      assertThat(e.getMessage(), is("only archiveVerify operation is supported by this tool"));
+      assertThat(e.getMessage(), is("only verify operation is supported by this tool"));
     }
   }
 

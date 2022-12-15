@@ -25,7 +25,7 @@ import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_OASIS_VR;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.core.Is.is;
 
 import java.net.URL;
 import java.util.UUID;
@@ -40,6 +40,7 @@ import org.junit.Test;
 
 import de.bund.bsi.tr_esor.api._1.S4_Service;
 import de.bund.bsi.tr_esor.checktool.TestUtils;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
@@ -81,7 +82,7 @@ public class WebServiceIT
     var jaxb = (JAXBElement<VerificationReportType>)resp.getOptionalOutputs().getAny().get(0);
     var report = jaxb.getValue();
     var overallResult = report.getIndividualReport().get(0).getResult();
-    assertThat(overallResult.getResultMajor(), endsWith("urn:oasis:names:tc:dss:1.0:detail:indetermined"));
+    assertThat(overallResult.getResultMajor(), is(OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri()));
     assertThat(overallResult.getResultMessage().getValue(),
                containsString("atss/0/0/tsp: no online validation of time stamp done"));
     assertThat(overallResult.getResultMessage().getValue(), not(containsString("common#parameterError")));

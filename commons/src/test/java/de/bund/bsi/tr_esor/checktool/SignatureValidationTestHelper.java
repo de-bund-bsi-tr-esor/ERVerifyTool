@@ -16,6 +16,7 @@ import jakarta.xml.bind.JAXBElement;
 
 import de.bund.bsi.tr_esor.checktool.parser.XaipParser;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.signatures.DetachedSignatureValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.signatures.DetachedSignatureValidationContextBuilder;
 import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
@@ -59,21 +60,41 @@ public final class SignatureValidationTestHelper
   {
     for ( IndividualReportType individualReport : individualReports.values() )
     {
-      assertValidResultsInIndividualReport(individualReport);
+      assertMajorSuccessInIndividualReport(individualReport);
     }
   }
 
-  public static void assertValidResultsInIndividualReport(IndividualReportType individualReport)
+  public static void assertMajorSuccessInIndividualReport(IndividualReportType individualReport)
   {
-    assertResult(individualReport.getResult(), ValidationResultMajor.VALID.toString(), ON_ALL_DOCUMENTS);
+    assertResult(individualReport.getResult(), OasisDssResultMajor.SUCCESS.toString(), ON_ALL_DOCUMENTS);
     var detailedSignatureReport = assertContainsDetailedSignatureReportType(individualReport);
-    assertValidResult(detailedSignatureReport.getFormatOK());
-    assertValidResult(detailedSignatureReport.getSignatureOK().getSigMathOK());
+    assertMajorSuccess(detailedSignatureReport.getFormatOK());
+    assertMajorSuccess(detailedSignatureReport.getSignatureOK().getSigMathOK());
   }
 
-  public static void assertValidResult(Result result)
+  public static void assertRequesterErrorInIndividualReport(IndividualReportType individualReport,
+                                                            String expectedMinor)
   {
-    assertThat(result.getResultMajor()).isEqualTo(ValidationResultMajor.VALID.toString());
+    assertResult(individualReport.getResult(), OasisDssResultMajor.REQUESTER_ERROR.toString(), expectedMinor);
+    var detailedSignatureReport = assertContainsDetailedSignatureReportType(individualReport);
+    assertMajorSuccess(detailedSignatureReport.getFormatOK());
+    assertMajorSuccess(detailedSignatureReport.getSignatureOK().getSigMathOK());
+  }
+
+  public static void assertInsufficientInformationInIndividualReport(IndividualReportType individualReport,
+                                                                     String expectedMinor)
+  {
+    assertResult(individualReport.getResult(),
+                 OasisDssResultMajor.INSUFFICIENT_INFORMATION.toString(),
+                 expectedMinor);
+    var detailedSignatureReport = assertContainsDetailedSignatureReportType(individualReport);
+    assertMajorSuccess(detailedSignatureReport.getFormatOK());
+    assertMajorSuccess(detailedSignatureReport.getSignatureOK().getSigMathOK());
+  }
+
+  public static void assertMajorSuccess(Result result)
+  {
+    assertThat(result.getResultMajor()).isEqualTo(OasisDssResultMajor.SUCCESS.toString());
     assertThat(result.getResultMessage()).isNull();
   }
 
@@ -91,7 +112,7 @@ public final class SignatureValidationTestHelper
     assertThat(result.getResultMessage().getValue()).isEqualTo(message);
   }
 
-  public static void assertValidResult(VerificationResultType result)
+  public static void assertMajorSuccess(VerificationResultType result)
   {
     assertThat(result.getResultMajor()).isEqualTo(ValidationResultMajor.VALID.toString());
     assertThat(result.getResultMessage()).isNull();
@@ -106,7 +127,7 @@ public final class SignatureValidationTestHelper
   public static void assertNoSignatureFound(IndividualReportType individualReport)
   {
     var result = individualReport.getResult();
-    assertThat(result.getResultMajor()).isEqualTo(ValidationResultMajor.VALID.toString());
+    assertThat(result.getResultMajor()).isEqualTo(OasisDssResultMajor.SUCCESS.toString());
     assertThat(result.getResultMinor()).isNull();
     assertThat(result.getResultMessage().getValue()).isEqualTo("No signature found in data object.");
     assertThat(individualReport.getDetails()).isNull();

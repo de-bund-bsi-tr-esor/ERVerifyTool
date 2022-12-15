@@ -46,7 +46,7 @@ public class EvidenceRecordReport extends ReportPart implements OutputCreator<Ev
   {
     super(ref);
     xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityType();
-    xmlReport.setVersion("1.3.0");
+    xmlReport.setVersion("urn:ietf:rfc:4998");
     xmlReport.setReportVersion("1.3.0");
   }
 

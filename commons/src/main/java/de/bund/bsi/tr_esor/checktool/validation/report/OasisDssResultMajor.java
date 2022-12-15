@@ -45,6 +45,21 @@ public enum OasisDssResultMajor
   }
 
   /**
+   * Get the appropriate enum value. Null is returned if no value matches the URI.
+   */
+  public static OasisDssResultMajor fromURI(String uri)
+  {
+    for ( OasisDssResultMajor major : OasisDssResultMajor.values() )
+    {
+      if (major.uri.equalsIgnoreCase(uri))
+      {
+        return major;
+      }
+    }
+    return null;
+  }
+
+  /**
    * Get the URI representation as specified by OASIS
    *
    * @return String containing the URI including OASIS prefix

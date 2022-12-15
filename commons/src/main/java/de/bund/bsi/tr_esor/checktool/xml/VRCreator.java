@@ -57,11 +57,14 @@ import org.xml.sax.SAXParseException;
 
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
+import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.OutputCreator;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
+import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardResultMinor;
 
 
 /**
@@ -306,10 +309,89 @@ public final class VRCreator
   private static Result translateResult(VerificationResultType input)
   {
     var result = XmlHelper.FACTORY_DSS.createResult();
-    result.setResultMajor(input.getResultMajor());
+    if (OasisDssResultMajor.REQUESTER_ERROR.toString().equals(result.getResultMajor())
+        || OasisDssResultMajor.SUCCESS.toString().equals(result.getResultMajor())
+        || OasisDssResultMajor.RESPONDER_ERROR.toString().equals(result.getResultMajor())
+        || OasisDssResultMajor.INSUFFICIENT_INFORMATION.toString().equals(result.getResultMajor()))
+    {
+      result.setResultMajor(input.getResultMajor());
+    }
+    else if (ValidationResultMajor.VALID.toString().equals(input.getResultMajor()))
+    {
+      result.setResultMajor(OasisDssResultMajor.SUCCESS.getUri());
+    }
+    else if (ValidationResultMajor.INVALID.toString().equals(input.getResultMajor()))
+    {
+      result.setResultMajor(translateMinorToOasisMajor(input.getResultMinor()).toString());
+    }
+    else if (ValidationResultMajor.INDETERMINED.toString().equals(input.getResultMajor()))
+    {
+      result.setResultMajor(OasisDssResultMajor.INSUFFICIENT_INFORMATION.toString());
+    }
+    else
+    {
+      result.setResultMajor(OasisDssResultMajor.RESPONDER_ERROR.toString());
+    }
+
     result.setResultMinor(input.getResultMinor());
     result.setResultMessage(input.getResultMessage());
     return result;
+  }
+
+  /**
+   * This estimates from the ECardResultMinor if the problem is caused by the requester in the sense that a
+   * invalid or defective document was provided for the check or by the responder (the eCard implementation),
+   * for example a non-reachable OCSP responder. Note that the mapping is designed by explicit BSI request
+   * such that only valid signatures lead to success results, while indetermined check results will show
+   * insufficient information and invalid signatures will lead to an error.
+   */
+  public static OasisDssResultMajor translateMinorToOasisMajor(String resultMinor)
+  {
+    if (resultMinor == null)
+    {
+      return OasisDssResultMajor.RESPONDER_ERROR;
+    }
+
+    switch (resultMinor)
+    {
+      case ECardResultMinor.INTERNAL_ERROR:
+      case ECardResultMinor.NO_PERMISSION:
+      case ECardResultMinor.COMMUNICATION_ERROR:
+      case ECardResultMinor.SIGNATURE_ALGORITHM_NOT_SUPPORTED:
+      case ECardResultMinor.RESOLUTION_OF_OBJECT_REFERENCE_IMPOSSIBLE:
+      case ECardResultMinor.TRANSFORMATION_ALGORITHM_NOT_SUPPORTED:
+      case ECardResultMinor.HASH_ALGORITHM_NOT_SUPPORTED:
+      case ECardResultMinor.UNKNOWN_VIEWER:
+      case ECardResultMinor.CERTIFICATE_NOT_FOUND:
+      case ECardResultMinor.SIGNATURE_FORMAT_NOT_SUPPORTED:
+      case "urn:oasis:names:tc:dss:1.0:resultminor:GeneralError":
+        return OasisDssResultMajor.RESPONDER_ERROR;
+      case ECardResultMinor.PARAMETER_ERROR:
+      case ECardResultMinor.INVALID_SIGNATURE:
+      case ECardResultMinor.CERTIFICATE_REVOKED:
+      case ECardResultMinor.INVALID_CERTIFICATE_PATH:
+      case ECardResultMinor.WRONG_MESSAGE_DIGEST:
+      case ECardResultMinor.INVALID_SIGNATURE_FORMAT:
+      case ECardResultMinor.HASH_ALGORITHM_NOT_SUITABLE:
+      case ECardResultMinor.CERTIFICATE_CHAIN_INTERRUPTED:
+      case ECardResultMinor.INVALID_CERTIFICATE_REFERENCE:
+      case ECardResultMinor.CERTIFICATE_FORMAT_NOT_CORRECT:
+      case ECardResultMinor.CERTIFICATE_PATH_NOT_VALIDATED:
+      case ECardResultMinor.CERTIFICATE_STATUS_NOT_CHECKED:
+      case ECardResultMinor.SIGNATURE_MANIFEST_NOT_CHECKED:
+      case ECardResultMinor.SIGNATURE_MANIFEST_NOT_CORRECT:
+      case ECardResultMinor.IMPROPER_REVOCATION_INFORMATION:
+      case ECardResultMinor.SIGNATURE_ALGORITHM_NOT_SUITABLE:
+      case ECardResultMinor.DETACHED_SIGNATURE_WITHOUT_E_CONTENT:
+      case ECardResultMinor.SUITABILITY_OF_ALGORITHMS_NOT_CHECKED:
+      case ECardResultMinor.REFERENCED_TIME_NOT_WITHIN_CERTIFICATE_VALIDITY_PERIOD:
+      case "urn:oasis:names:tc:dss:1.0:resultminor:invalid:IncorrectSignature":
+      case "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch":
+      case "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat":
+        return OasisDssResultMajor.REQUESTER_ERROR;
+      default:
+        return OasisDssResultMajor.RESPONDER_ERROR;
+    }
   }
 
   private static class LoggingErrorHandler implements ErrorHandler

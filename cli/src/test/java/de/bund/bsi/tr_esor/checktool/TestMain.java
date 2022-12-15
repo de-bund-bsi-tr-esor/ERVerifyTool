@@ -120,7 +120,7 @@ public class TestMain extends TestBase
     var report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "xaip/xaip_ok_ers.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**
@@ -141,7 +141,7 @@ public class TestMain extends TestBase
                           RES_DIR + "/xaip/xaip_ok.er.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**
@@ -162,7 +162,7 @@ public class TestMain extends TestBase
                           RES_DIR + "/xaip/xaip_ok.er.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**
@@ -183,7 +183,7 @@ public class TestMain extends TestBase
                           RES_DIR + "/lxaip/lxaip_ok.ers.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**
@@ -199,7 +199,7 @@ public class TestMain extends TestBase
     var data = createDecodedTempFile("/cms/encapsulated_with_er.p7s.b64");
     var report = callMain("-conf", RES_DIR + "config.xml", "-er", data.getAbsolutePath());
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**
@@ -218,12 +218,12 @@ public class TestMain extends TestBase
 
     var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
 
     // negative case:
     report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "config.xml", "-er", ers);
     assertNumberElements(report, "ReducedHashTree", 1);
-    assertFirstMajor(report, "invalid");
+    assertFirstMajor(report, "RequesterError");
   }
 
   /**
@@ -237,7 +237,7 @@ public class TestMain extends TestBase
   {
     var ers = createDecodedTempFile("/bin/er_nok_wrong_version.er.b64").getAbsolutePath();
     var report = callMain("-conf", RES_DIR + "config.xml", "-er", ers);
-    assertFirstMajor(report, "invalid");
+    assertFirstMajor(report, "RequesterError");
     assertThat("the invalidFormat result minor is contained in the report",
                report,
                containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
@@ -266,7 +266,7 @@ public class TestMain extends TestBase
       var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", erPath);
       assertNumberElements(report, "IndividualReport", 1);
       assertNumberElements(report, "ArchiveTimeStamp", 1);
-      assertFirstMajor(report, "indetermined");
+      assertFirstMajor(report, "InsufficientInformation");
     }
   }
 
@@ -293,7 +293,7 @@ public class TestMain extends TestBase
                           dataFile.getAbsolutePath(),
                           "-er",
                           erPath);
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
     assertThat("There is no mismatch detected",
                report,
                not(containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch")));
@@ -318,15 +318,15 @@ public class TestMain extends TestBase
   }
 
   /**
-   * Asserts that an unsupported format of ER value is reported. Major code will be "indetermined" because we
-   * only know that the application does not support that value. Report must not contain details because
+   * Asserts that an unsupported format of ER value is reported. Major code will be "RequesterError" because
+   * we only know that the application does not support that value. Report must not contain details because
    * application does not know details for what.
    */
   @Test
   public void verifyInvalidErParam() throws Exception
   {
     var report = callMain("-conf", RES_DIR + "config.xml", "-er", RES_DIR + "config.xml");
-    assertThat("report", report, containsString("urn:oasis:names:tc:dss:1.0:detail:indetermined"));
+    assertThat("report", report, containsString("ResponderError"));
     assertThat("report", report, containsString("resultminor/invalidFormat"));
     assertThat("report", report, not(containsString("Details")));
   }
@@ -351,7 +351,7 @@ public class TestMain extends TestBase
 
     assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
 
-    assertFirstMajor(report, "invalid");
+    assertFirstMajor(report, "RequesterError");
     assertThat("report",
                report,
                containsString("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"));
@@ -379,7 +379,7 @@ public class TestMain extends TestBase
                           RES_DIR + erPath);
 
     assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(report, "invalid");
+    assertFirstMajor(report, "RequesterError");
     assertThat("report",
                report,
                containsString("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"));
@@ -399,7 +399,7 @@ public class TestMain extends TestBase
 
     var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
 
-    assertFirstMajor(report, "invalid");
+    assertFirstMajor(report, "RequesterError");
     assertNumberElements(report, "IndividualReport", 1);
     assertNumberElements(report, "ArchiveTimeStamp", 1);
     assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
@@ -435,7 +435,7 @@ public class TestMain extends TestBase
                            "-data",
                            RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
     assertThat("report", report2, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
     assertThat("report",
                report2,
                containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
@@ -462,7 +462,7 @@ public class TestMain extends TestBase
                                 "-data",
                                 RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
     assertThat("report", reportSorted, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(reportSorted, "indetermined");
+    assertFirstMajor(reportSorted, "InsufficientInformation");
     assertThat("report", reportSorted, not(containsString("hashValueMismatch")));
     assertThat("report", reportSorted, not(containsString("Missing digest(s) for:")));
     assertThat("report", reportSorted, not(containsString("additional protected hash values")));
@@ -477,7 +477,7 @@ public class TestMain extends TestBase
                                   "-er",
                                   RES_DIR + "/xaip/xaip_ok.rehashed.ers.b64");
     assertThat("report", reportUnsorted, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(reportUnsorted, "indetermined");
+    assertFirstMajor(reportUnsorted, "InsufficientInformation");
     assertThat("report", reportUnsorted, not(containsString("hashValueMismatch")));
     assertThat("report", reportUnsorted, not(containsString("Missing digest(s) for:")));
     assertThat("report", reportUnsorted, not(containsString("additional protected hash values")));
@@ -496,7 +496,7 @@ public class TestMain extends TestBase
     assertThat("report",
                report,
                containsString("No online validation of a potential signature was possible"));
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**
@@ -506,7 +506,7 @@ public class TestMain extends TestBase
   public void checkUnsupportedXaipVersion() throws Exception
   {
     var report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "/xaip/esor12/xaip_ok.xml");
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "ResponderError");
     assertThat("report", report, containsString("illegal or unsupported data format"));
   }
 
@@ -522,7 +522,7 @@ public class TestMain extends TestBase
                           RES_DIR + "/xaip/xaip_xml_meta.xml",
                           "-er",
                           RES_DIR + "/xaip/xaip_xml_meta.ers");
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
     assertThat("report",
                report,
                containsString("ResultMessage xml:lang=\"en\">atss/0/0/tsp: no online validation of time stamp done</"));
@@ -540,7 +540,7 @@ public class TestMain extends TestBase
                           RES_DIR + "xaip/xaip_ok_ers_namespace.xml");
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertThat("report", report, not(containsString("hashValueMismatch")));
-    assertFirstMajor(report, "indetermined");
+    assertFirstMajor(report, "InsufficientInformation");
   }
 
   /**

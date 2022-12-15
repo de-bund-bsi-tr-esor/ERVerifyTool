@@ -22,7 +22,9 @@
 package de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers;
 
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.endsWith;
+import static org.hamcrest.Matchers.is;
 
 import java.util.ArrayList;
 import java.util.Collections;

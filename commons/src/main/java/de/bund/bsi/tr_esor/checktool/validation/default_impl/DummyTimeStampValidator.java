@@ -66,7 +66,7 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
   {
     var sig = XmlHelper.FACTORY_OASIS_VR.createSignatureValidityType();
     var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#indetermined");
+    result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
     result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported");
     var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
     message.setLang("en-en");
@@ -81,7 +81,7 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
   {
     var certValidity = XmlHelper.FACTORY_OASIS_VR.createCertificatePathValidityType();
     var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#warning");
+    result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
     result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported");
     var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
     message.setLang("en-en");

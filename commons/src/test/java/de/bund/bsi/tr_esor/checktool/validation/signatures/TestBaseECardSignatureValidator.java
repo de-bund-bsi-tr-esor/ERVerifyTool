@@ -110,7 +110,7 @@ public class TestBaseECardSignatureValidator
     optionalOutputs.getAny().add(element);
     response.setOptionalOutputs(optionalOutputs);
     var result = new Result();
-    result.setResultMajor(ValidationResultMajor.VALID.toString());
+    result.setResultMajor(ECardResultMajor.OK);
     response.setResult(result);
     var report = new SignatureReportPart(new Reference(TEST));
 
