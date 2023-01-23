@@ -47,8 +47,9 @@ public class OutputFolder
    *
    * @param destinationFolder base folder for storing output data
    */
-  public OutputFolder(Path destinationFolder)
+  public OutputFolder(Path destinationFolder) throws IOException
   {
+    Files.createDirectories(destinationFolder);
     this.destinationFolder = destinationFolder;
 
     LOG.debug("destinationFolder: {}", destinationFolder.toAbsolutePath());
@@ -64,8 +65,6 @@ public class OutputFolder
    */
   public OutputFolder createAoidFolder(String aoid) throws IOException
   {
-    Files.createDirectories(destinationFolder);
-
     var cleanAoid = sanitizeFolderName(aoid);
     this.aoidFolder = createNewFolder(destinationFolder, cleanAoid);
 

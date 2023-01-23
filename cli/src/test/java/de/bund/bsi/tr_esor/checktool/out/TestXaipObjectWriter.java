@@ -96,7 +96,7 @@ public class TestXaipObjectWriter extends FileOutputChecker
    * Check if null makes no trouble for {@link DataObjectType} signature.
    */
   @Test
-  public void testWriteWithNullForDataObject()
+  public void testWriteWithNullForDataObject() throws IOException
   {
     new XaipObjectWriter().withOutputFolder(new OutputFolder(destination)).write((DataObjectType)null);
   }
@@ -105,7 +105,7 @@ public class TestXaipObjectWriter extends FileOutputChecker
    * Check if null makes no trouble for {@link DetachedSignatureValidationContext} signature.
    */
   @Test
-  public void testWriteWithNullForContext()
+  public void testWriteWithNullForContext() throws IOException
   {
     new XaipObjectWriter().withOutputFolder(new OutputFolder(destination))
                           .write((DetachedSignatureValidationContext)null);

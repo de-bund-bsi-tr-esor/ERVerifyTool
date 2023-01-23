@@ -199,7 +199,7 @@ public abstract class BaseECardSignatureValidator<T, C extends ValidationContext
   {
     var message = "No online validation of a potential signature was possible as no validation service is configured in the active profile.";
     result.updateCodes(ValidationResultMajor.INDETERMINED,
-                       ECardResultMinor.COMMUNICATION_ERROR,
+                       BsiResultMinor.NOT_SUPPORTED.getUri(),
                        MinorPriority.NORMAL,
                        message,
                        ref);

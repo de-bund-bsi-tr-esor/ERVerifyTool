@@ -195,9 +195,6 @@ public class TestMainIT extends TestBase
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO_01"));
   }
 
-  /**
-   * FIXME Exchange test data for valid result
-   */
   @Test
   public void lxaipWithCredential() throws Exception
   {
@@ -209,8 +206,7 @@ public class TestMainIT extends TestBase
                                    "Hundename_V001",
                                    "fileSize_V001");
 
-    SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("Impfausweissignature_V001"),
-                                                                                  OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+    SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("Impfausweissignature_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("HundesteuerAnmeldung_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("Hundename_V001"));
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("fileSize_V001"));

@@ -559,7 +559,9 @@ public class TestMain extends TestBase
     {
       var data = createDecodedTempFile("/bin/example.tif.b64").getAbsolutePath();
       var ers = createDecodedTempFile("/bin/example.ers.b64").getAbsolutePath();
-      var destination = Paths.get(System.getProperty("java.io.tmpdir"), getClass().getSimpleName());
+      var destination = Paths.get(System.getProperty("java.io.tmpdir"),
+                                  getClass().getSimpleName(),
+                                  "reportFolder");
 
       callMain("-conf",
                RES_DIR + "config.xml",
