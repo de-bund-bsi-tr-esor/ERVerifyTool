@@ -22,11 +22,24 @@
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
 import java.math.BigInteger;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+import java.util.Collection;
+import java.util.Iterator;
 
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignatureValidityType;
 
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cms.*;
+import org.bouncycastle.cms.jcajce.JcaSimpleSignerInfoVerifierBuilder;
+import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.tsp.TSPException;
+import org.bouncycastle.tsp.TSPValidationException;
 import org.bouncycastle.tsp.TimeStampToken;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
@@ -45,6 +58,8 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class DummyTimeStampValidator extends BaseTimeStampValidator
 {
 
+  private static final Logger LOG = LoggerFactory.getLogger(DummyTimeStampValidator.class);
+
   @Override
   protected TimeStampReport validateInternal(Reference ref, TimeStampToken toCheck)
   {
@@ -52,7 +67,8 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
     var formatOk = new FormatOkReport(ref);
     checkUnsignedAttributes(toCheck, formatOk);
     tsReport.getFormatted().setCertificatePathValidity(mockCertificatePathValidity());
-    tsReport.getFormatted().setSignatureOK(mockSignatureValidity());
+    // tsReport.getFormatted().setSignatureOK(mockSignatureValidity());
+    tsReport.getFormatted().setSignatureOK(validateMathSigOK(toCheck));
     tsReport.updateCodes(ValidationResultMajor.INDETERMINED,
                          null,
                          MinorPriority.NORMAL,
@@ -72,6 +88,105 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
     message.setLang("en-en");
     message.setValue("Checking digital signatures is not supported by this tool. To check signatures comprehensively, configure an online eCard validation service.");
     result.setResultMessage(message);
+    sig.setSigMathOK(result);
+    return sig;
+  }
+
+  private SignatureValidityType validateMathSigOK(TimeStampToken toCheck)
+  {
+    var sig = XmlHelper.FACTORY_OASIS_VR.createSignatureValidityType();
+    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+    Collection<X509CertificateHolder> tstMatches = toCheck.getCertificates().getMatches(toCheck.getSID());
+    X509CertificateHolder holder = tstMatches.iterator().next();
+    X509Certificate tstCert = null;
+    while (true)
+    {
+      try
+      {
+        tstCert = new JcaX509CertificateConverter().getCertificate(holder);
+      }
+      catch (CertificateException ex)
+      {
+        LOG.error("unable to get the signing certificate for the given time stamp token");
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor(AlgorithmUsageValidator.ValidationResultMinor.INTERNAL_ERROR.toString());
+        break;
+      }
+      SignerInformationVerifier siv = null;
+      try
+      {
+        siv = new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(tstCert);
+      }
+      catch (OperatorCreationException e)
+      {
+        LOG.error("building the signer information verifier for timestamp verification failed");
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor(AlgorithmUsageValidator.ValidationResultMinor.INTERNAL_ERROR.toString());
+        break;
+      }
+      try
+      {
+        toCheck.validate(siv);
+
+      }
+      catch (TSPValidationException e)
+      {
+        LOG.warn("validation of given time stamp failed");
+        result.setResultMajor(ValidationResultMajor.INVALID.toString());
+        // result.setResultMinor(AlgorithmUsageValidator.ValidationResultMinor.INTERNAL_ERROR.toString());
+        var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
+        message.setLang("en-en");
+        message.setValue("Validation of the mathematical correctness of the given timestamp failed");
+        result.setResultMessage(message);
+        break;
+      }
+      catch (TSPException e1)
+      {
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor(AlgorithmUsageValidator.ValidationResultMinor.INTERNAL_ERROR.toString());
+        break;
+      }
+      CMSSignedDataGenerator gen = new CMSSignedDataGenerator();
+      CMSSignedData signedData = toCheck.toCMSSignedData();
+      SignerInformationStore signers = signedData.getSignerInfos();
+      Collection<SignerInformation> c = signers.getSigners();
+      Iterator<SignerInformation> it = c.iterator();
+      boolean validatedOK = false;
+      while (it.hasNext())
+      {
+        try
+        {
+          SignerInformation signer = it.next();
+          if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider("BC").build(tstCert)))
+          {
+            LOG.info("Signature verified");
+            validatedOK = true;
+            break;
+          }
+        }
+        catch (Exception e)
+        {
+          LOG.error("building the signer information verifier for timestamp verification failed");
+          result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+          result.setResultMinor(AlgorithmUsageValidator.ValidationResultMinor.INTERNAL_ERROR.toString());
+          break;
+        }
+      }
+      if (validatedOK)
+      {
+        result.setResultMajor(ValidationResultMajor.VALID.toString());
+        break;
+      }
+
+      LOG.warn("validation of given time stamp failed");
+      result.setResultMajor(ValidationResultMajor.INVALID.toString());
+      var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
+      message.setLang("en-en");
+      message.setValue("Validation of the mathematical correctness of the given timestamp failed");
+      result.setResultMessage(message);
+
+      break;
+    }
     sig.setSigMathOK(result);
     return sig;
   }

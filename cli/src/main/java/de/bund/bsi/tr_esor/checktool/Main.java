@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.file.Paths;
+import java.security.Security;
 import java.util.Optional;
 
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
@@ -84,6 +85,7 @@ public final class Main
    */
   public static void main(String[] args)
   {
+    Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
     var options = getCliOptions();
 
     try

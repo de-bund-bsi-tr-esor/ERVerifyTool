@@ -8,6 +8,7 @@ dependencies {
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:3.0.1'
     implementation 'com.sun.xml.bind:jaxb-impl:3.0.2'
     implementation 'com.sun.xml.ws:jaxws-rt:3.0.2'
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.59'
     implementation ('org.apache.santuario:xmlsec:2.3.0') {
         exclude group: 'org.codehaus.woodstox'
         exclude group: 'org.slf4j'
