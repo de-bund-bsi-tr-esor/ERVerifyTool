@@ -109,7 +109,7 @@ public class DumpHandler
    */
   public void dumpReport(VerificationReportType report) throws IOException, JAXBException
   {
-    var destFolder = outputFolder.getAoidFolder() == null ? outputFolder.getDestinationFolder()
+    var destFolder = outputFolder.getAoidFolder() == null ? outputFolder.noAoidDestinationFolder()
       : outputFolder.getAoidFolder();
     try (OutputStream outs = new FileOutputStream(Paths.get(destFolder.toString(), "report.xml")
                                                        .toAbsolutePath()

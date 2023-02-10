@@ -572,7 +572,7 @@ public class TestMain extends TestBase
                "-out",
                destination.toAbsolutePath().toString());
 
-      reportFile = destination.resolve("report.xml");
+      reportFile = destination.resolve("no_aoid").resolve("report.xml");
       assertThat(reportFile.toFile(), anExistingFile());
 
       var report = Files.readString(reportFile);

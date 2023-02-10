@@ -19,12 +19,12 @@
   </Profile>
 
   <!-- The TR-ESOR profile requires an online validation service and qualified timestamps -->
-  <Profile name="TR-ESOR" requireQualifiedTimestamps="true" validationService="http://lza-k8s.govkg.de:31780/ECardService/eCard?wsdl">
+  <Profile name="TR-ESOR" requireQualifiedTimestamps="true" validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl">
   </Profile>
 
   <!-- Take away the comment from this part in order to allow online checks to be performed in the Basis-ERS profile -->
   <!-- The Basis-ERS includes additional checks for conformity to the TR-ESOR-ERS specification -->
-  <!--<Profile name="Basis-ERS" requireQualifiedTimestamps="false" validationService="http://lza-k8s.govkg.de:31780/ECardService/eCard?wsdl">
+  <!--<Profile name="Basis-ERS" requireQualifiedTimestamps="false" validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator</className>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
@@ -32,7 +32,7 @@
   </Profile>-->
 
   <!-- You may specify own profiles with any number of new or replaced validators: -->
-  <Profile name="custom" hashMode="unsorted" lxaipDataDirectory="../commons/src/test/resources/lxaip" validationService="http://lza-k8s.govkg.de:31780/ECardService/eCard?wsdl" requireQualifiedTimestamps="false">
+  <Profile name="custom" hashMode="unsorted" lxaipDataDirectory="../commons/src/test/resources/lxaip" validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl" requireQualifiedTimestamps="false">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>

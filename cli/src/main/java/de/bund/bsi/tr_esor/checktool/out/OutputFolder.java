@@ -42,6 +42,8 @@ public class OutputFolder
 
   private Path aoidFolder;
 
+  private Path noAoidFolder;
+
   /**
    * Default Constructor
    *
@@ -145,10 +147,14 @@ public class OutputFolder
   }
 
   /**
-   * Get path for the destination folder
+   * Get folder path for no aoid
    */
-  public Path getDestinationFolder()
+  public Path noAoidDestinationFolder() throws IOException
   {
-    return destinationFolder;
+    if (noAoidFolder == null)
+    {
+      noAoidFolder = createNewFolder(destinationFolder, "no_aoid");
+    }
+    return noAoidFolder;
   }
 }

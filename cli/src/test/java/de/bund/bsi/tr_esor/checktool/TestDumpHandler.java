@@ -76,7 +76,7 @@ public class TestDumpHandler extends FileOutputChecker
   public void reportToFolder() throws Exception
   {
     sut.dumpReport(mock(VerificationReportType.class));
-    assertFileExists("report.xml");
+    assertFileExists("no_aoid/report.xml");
   }
 
   @Test
