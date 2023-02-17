@@ -23,7 +23,6 @@ package de.bund.bsi.tr_esor.servlet;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -34,6 +33,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.nio.file.Files;
+import java.nio.file.Path;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -51,9 +52,9 @@ import org.junit.Test;
 public class TestConfigurationServlet
 {
 
-  private static File VALID_CONFIG;
+  private static Path VALID_CONFIG;
 
-  private static File IVALID_CONFIG;
+  private static Path INVALID_CONFIG;
 
   /**
    * Creates temporary files for test.
@@ -61,18 +62,18 @@ public class TestConfigurationServlet
   @BeforeClass
   public static void beforeClass() throws Exception
   {
-    VALID_CONFIG = fromResource("/validConfig.xml");
-    IVALID_CONFIG = fromResource("/invalidConfig.xml");
+    VALID_CONFIG = fromResource("/validConfig.xml").toPath();
+    INVALID_CONFIG = fromResource("/invalidConfig.xml").toPath();
   }
 
   /**
    * Deletes temporary test files.
    */
   @AfterClass
-  public static void afterClass()
+  public static void afterClass() throws IOException
   {
-    assertTrue(VALID_CONFIG.delete());
-    assertTrue(IVALID_CONFIG.delete());
+    Files.delete(VALID_CONFIG);
+    Files.delete(INVALID_CONFIG);
   }
 
   /**
@@ -92,19 +93,19 @@ public class TestConfigurationServlet
                       VALID_CONFIG,
                       "<p><label>Default Profile</label>  <span>https://tools.ietf.org/html/rfc4998</span></p>");
     testConfiguration("missing config",
-                      new File("mich_gibt_es_nicht.xml"),
-                      "The configuration was not loaded.");
-    testConfiguration("invalid config", IVALID_CONFIG, "The configuration was not loaded.");
+                      Path.of("mich_gibt_es_nicht.xml"),
+                      "The configuration has been loaded from the application war file.");
+    testConfiguration("invalid config", INVALID_CONFIG, "The configuration was not loaded.");
   }
 
   /**
-   * Assert if we use the configuration from class path primarily.
+   * Assert that we use the configuration from class path if no other is available.
    */
   @Test
   public void useConfigFromClasspath() throws IOException
   {
     var systemUnderTest = new FakedConfigConfiguration();
-    FakedConfigConfiguration.setConfigFile(IVALID_CONFIG);
+    FakedConfigConfiguration.setConfigFile(Path.of("inexistent"));
 
     makeRequestAndAssert("config from classpath",
                          "<p><label>Default Profile</label>  <span>https://tools.ietf.org/html/rfc4998</span></p>",
@@ -112,9 +113,9 @@ public class TestConfigurationServlet
 
   }
 
-  private void testConfiguration(String label, File configFile, String expectedContent) throws Exception
+  private void testConfiguration(String label, Path configFile, String expectedContent) throws Exception
   {
-    var systemUnderTest = new ConfigurationServlet();
+    var systemUnderTest = new FakedConfigConfiguration();
     ConfigurationServlet.configFile = configFile;
     makeRequestAndAssert(label, expectedContent, systemUnderTest);
   }
@@ -153,13 +154,13 @@ public class TestConfigurationServlet
 
     private static final long serialVersionUID = 1L;
 
-    static void setConfigFile(File file)
+    static void setConfigFile(Path path)
     {
-      configFile = file;
+      configFile = path;
     }
 
     @Override
-    InputStream getConfigFromClasspath()
+    protected InputStream loadConfigFromClasspath()
     {
       return getClass().getResourceAsStream("/validConfig.xml");
     }

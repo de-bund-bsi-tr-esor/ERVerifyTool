@@ -21,10 +21,10 @@
  */
 package de.bund.bsi.tr_esor.servlet;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -59,13 +59,15 @@ public class ConfigurationServlet extends HttpServlet
 
   static final String ROUTE_TO_RELOAD_CONFIGURATION = "loadConfiguration";
 
-  private static final File CONFIG_DIR = new File(System.getenv("CATALINA_BASE"), "conf");
+  private static final Path CONFIG_DIR = Path.of(System.getenv("CATALINA_BASE"), "conf");
 
-  static File configFile = new File(CONFIG_DIR, "ErVerifyTool.xml").getAbsoluteFile();
+  static Path configFile = CONFIG_DIR.resolve("ErVerifyTool.xml");
 
   private final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.GERMANY);
 
   private static Date configLoad = null;
+
+  private static boolean configLoadedFromWar = false;
 
   private static String version;
 
@@ -120,12 +122,22 @@ public class ConfigurationServlet extends HttpServlet
   {
     var result = new ConfigurationDataToRender();
     result.setVersion(version == null ? "unknown" : version);
-    result.setPathToConfiguration(configFile.getAbsolutePath());
+    if (configLoadedFromWar)
+    {
+      String message = String.format("The configuration has been loaded from the application war file. To load a configuration from a file place it in %s",
+                                     configFile.toAbsolutePath());
+      result.setPathToConfiguration(message);
+    }
+    else
+    {
+      result.setPathToConfiguration(configFile.toAbsolutePath().toString());
+    }
     result.setErrorMessage(errorMessage);
     if (configLoad != null)
     {
       result.setConfigurationLoadTime(df.format(configLoad));
-      result.setConfigurationUpToDate(configLoad.after(new Date(configFile.lastModified())) ? "yes" : "no");
+      result.setConfigurationUpToDate(configLoad.after(new Date(configFile.toFile().lastModified())) ? "yes"
+        : "no");
       result.setCurrentProfile(Configurator.getInstance().getDefaultProfileName());
       result.setVerififerId(Configurator.getInstance().getVerifierID());
       var availableProfiles = Configurator.getInstance().getSupportedProfileNames().toString();
@@ -137,9 +149,10 @@ public class ConfigurationServlet extends HttpServlet
   @SuppressWarnings("PMD.NullAssignment")
   private void loadConfiguration()
   {
-    try (var stream = Optional.ofNullable(getConfigFromClasspath()).orElse(new FileInputStream(configFile)))
+    try (InputStream stream = loadConfigurationFromFileOrClasspath(configFile))
     {
       Configurator.getInstance().load(stream);
+
       configLoad = new Date();
       errorMessage = "";
       LOG.info("Configuration loaded");
@@ -153,7 +166,25 @@ public class ConfigurationServlet extends HttpServlet
     }
   }
 
-  InputStream getConfigFromClasspath()
+  private InputStream loadConfigurationFromFileOrClasspath(Path config)
+  {
+    try
+    {
+      var ins = Files.newInputStream(config);
+      configLoadedFromWar = false;
+      return ins;
+    }
+    catch (IOException e)
+    {
+      var message = String.format("Cannot load configuration file from %s, using configuration from class path instead.",
+                                  config);
+      LOG.warn(message);
+      configLoadedFromWar = true;
+      return loadConfigFromClasspath();
+    }
+  }
+
+  protected InputStream loadConfigFromClasspath()
   {
     return Thread.currentThread().getContextClassLoader().getResourceAsStream("ErVerifyTool.xml");
   }
@@ -161,7 +192,7 @@ public class ConfigurationServlet extends HttpServlet
 
   private static void setupLogging()
   {
-    var file = new File(CONFIG_DIR, "log4j2.xml").getAbsoluteFile();
+    var file = CONFIG_DIR.resolve("log4j2.xml").toFile().getAbsoluteFile();
     if (file.canRead())
     {
       try (var context = (LoggerContext)LogManager.getContext(false))
