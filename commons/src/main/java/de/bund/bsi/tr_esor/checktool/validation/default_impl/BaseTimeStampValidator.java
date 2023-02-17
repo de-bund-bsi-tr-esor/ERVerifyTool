@@ -41,6 +41,8 @@ public abstract class BaseTimeStampValidator
   extends BaseValidator<TimeStampToken, ErValidationContext, TimeStampReport>
 {
 
+  protected byte[] sourceOfRootHash;
+
   /**
    * Checks the unsigned attributes of a time stamp for presence of certificate and revocation info.
    *
@@ -74,5 +76,10 @@ public abstract class BaseTimeStampValidator
   protected Class<ErValidationContext> getRequiredContextClass()
   {
     return ErValidationContext.class;
+  }
+
+  void setSourceOfRootHash(byte[] sourceOfRootHash)
+  {
+    this.sourceOfRootHash = sourceOfRootHash;
   }
 }

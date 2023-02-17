@@ -211,9 +211,9 @@ public class ArchiveTimeStampValidator
     var tsp = atsID.newChild("tsp");
     // CHECKSTYLE:OFF
     atsReport.addChild(callValidator(ats.getTimeStampToken(), tsp, v -> {
-      if (v instanceof ECardTimeStampValidator)
+      if (v instanceof BaseTimeStampValidator)
       {
-        var validator = (ECardTimeStampValidator)v;
+        var validator = (BaseTimeStampValidator)v;
         validator.setSourceOfRootHash(sourceOfRootHash(ats, atsID));
       }
     }, TimeStampReport.class));

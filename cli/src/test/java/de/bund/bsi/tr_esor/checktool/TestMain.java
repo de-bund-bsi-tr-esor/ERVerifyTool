@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.matchesRegex;
 import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.startsWith;
 import static org.hamcrest.io.FileMatchers.anExistingFile;
@@ -146,6 +147,9 @@ public class TestMain extends TestBase
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertNumberElements(report, "ReducedHashTree", 1);
     assertFirstMajor(report, "InsufficientInformation");
+    assertNumberElements(report, "SigMathOK", 1);
+    assertThat(report,
+               matchesRegex(".*SignatureOK>.*SigMathOK>.*Major>.*detail:valid.*Major>.*SigMathOK>.*SignatureOK>.*"));
   }
 
   /**

@@ -86,8 +86,6 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
 
   private final Supplier<ECard> eCard;
 
-  private byte[] sourceOfRootHash;
-
   /**
    * Constructor.
    */
@@ -348,11 +346,6 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
                                       null);
     optional.getAny().add(element);
     return optional;
-  }
-
-  void setSourceOfRootHash(byte[] sourceOfRootHash)
-  {
-    this.sourceOfRootHash = sourceOfRootHash;
   }
 
   void checkSignatureQuality(IndividualReportType irt, TimeStampReport tsr, Reference ref)

@@ -29,11 +29,11 @@ public class TestS4VerifyOnlyIT
 
   private static final String ENDPOINT_URL = "http://localhost:9988/ErVerifyTool/esor13/exec";
 
-  private static final String MAJOR_INDETERMINED = ":ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined";
+  private static final String MAJOR_INDETERMINED = "ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined";
 
-  private static final String MAJOR_INVALID = ":ResultMajor>urn:oasis:names:tc:dss:1.0:detail:invalid";
+  private static final String MAJOR_INVALID = "ResultMajor>urn:oasis:names:tc:dss:1.0:detail:invalid";
 
-  private static final String MAJOR_VALID = ":ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid";
+  private static final String MAJOR_VALID = "ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid";
 
   private static final String PARAMETER_ERROR = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError";
 
