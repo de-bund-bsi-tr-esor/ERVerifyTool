@@ -21,6 +21,7 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_DSS;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ECARD;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_OASIS_VR;
@@ -258,7 +259,7 @@ public class TestECardTimeStampValidator
     assertThat(report.getOverallResult().getResultMinor(),
                is("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError"));
     assertThat(report.getOverallResult().getResultMessage().getValue(),
-               is("eCard request failed. Response error was: " + errMsg));
+               containsString("eCard request failed. Response error was: " + errMsg));
   }
 
   /**
@@ -380,7 +381,7 @@ public class TestECardTimeStampValidator
     assertThat(report.getOverallResult().getResultMinor(),
                is("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"));
     assertThat(report.getOverallResult().getResultMessage().getValue(),
-               is("Illegal eCard response. " + message));
+               containsString("Illegal eCard response. " + message));
 
   }
 

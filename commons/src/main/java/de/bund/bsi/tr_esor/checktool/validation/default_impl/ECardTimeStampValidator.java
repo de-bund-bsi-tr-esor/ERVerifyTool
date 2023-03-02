@@ -126,25 +126,24 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
       var request = sourceOfRootHash == null ? verifyRequest(toCheck, ctx)
         : verifyRequest(toCheck, sourceOfRootHash, ctx);
       var response = eCard.get().verifyRequest(request);
-      if ("http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error".equals(response.getResult()
-                                                                                  .getResultMajor()))
+
+      var irt = extractTimestampIndividualReportFromAny(response.getOptionalOutputs(), ref, tsr);
+      if (irt == null)
       {
+        var minor = response.getResult().getResultMinor() != null ? response.getResult().getResultMinor()
+          : MINOR_PARAMETER_ERROR;
         var err = response.getResult().getResultMessage() == null ? ""
           : "Response error was: " + response.getResult().getResultMessage().getValue();
         tsr.updateCodes(ValidationResultMajor.INDETERMINED,
-                        response.getResult().getResultMinor(),
+                        minor,
                         MinorPriority.NORMAL,
                         "eCard request failed. " + err,
                         ref);
       }
       else
       {
-        var irt = extractTimestampIndividualReportFromAny(response.getOptionalOutputs(), ref, tsr);
-        if (irt != null)
-        {
-          tsr = createTimestampReportFromIndividualReport(irt, ref, tsr);
-          checkSignatureQuality(irt, tsr, ref);
-        }
+        tsr = createTimestampReportFromIndividualReport(irt, ref, tsr);
+        checkSignatureQuality(irt, tsr, ref);
       }
     }
     catch (WebServiceException e)

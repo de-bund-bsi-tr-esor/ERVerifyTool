@@ -25,11 +25,13 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.allOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assume.assumeTrue;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -82,6 +84,23 @@ public class TestECardTimeStampValidatorIT
   }
 
   /**
+   * Asserts that a valid time stamp is checked invalid if mismatching data is presented
+   */
+  @Test
+  public void detectsHashValueMismatch() throws Exception
+  {
+    TimeStampReport report = validateErFromRessourcesForContent("/xaip/xaip_ok.ers.b64",
+                                                                "custom",
+                                                                "mismatch".getBytes(StandardCharsets.UTF_8));
+    assertThat(report.getOverallResult().getResultMajor(), is(ValidationResultMajor.INVALID.toString()));
+    assertThat(report.getSummarizedMessage(), not(containsString("detached_content_file_missing")));
+    assertThat(report.getOverallResult().getResultMinor(),
+               containsString("urn:oasis:names:tc:dss:1.0:resultminor:invalid:IncorrectSignature"));
+    assertThat(report.getFormatted().getSignatureOK().getSigMathOK().getResultMajor(),
+               containsString("invalid"));
+  }
+
+  /**
    * Asserts that a test time stamp is checked as invalid if the TR-ESOR profile requiring qualified
    * timestamps is selected
    */
@@ -98,9 +117,18 @@ public class TestECardTimeStampValidatorIT
 
   private TimeStampReport validateErFromRessources(String testResource, String profileName) throws IOException
   {
+    return validateErFromRessourcesForContent(testResource, profileName, null);
+  }
+
+  private TimeStampReport validateErFromRessourcesForContent(String testResource,
+                                                             String profileName,
+                                                             byte[] content)
+    throws IOException
+  {
     var erBytes = TestUtils.decodeTestResource(testResource);
     var er = new ASN1EvidenceRecordParser().parse(erBytes);
     var sut = new ECardTimeStampValidator();
+    sut.setSourceOfRootHash(content);
     sut.setContext(new ErValidationContext(new Reference("timestamp"), "", profileName));
     return sut.validate(new Reference("timestamp"), er.getAtss().get(0).get(0).getTimeStampToken());
   }
