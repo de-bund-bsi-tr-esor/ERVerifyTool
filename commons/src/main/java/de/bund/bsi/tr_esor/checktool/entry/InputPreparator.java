@@ -146,7 +146,7 @@ public class InputPreparator
   {
     for ( var entry : reader.getEvidenceRecords().entrySet() )
     {
-      if (verifyReferencedVersionForEvidenceRecord(entry))
+      if (verifyReferencedVersionAndAoidForEvidenceRecord(entry, reader.getAoid()))
       {
         var er = entry.getValue().getEvidenceRecord();
         if (er.getVersionID() == null && reader.listVersions().size() > 1)
@@ -177,11 +177,24 @@ public class InputPreparator
   }
 
 
-  private boolean verifyReferencedVersionForEvidenceRecord(Entry<Reference, CredentialType> credEntry)
+  private boolean verifyReferencedVersionAndAoidForEvidenceRecord(Entry<Reference, CredentialType> credEntry,
+                                                                  String aoid)
   {
     var cred = credEntry.getValue();
-    var relatedObjects = cred.getRelatedObjects();
 
+    var evidenceRecord = cred.getEvidenceRecord();
+    if (evidenceRecord != null)
+    {
+      var aoidFromEr = evidenceRecord.getAOID();
+      if (aoidFromEr != null && aoid != null && !aoidFromEr.equals(aoid))
+      {
+        createContextForNoVerification("AOID " + aoid + " in XAIP header does not match AOID " + aoidFromEr
+                                       + " addressed in xaip:evidenceRecord.");
+        return false;
+      }
+    }
+
+    var relatedObjects = cred.getRelatedObjects();
     if (relatedObjects.isEmpty())
     {
       return true;
@@ -215,7 +228,6 @@ public class InputPreparator
                                        "Version ID for EvidenceRecord and relatedObjects reference in enveloping credential do not match");
         return false;
       }
-
     }
 
     if (numberOfVersionManifestsFound == 0)
@@ -251,6 +263,7 @@ public class InputPreparator
       createContextForNoVerification("Given XAIP is not well-formed, thus requirements from xaip:evidenceRecord are not met.");
       return true;
     }
+
     if (aoid != null && !aoid.equals(header.getAOID()))
     {
       createContextForNoVerification("Given XAIP does not match AOID " + aoid

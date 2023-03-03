@@ -395,6 +395,28 @@ public class TestMain extends TestBase
   }
 
   /**
+   * Asserts that validation of a XAIP enclosing an evidence record specifying a wrong AOID results in a
+   * VerificationReport containing an individual report stating the verification was impossible and resulted
+   * in an invalid result and no error is printed to the console.
+   */
+  @Test
+  public void wrongAoidInEmbeddedEr() throws Exception
+  {
+    var xaipPath = "/xaip/xaip_nok_ers_wrong_aoid.xml";
+
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + xaipPath);
+
+    assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
+    assertFirstMajor(report, "RequesterError");
+    assertThat("report",
+               report,
+               containsString("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"));
+    assertThat("report",
+               report,
+               containsString("AOID d9984bc6-2268-4d93-a9ea-50b20dfde3db in XAIP header does not match AOID mismatching_aoid addressed in xaip:evidenceRecord."));
+  }
+
+  /**
    * Asserts that the validation of an evidence record that contains an invalid CMS version leads to a clear
    * and understandable error message. The test data is an otherwise valid ER where only the CMS version of
    * the first timestamp has been manipulated.

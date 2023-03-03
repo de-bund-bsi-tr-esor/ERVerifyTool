@@ -403,6 +403,11 @@ public class XaipReader
                .orElseThrow(() -> new VersionNotFoundException(versionId, listVersions()));
   }
 
+  public String getAoid()
+  {
+    return xaip.getPackageHeader().getAOID();
+  }
+
   /**
    * Returns version of the XAIP.
    */
