@@ -19,6 +19,7 @@ import de.bund.bsi.tr_esor.checktool.out.OutputFolder;
 import de.bund.bsi.tr_esor.checktool.out.XaipObjectWriter;
 import de.bund.bsi.tr_esor.checktool.validation.signatures.DetachedSignatureValidationContextBuilder;
 import de.bund.bsi.tr_esor.checktool.xml.ComprehensiveXaipSerializer;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.xaip.PackageHeaderType;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
@@ -47,7 +48,11 @@ public class DumpHandler
   /**
    * Extracts data from XAIP and writes them to the output folder.
    */
-  public void dumpXaip(XAIPType xaip, ComprehensiveXaipSerializer serializer) throws IOException
+  public void dumpXaip(XAIPType xaip,
+                       ComprehensiveXaipSerializer serializer,
+                       LXaipReader lXaipReader,
+                       String profile)
+    throws IOException
   {
     var xas = new XaipAndSerializer(xaip, serializer);
     var aoid = Optional.ofNullable(xas.getXaip())
@@ -56,7 +61,7 @@ public class DumpHandler
                        .orElse("no_aoid");
     outputFolder.createAoidFolder(aoid);
     dumpDataSection(xas, outputFolder);
-    dumpSignature(xas, outputFolder);
+    dumpSignature(xas, outputFolder, lXaipReader, profile);
   }
 
   @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
@@ -77,7 +82,11 @@ public class DumpHandler
   }
 
   @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
-  private void dumpSignature(XaipAndSerializer xas, OutputFolder outFolder) throws IOException
+  private void dumpSignature(XaipAndSerializer xas,
+                             OutputFolder outFolder,
+                             LXaipReader lXaipReader,
+                             String profileName)
+    throws IOException
   {
     var credentialSection = xas.getXaip().getCredentialsSection();
     if (credentialSection == null)
@@ -95,6 +104,22 @@ public class DumpHandler
         var ctx = new DetachedSignatureValidationContextBuilder().withXaipSerializer(xas.getSerializer())
                                                                  .create(cred);
         xaipObjectWriter.write(ctx);
+      }
+      else if (cred.getOther() != null)
+      {
+        if (lXaipReader.isValidLXaipElement(cred, cred.getCredentialID()))
+        {
+          var ctx = new DetachedSignatureValidationContextBuilder().withXaipSerializer(xas.getSerializer())
+                                                                   .withProfileName(profileName)
+                                                                   .create(cred);
+          xaipObjectWriter.write(ctx);
+        }
+        else
+        {
+          LOG.warn("Credential {} is not a supported signature object. For Credentials containing xaip:other, only LXAIP data references are supported.",
+                   cred.getCredentialID());
+        }
+
       }
       else
       {

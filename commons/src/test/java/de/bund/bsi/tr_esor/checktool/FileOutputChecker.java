@@ -36,6 +36,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Comparator;
 
+import org.assertj.core.api.Assertions;
 import org.junit.After;
 import org.junit.Before;
 
@@ -103,6 +104,14 @@ public class FileOutputChecker
   }
 
   /**
+   * Asserts that the content of a specified file contains given bytes.
+   */
+  protected void assertFileContainsBytes(String relativeFilePath, byte[] bytes) throws Exception
+  {
+    Assertions.assertThat(contentBinary(relativeFilePath)).contains(bytes);
+  }
+
+  /**
    * Asserts that the content of a specified file matches given pattern.
    */
   protected void assertFileContainsPattern(String relativeFilePath, String expectedPattern) throws Exception
@@ -134,6 +143,15 @@ public class FileOutputChecker
   {
     assertFileExists(relativeFilePath);
     return Files.readAllLines(file(relativeFilePath)).toString();
+  }
+
+  /**
+   * content of file as String
+   */
+  protected byte[] contentBinary(String relativeFilePath) throws Exception
+  {
+    assertFileExists(relativeFilePath);
+    return Files.readAllBytes(file(relativeFilePath));
   }
 
   private Path file(String relativeFilePath)

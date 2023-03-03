@@ -620,6 +620,37 @@ public class TestMain extends TestBase
   }
 
   /**
+   * Assert contents from an LXAIP are read and written to the output folder provided.
+   */
+  @Test
+  public void writesLXaipContentToFolder() throws Exception
+  {
+
+    callMain("-conf",
+             RES_DIR + "config.xml",
+             "-data",
+             RES_DIR + "/lxaip/lxaip_ok_er_cred.xml",
+             "-out",
+             destination.toAbsolutePath().toString());
+
+    final var aoid_folder = "0cd5ec81_b123_4024_b1cc_d20a32dca014";
+    var reportFile = destination.resolve(aoid_folder).resolve("report.xml");
+    assertThat(reportFile.toFile(), anExistingFile());
+
+    assertFolderExists(aoid_folder + "/D0_V001");
+    assertFolderExists(aoid_folder + "/CT_V001");
+
+    assertFileExists(aoid_folder + "/D0_V001/D0_V001.bin");
+    assertFileExists(aoid_folder + "/CT_V001/D0_V001.bin");
+    assertFileExists(aoid_folder + "/CT_V001/signature.dat");
+
+    assertFileContainsBytes(aoid_folder + "/D0_V001/D0_V001.bin", "PNG".getBytes(StandardCharsets.US_ASCII));
+    assertFileContainsBytes(aoid_folder + "/CT_V001/D0_V001.bin", "PNG".getBytes(StandardCharsets.US_ASCII));
+    assertFileContainsBytes(aoid_folder + "/CT_V001/signature.dat",
+                            "Governikus CA".getBytes(StandardCharsets.US_ASCII));
+  }
+
+  /**
    * Asserts that S4 web server can be started using the command line parameters "-server" and "-port".
    */
   @Test(timeout = 30_000)

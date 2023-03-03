@@ -175,12 +175,23 @@ public class ComprehensiveXaipSerializer implements XaipSerializer
     if (value instanceof MetaDataObjectType)
     {
       var meta = (MetaDataObjectType)value;
+      if (LXaipReader.isValidLXaipElement(meta, meta.getMetaDataID()))
+      {
+        return lXaipReader.readBinaryData(meta, meta.getMetaDataID());
+      }
       elem = getNodeByLocalNameAndId(xaip, "metaDataObject", "metaDataID", meta.getMetaDataID());
     }
     if (value instanceof CredentialType)
     {
       var cred = (CredentialType)value;
-      elem = getNodeByLocalNameAndId(xaip, "credential", "credentialID", cred.getCredentialID());
+      if (LXaipReader.isValidLXaipElement(cred, cred.getCredentialID()))
+      {
+        return lXaipReader.readBinaryData(cred, cred.getCredentialID());
+      }
+      else
+      {
+        elem = getNodeByLocalNameAndId(xaip, "credential", "credentialID", cred.getCredentialID());
+      }
     }
     if (value instanceof VersionManifestType)
     {

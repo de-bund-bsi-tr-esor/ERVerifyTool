@@ -54,6 +54,10 @@ public final class Toolbox
     var binData = data.getBinaryData();
     if (binData == null)
     {
+      if (LXaipReader.isValidLXaipElement(data, data.getDataObjectID()))
+      {
+        return ".bin";
+      }
       return ".xml";
     }
 

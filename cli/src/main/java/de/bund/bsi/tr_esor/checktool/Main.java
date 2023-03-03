@@ -49,6 +49,7 @@ import de.bund.bsi.tr_esor.checktool.entry.S4VerifyOnly;
 import de.bund.bsi.tr_esor.checktool.out.OutputFolder;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationScheduler;
 import de.bund.bsi.tr_esor.checktool.xml.ComprehensiveXaipSerializer;
+import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
@@ -100,13 +101,15 @@ public final class Main
           runServer(cmd.getOptionValue("host", "localhost"), cmd.getOptionValue("port", "9999"));
           return;
         }
-        checkGivenProfile(cmd.getOptionValue(PROFILE_NAME));
+        var profile = cmd.hasOption(PROFILE_NAME) ? cmd.getOptionValue(PROFILE_NAME)
+          : Configurator.getInstance().getDefaultProfileName();
+        checkGivenProfile(profile);
         if (cmd.hasOption("data") || cmd.hasOption("er"))
         {
           runValidation(cmd.getOptionValue("data"),
                         cmd.getOptionValue("er"),
                         cmd.getOptionValue("out"),
-                        cmd.getOptionValue(PROFILE_NAME));
+                        profile);
           return;
         }
       }
@@ -207,7 +210,8 @@ public final class Main
       }
       else
       {
-        dump(destination, report, params.getXaip(), params.getSerializer());
+        var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory(profile));
+        dump(destination, report, params.getXaip(), params.getSerializer(), lXaipReader, profile);
       }
     }
 
@@ -221,14 +225,16 @@ public final class Main
   private static void dump(String destination,
                            VerificationReportType report,
                            XAIPType xaip,
-                           XaipSerializer serializer)
+                           XaipSerializer serializer,
+                           LXaipReader lXaipReader,
+                           String profile)
     throws IOException, JAXBException
   {
     var outputFolder = new OutputFolder(Paths.get(destination));
     var dumpHandler = new DumpHandler(outputFolder);
     if (xaip != null && serializer != null)
     {
-      dumpHandler.dumpXaip(xaip, (ComprehensiveXaipSerializer)serializer);
+      dumpHandler.dumpXaip(xaip, (ComprehensiveXaipSerializer)serializer, lXaipReader, profile);
     }
     dumpHandler.dumpReport(report);
   }

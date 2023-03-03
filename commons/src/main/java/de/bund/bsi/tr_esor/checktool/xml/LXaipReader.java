@@ -42,7 +42,7 @@ public class LXaipReader
   /**
    *
    */
-  public boolean isValidLXaipElement(Object data, String id)
+  public static boolean isValidLXaipElement(Object data, String id)
   {
     return isLXaip(data) && isValidOrThrow(dataObjectReferenceFrom(data), id);
   }
