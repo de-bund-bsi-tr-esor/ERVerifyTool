@@ -22,6 +22,7 @@
 package de.bund.bsi.tr_esor.checktool.validation;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -52,7 +53,7 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
 
   private HashCreator hashCreator;
 
-  private final String parseFailMessage;
+  private final List<String> additionalMessages = new ArrayList<>();
 
   private final FormatOkReport formatOk;
 
@@ -82,7 +83,6 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
   {
     super(reference, objectToValidate, profileName, returnVerificationReport);
     this.hashCreator = ValidatorFactory.getInstance().getHashCreator();
-    this.parseFailMessage = null;
     this.formatOk = new FormatOkReport(reference);
     this.checkForAdditionalHashes = checkForAdditionalHashes;
   }
@@ -94,7 +94,7 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
   public ErValidationContext(Reference reference, String parseFailMessage, String profileName)
   {
     super(reference, null, profileName, null);
-    this.parseFailMessage = parseFailMessage;
+    this.additionalMessages.add(parseFailMessage);
     this.formatOk = null;
     this.checkForAdditionalHashes = false;
   }
@@ -109,6 +109,22 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
       throw new IllegalArgumentException("duplicate key: " + key);
     }
     protectedDataByID.put(key, data);
+  }
+
+  /**
+   * Add a message that should be included in the result message
+   */
+  public void addAdditionalMessage(String info)
+  {
+    additionalMessages.add(info);
+  }
+
+  /**
+   * Get messages that should be included in the result message of the report
+   */
+  public List<String> getAdditionalMessages()
+  {
+    return additionalMessages;
   }
 
 
@@ -175,14 +191,6 @@ public class ErValidationContext extends ValidationContext<EvidenceRecord>
   public boolean isRestrictedValidation()
   {
     return false;
-  }
-
-  /**
-   * Returns a message describing why parsing the evidence record failed.
-   */
-  public String getParseFailMessage()
-  {
-    return parseFailMessage;
   }
 
   /**

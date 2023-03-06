@@ -66,10 +66,6 @@ public final class ValidationScheduler
       {
         return ReportPart.forNoProfile(context.getReference(), context.getProfileName());
       }
-      if (context.getTargetClass() == null)
-      {
-        return ReportPart.forUnsupportedInput(context.getReference());
-      }
       Validator<T, ?, ReportPart> val = factory.getValidator(context.getTargetClass(),
                                                              ReportPart.class,
                                                              context);

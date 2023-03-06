@@ -45,7 +45,7 @@ public class EvidenceRecordValidator
   private Reference reference;
 
   @Override
-  public EvidenceRecordReport validateInternal(Reference ref, EvidenceRecord record)
+  public EvidenceRecordReport validateInternal(Reference ref, EvidenceRecord er)
   {
     if (!ctx.getReference().equals(ref))
     {
@@ -54,18 +54,24 @@ public class EvidenceRecordValidator
     reference = ctx.getReference();
 
     var detailReport = new EvidenceRecordReport(ref);
-    if (record == null)
+
+    for ( var message : ctx.getAdditionalMessages() )
+    {
+      detailReport.addMessageOnly(message, reference);
+    }
+
+    if (er == null)
     {
       ctx.getFormatOk().setNoParsedObject("Evidence record");
     }
     else
     {
-      checkVersion(record.getVersion(), detailReport);
-      checkCryptoInfo(record.getCryptoInfo(), detailReport);
-      checkEncryptionInfo(record.getEncryptionInfo(), detailReport);
-      ctx.setDeclaredDigestOIDs(record.getDigestAlgorithms());
-      checkTimeStampSequence(record.getAtss(), detailReport);
-      checkDigestAlgorithmValidity(record, detailReport);
+      checkVersion(er.getVersion(), detailReport);
+      checkCryptoInfo(er.getCryptoInfo(), detailReport);
+      checkEncryptionInfo(er.getEncryptionInfo(), detailReport);
+      ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
+      checkTimeStampSequence(er.getAtss(), detailReport);
+      checkDigestAlgorithmValidity(er, detailReport);
     }
     detailReport.setFormatOk(ctx.getFormatOk());
     return detailReport;
@@ -113,9 +119,9 @@ public class EvidenceRecordValidator
     detailReport.addChild(callValidator(atss, ref, ATSSequenceReport.class));
   }
 
-  private void checkDigestAlgorithmValidity(EvidenceRecord record, EvidenceRecordReport detailReport)
+  private void checkDigestAlgorithmValidity(EvidenceRecord er, EvidenceRecordReport detailReport)
   {
-    for ( var oid : record.getDigestAlgorithms() )
+    for ( var oid : er.getDigestAlgorithms() )
     {
       var usage = AlgorithmUsage.createHashed(oid, ctx.getLatestPossibleUsage(oid));
 

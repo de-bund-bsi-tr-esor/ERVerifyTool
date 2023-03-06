@@ -53,6 +53,8 @@ import org.slf4j.LoggerFactory;
 
 import de.bund.bsi.tr_esor.checktool.entry.IsValidXML;
 import de.bund.bsi.tr_esor.checktool.entry.TestS4VerifyOnly;
+import de.bund.bsi.tr_esor.checktool.validation.report.BsiResultMinor;
+import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
 
 
 /**
@@ -77,8 +79,6 @@ public class TestMain extends TestBase
 
   /**
    * Asserts that invalid command line parameters are reported in a suitable form.
-   *
-   * @throws IOException
    */
   @Test
   public void invalidParameters() throws IOException
@@ -93,8 +93,6 @@ public class TestMain extends TestBase
   /**
    * Asserts that a verification report contains a sensible message in case of unknown profile. Actual
    * validation is not done in this case.
-   *
-   * @throws IOException
    */
   @Test
   public void unknownProfile() throws IOException
@@ -115,8 +113,6 @@ public class TestMain extends TestBase
    * record embedded within a XAIP.
    * <p>
    * See TR-ESOR-ERS-FEIN p. 23 UC1.1/1.2 paragraph 1.
-   *
-   * @throws IOException
    */
   @Test
   public void erInXaip() throws IOException
@@ -132,8 +128,6 @@ public class TestMain extends TestBase
    * Asserts that an evidence record for a XAIP given separately can be validated.
    * <p>
    * See TR-ESOR-ERS-FEIN p. 23 UC1.1/1.2 paragraph 2.
-   *
-   * @throws IOException
    */
   @Test
   public void detachedErForXaip() throws IOException
@@ -154,8 +148,6 @@ public class TestMain extends TestBase
 
   /**
    * Asserts that a standard detached ER can be verified in the Basis-ERS profile
-   *
-   * @throws IOException
    */
   @Test
   public void usingBasisErsProfile() throws IOException
@@ -177,8 +169,6 @@ public class TestMain extends TestBase
    * Asserts that an evidence record for a XAIP given separately can be validated.
    * <p>
    * See TR-ESOR-ERS-FEIN p. 23 UC1.1/1.2 paragraph 2.
-   *
-   * @throws IOException
    */
   @Test
   public void detachedErForLXaip() throws IOException
@@ -215,8 +205,6 @@ public class TestMain extends TestBase
    * that the data attribute is covered, we include a negative test giving wrong data.
    * <p>
    * See TR-ESOR-ERS-FEIN p. 23 UC1.1/1.2 paragraph 3. <br>
-   *
-   * @throws IOException
    */
   @Test
   public void erInCmsDetached() throws IOException
@@ -237,8 +225,6 @@ public class TestMain extends TestBase
   /**
    * Asserts the tool can take an ASN1-encoded evidence record containing a version number other than 1 and
    * returns invalid as a result as other versions are not supported according to the specification.
-   *
-   * @throws IOException
    */
   @Test
   public void erInvalidVersion() throws IOException
@@ -260,8 +246,6 @@ public class TestMain extends TestBase
    * <p>
    * The checks are executed twice: the evidence record is given as ASN.1 encoded binary file or within an XML
    * file.
-   *
-   * @throws IOException
    */
   @Test
   public void erForBinary() throws IOException
@@ -334,9 +318,11 @@ public class TestMain extends TestBase
   public void verifyInvalidErParam() throws Exception
   {
     var report = callMain("-conf", RES_DIR + "config.xml", "-er", RES_DIR + "config.xml");
-    assertThat("report", report, containsString("ResponderError"));
-    assertThat("report", report, containsString("resultminor/invalidFormat"));
-    assertThat("report", report, not(containsString("Details")));
+    assertThat(report, containsString("FieldName=\"command line parameter er\""));
+    assertThat(report, containsString(OasisDssResultMajor.REQUESTER_ERROR.getUri()));
+    assertThat(report, containsString(BsiResultMinor.PARAMETER_ERROR.getUri()));
+    assertThat(report, containsString("illegal or unsupported data format"));
+    assertThat(report, not(containsString("Details")));
   }
 
   /**
@@ -530,17 +516,6 @@ public class TestMain extends TestBase
   }
 
   /**
-   * Assert that presenting an unsupported XAIP version is detected
-   */
-  @Test
-  public void checkUnsupportedXaipVersion() throws Exception
-  {
-    var report = callMain("-conf", RES_DIR + "config.xml", "-data", RES_DIR + "/xaip/esor12/xaip_ok.xml");
-    assertFirstMajor(report, "ResponderError");
-    assertThat("report", report, containsString("illegal or unsupported data format"));
-  }
-
-  /**
    * Assert that a XAIP using non-exclusive xml canonicalization can be validated.
    */
   @Test
@@ -571,6 +546,62 @@ public class TestMain extends TestBase
     assertThat("report", report, containsString("SAMLv2Identifier>urn:Beispiel</"));
     assertThat("report", report, not(containsString("hashValueMismatch")));
     assertFirstMajor(report, "InsufficientInformation");
+  }
+
+  /**
+   * Asserts that when the tool is used with legacy (TR-ESOR 1.1 or 1.2) XAIPs, an appropriate message is
+   * written to the report.
+   */
+  @Test
+  public void errorsOnLegacyXAIP() throws IOException
+  {
+    var reportEsor11NoEr = callMain("-conf",
+                                    RES_DIR + "config.xml",
+                                    "-data",
+                                    RES_DIR + "xaip/esor11/xaip_ok.xml");
+    assertUnsupportedData(reportEsor11NoEr);
+
+    var reportEsor12NoEr = callMain("-conf",
+                                    RES_DIR + "config.xml",
+                                    "-data",
+                                    RES_DIR + "xaip/esor12/xaip_ok.xml");
+    assertUnsupportedData(reportEsor12NoEr);
+
+    var reportEsor11DetachedEr = callMain("-conf",
+                                          RES_DIR + "config.xml",
+                                          "-data",
+                                          RES_DIR + "xaip/esor11/xaip_ok.xml",
+                                          "-er",
+                                          RES_DIR + "xaip/xaip_ok.ers");
+    assertUnsupportedDataForDetachedEr(reportEsor11DetachedEr);
+
+    var reportEsor12DetachedEr = callMain("-conf",
+                                          RES_DIR + "config.xml",
+                                          "-data",
+                                          RES_DIR + "xaip/esor12/xaip_ok.xml",
+                                          "-er",
+                                          RES_DIR + "xaip/xaip_ok.ers");
+    assertUnsupportedDataForDetachedEr(reportEsor12DetachedEr);
+  }
+
+  private void assertUnsupportedData(String report)
+  {
+    assertFirstMajor(report, OasisDssResultMajor.REQUESTER_ERROR.getUri());
+    assertThat(report, containsString(BsiResultMinor.PARAMETER_ERROR.getUri()));
+    assertThat(report, containsString("An unsupported XAIP format (TR-ESOR 1.1 or 1.2) was found."));
+    assertThat(report, not(containsString("illegal or unsupported data format")));
+    assertThat(report, not(containsString("hashValueMismatch")));
+  }
+
+  private void assertUnsupportedDataForDetachedEr(String report)
+  {
+    assertFirstMajor(report, OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri());
+    assertThat(report, containsString(BsiResultMinor.PARAMETER_ERROR.getUri()));
+    assertThat(report,
+               containsString("The input data uses an unsupported format. An unsupported XAIP format (TR-ESOR 1.1 or 1.2) was found. The evidence record is not checked with regard to the data."));
+    assertThat(report, containsString("An unsupported XAIP format (TR-ESOR 1.1 or 1.2) was found."));
+    assertThat(report, not(containsString("illegal or unsupported data format")));
+    assertThat(report, not(containsString("hashValueMismatch")));
   }
 
   /**

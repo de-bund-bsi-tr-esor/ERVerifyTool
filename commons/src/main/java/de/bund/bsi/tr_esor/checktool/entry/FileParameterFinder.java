@@ -116,6 +116,7 @@ public class FileParameterFinder extends ParameterFinder
     if (parsedData instanceof UnsupportedData)
     {
       unsupportedRef = dataRef;
+      unsupportedData = (UnsupportedData)parsedData;
     }
     else if (parsedData instanceof XaipAndSerializer)
     {

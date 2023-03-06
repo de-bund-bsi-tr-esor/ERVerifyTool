@@ -102,41 +102,4 @@ public abstract class ValidationContext<T>
     return returnVerificationReport;
   }
 
-  /**
-   * Returns a context indication that the object is not recognized and therefore cannot be validated.
-   */
-  public static ValidationContext<Object> forUnsupported(Reference ref, String profileName)
-  {
-    return new UnsupportedContext(ref, profileName);
-  }
-
-  /**
-   * Subtype for nothing parsed to validate.
-   */
-  private static class UnsupportedContext extends ValidationContext<Object>
-  {
-
-    /**
-     * Creates new instance
-     */
-    protected UnsupportedContext(Reference reference, String profileName)
-    {
-      super(reference, null, profileName, null);
-    }
-
-    /**
-     * There is no object to be validated here, hence no class.
-     */
-    @Override
-    public Class<Object> getTargetClass()
-    {
-      return null;
-    }
-
-    @Override
-    public boolean isRestrictedValidation()
-    {
-      return false;
-    }
-  }
 }

@@ -97,14 +97,34 @@ public class InputPreparator
 
     if (params.getUnsupportedRef() != null)
     {
-      validations.add(ValidationContext.forUnsupported(params.getUnsupportedRef(), params.getProfileName()));
+      var message = params.getUnsupportedData() != null ? params.getUnsupportedData().getMessage()
+        : "illegal or unsupported data format";
+      var noVerificationContext = new NoVerificationContext(params.getUnsupportedRef(),
+                                                            params.getProfileName(), message);
+      validations.add(noVerificationContext);
     }
   }
 
   private ErValidationContext addProtectedDataFromBinaryDocuments(ErValidationContext evc)
   {
     var binaryDocuments = params.getBinaryDocuments();
-    binaryDocuments.forEach(evc::addProtectedData);
+    if (binaryDocuments.isEmpty())
+    {
+      if (params.getUnsupportedData() == null)
+      {
+        evc.addAdditionalMessage("No data found. The evidence record is not checked with regard to any data.");
+      }
+      else
+      {
+        evc.addAdditionalMessage("The input data uses an unsupported format. "
+                                 + params.getUnsupportedData().getMessage()
+                                 + " The evidence record is not checked with regard to the data.");
+      }
+    }
+    else
+    {
+      binaryDocuments.forEach(evc::addProtectedData);
+    }
     return evc;
   }
 

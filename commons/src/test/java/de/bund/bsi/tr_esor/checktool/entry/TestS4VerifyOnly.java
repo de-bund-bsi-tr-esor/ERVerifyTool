@@ -291,7 +291,7 @@ public class TestS4VerifyOnly
     }, ECardResultMajor.ERROR);
     checkReportFor(report,
                    "SignatureObject/Base64Signature/Value",
-                   OasisDssResultMajor.RESPONDER_ERROR.getUri(),
+                   OasisDssResultMajor.REQUESTER_ERROR.getUri(),
                    false);
     assertThat("message",
                report.getIndividualReport().get(0).getResult().getResultMessage().getValue(),

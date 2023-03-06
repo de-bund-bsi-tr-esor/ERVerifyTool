@@ -32,6 +32,7 @@ import org.bouncycastle.cms.CMSSignedData;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
+import de.bund.bsi.tr_esor.checktool.data.UnsupportedData;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
@@ -81,6 +82,9 @@ public abstract class ParameterFinder
 
   /** reference of some input which cannot be parsed to any supported type. */
   protected Reference unsupportedRef;
+
+  /** Information on the input in the unsupported ref. */
+  protected UnsupportedData unsupportedData;
 
   private String profileName;
 
@@ -189,6 +193,14 @@ public abstract class ParameterFinder
   public Reference getUnsupportedRef()
   {
     return unsupportedRef;
+  }
+
+  /**
+   * Returns information on the unsupported element referenced through the unsupportedRef
+   */
+  public UnsupportedData getUnsupportedData()
+  {
+    return unsupportedData;
   }
 
   /**

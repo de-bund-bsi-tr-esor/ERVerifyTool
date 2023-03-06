@@ -91,7 +91,7 @@ public class TestErValidation
     var result = report.getIndividualReport().get(0).getResult();
     assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
     assertThat(result.getResultMessage().getValue(),
-               is("atss/0: no protected data to check\natss/0/0/tsp: no online validation of time stamp done"));
+               is("No data found. The evidence record is not checked with regard to any data.\natss/0: no protected data to check\natss/0/0/tsp: no online validation of time stamp done"));
   }
 
 

@@ -111,19 +111,6 @@ public class ReportPart
   }
 
   /**
-   * Returns instance which states that the input was not parsed. Consequently, no validation is possible.
-   */
-  public static ReportPart forUnsupportedInput(Reference ref)
-  {
-    var result = new ReportPart(ref);
-    result.detailsPresent = false;
-    result.major = ValidationResultMajor.INVALID;
-    result.minor = BsiResultMinor.INVALID_FORMAT.getUri();
-    result.message = "illegal or unsupported data format";
-    return result;
-  }
-
-  /**
    * Returns instance which states that no verification was done because of the reason given in the message.
    */
   public static ReportPart forNoVerification(Reference ref, String message)

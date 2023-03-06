@@ -18,6 +18,6 @@ public class UnsupportedXaipParser extends RegexBasedParser
   @Override
   public Object parse() throws IOException
   {
-    return new UnsupportedData("A XAIP that does not conform to the XAIP version supported by this tool was found.");
+    return new UnsupportedData("An unsupported XAIP format (TR-ESOR 1.1 or 1.2) was found.");
   }
 }
