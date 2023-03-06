@@ -136,7 +136,7 @@ public class TestECardInlineSignatureValidatorIT
                                .getResultMinor()).endsWith(OasisDssResultMinor.ERROR_REQUEST_NOT_SUPPORTED.getUri());
     assertThat(individualReport.getResult()
                                .getResultMessage()
-                               .getValue()).endsWith("No signature found in data object.");
+                               .getValue()).endsWith("No inline signature found in data object. Detached signatures might be present.");
     assertThat(individualReport.getDetails()).isNull();
   }
 

@@ -186,14 +186,15 @@ public abstract class BaseECardSignatureValidator<T, C extends ValidationContext
     return port;
   }
 
-  private static void fillForNoSignature(SignatureReportPart result, Reference ref)
+  private void fillForNoSignature(SignatureReportPart result, Reference ref)
   {
-    var message = "No signature found in data object.";
-    result.addMessageOnly(message, ref);
+    result.addMessageOnly(noSignatureFoundMessage(), ref);
     result.setVr(singleMessageVerificationReport(OasisDssResultMajor.REQUESTER_ERROR,
                                                  OasisDssResultMinor.ERROR_REQUEST_NOT_SUPPORTED,
-                                                 message));
+                                                 noSignatureFoundMessage()));
   }
+
+  protected abstract String noSignatureFoundMessage();
 
   private static void fillForNoUrl(SignatureReportPart result, Reference ref)
   {

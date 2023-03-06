@@ -61,6 +61,7 @@ public class TestS4VerifyOnlySignaturesIT
                                    "Hundename_V001",
                                    "fileSize_V001",
                                    "Hundename_V002",
+                                   "Impfausweis_V001",
                                    "Impfausweissignature_V001");
 
     SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("ER_2.16.840.1.101.3.4.2.1_V001")
@@ -94,7 +95,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void signatureInXaip() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_sig.xml", "DO-02", "detachedSignature");
+    var individualReports = verify("xaip/signature/xaip_ok_sig.xml", "DO-01", "DO-02", "detachedSignature");
 
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-02"));
     SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("detachedSignature"),
@@ -107,7 +108,10 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validateDoubleDetachedSignature() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_xades_det_double.xml", "CR-01", "CR-01 (2)");
+    var individualReports = verify("xaip/signature/xaip_ok_xades_det_double.xml",
+                                   "DO-01",
+                                   "CR-01",
+                                   "CR-01 (2)");
 
     SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
                                                                                   OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
@@ -126,7 +130,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void testInvalidDetachedSignature() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_nok_sig.xml", "DO-02", "detachedSignature");
+    var individualReports = verify("xaip/signature/xaip_nok_sig.xml", "DO-01", "DO-02", "detachedSignature");
 
     SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("DO-02"));
     var reportDetachedSignature = individualReports.get("detachedSignature");
@@ -147,7 +151,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void xmlSigWithWrongEmbedding() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_nok_xmlsig.xml", "detachedSignature");
+    var individualReports = verify("xaip/signature/xaip_nok_xmlsig.xml", "data", "detachedSignature");
 
     var reportDetachedSignature = individualReports.get("detachedSignature");
     SignatureValidationTestHelper.assertResult(reportDetachedSignature.getResult(),
@@ -163,7 +167,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validateXmlSigBase64() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_xmlsig_asBinary.xml", "detachedSignature");
+    var individualReports = verify("xaip/signature/xaip_ok_xmlsig_asBinary.xml", "data", "detachedSignature");
 
     // TASK LZA-7045: Response enthält Fehler, obwohl Test von keinen Fehlern ausgeht
     // (im XSV gab wird derselbe Fehler angezeigt aber im Test nicht darauf geprüft)
@@ -205,7 +209,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validateXaipOkXadesDetXmlSingle() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_xades_det_xml_single.xml", "CR-01");
+    var individualReports = verify("xaip/signature/xaip_ok_xades_det_xml_single.xml", "DO-01", "CR-01");
 
     SignatureValidationTestHelper.assertResult(individualReports.get("CR-01").getResult(),
                                                OasisDssResultMajor.INSUFFICIENT_INFORMATION.toString(),
@@ -233,7 +237,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validatesTwoCadesSigs() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_pdf_two_sigs.xml", "CR-01", "CR-01 (2)");
+    var individualReports = verify("xaip/signature/xaip_ok_pdf_two_sigs.xml", "DO-01", "CR-01", "CR-01 (2)");
 
     SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
                                                                                   OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
@@ -310,7 +314,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validateValidTextMetadata() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_textmeta_cades.xml", "DO-01", "CR-01");
+    var individualReports = verify("xaip/signature/xaip_ok_textmeta_cades.xml", "MDO-01", "DO-01", "CR-01");
 
     SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
                                                                                   OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
@@ -338,7 +342,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validateValidTimeStamp() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_ok_tsp.xml", "CR-01");
+    var individualReports = verify("xaip/signature/xaip_ok_tsp.xml", "DO-01", "CR-01");
 
     var individualReport = individualReports.get("CR-01");
     SignatureValidationTestHelper.assertResult(individualReport.getResult(),
@@ -356,7 +360,7 @@ public class TestS4VerifyOnlySignaturesIT
   @Test
   public void validateInvalidTimeStamp() throws Exception
   {
-    var individualReports = verify("xaip/signature/xaip_nok_tsp.xml", "CR-01");
+    var individualReports = verify("xaip/signature/xaip_nok_tsp.xml", "DO-01", "CR-01");
 
     var individualReport = individualReports.get("CR-01");
     SignatureValidationTestHelper.assertResult(individualReport.getResult(),
@@ -395,6 +399,7 @@ public class TestS4VerifyOnlySignaturesIT
     var individualReports = verify("lxaip/lxaip_ok_er_cred.xml",
                                    "CT_V001",
                                    "MDO_V001",
+                                   "D0_V001",
                                    "ER_2.16.840.1.101.3.4.2.1_V001");
 
     SignatureValidationTestHelper.assertMajorSuccess(individualReports.get("ER_2.16.840.1.101.3.4.2.1_V001")

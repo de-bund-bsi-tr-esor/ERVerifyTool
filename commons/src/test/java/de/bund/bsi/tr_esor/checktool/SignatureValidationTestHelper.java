@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 import oasis.names.tc.dss._1_0.core.schema.Result;
@@ -129,7 +130,8 @@ public final class SignatureValidationTestHelper
     var result = individualReport.getResult();
     assertThat(result.getResultMajor()).isEqualTo(OasisDssResultMajor.SUCCESS.toString());
     assertThat(result.getResultMinor()).isNull();
-    assertThat(result.getResultMessage().getValue()).isEqualTo("No signature found in data object.");
+    assertThat(result.getResultMessage()
+                     .getValue()).isEqualTo("No inline signature found in data object. Detached signatures might be present.");
     assertThat(individualReport.getDetails()).isNull();
   }
 
@@ -142,6 +144,25 @@ public final class SignatureValidationTestHelper
       parser.setInput(ins);
       var xas = parser.parse();
       var cred = xas.getXaip().getCredentialsSection().getCredential().get(0);
+
+      return new DetachedSignatureValidationContextBuilder().withXaipSerializer(xas.getSerializer())
+                                                            .withProfileName("custom")
+                                                            .create(cred);
+    }
+  }
+
+  public static DetachedSignatureValidationContext getNoSignatureDetachedContext() throws IOException
+  {
+    try (var ins = TestUtils.class.getResourceAsStream("/xaip/signature/xaip_ok_sig.xml"))
+    {
+      assertThat(ins).isNotNull();
+      var parser = new XaipParser(mock(LXaipReader.class));
+      parser.setInput(ins);
+      var xas = parser.parse();
+      var cred = xas.getXaip().getCredentialsSection().getCredential().get(0);
+      cred.getSignatureObject()
+          .getBase64Signature()
+          .setValue("notASignature".getBytes(StandardCharsets.UTF_8));
 
       return new DetachedSignatureValidationContextBuilder().withXaipSerializer(xas.getSerializer())
                                                             .withProfileName("custom")

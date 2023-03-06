@@ -94,6 +94,20 @@ public class TestECardDetachedSignatureValidatorIT
 
   }
 
+  /**
+   * Asserts that a detached signature object that is not a signature is detected as not a signature
+   */
+  @Test
+  public void noSignatureInCredential() throws Exception
+  {
+    DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getNoSignatureDetachedContext();
+
+    systemUnderTest.setContext(ctx);
+    SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
+
+    assertThat(report.getSummarizedMessage()).contains("No signature found in credential.");
+  }
+
   private DetailedSignatureReportType extractDetailedSigReport(SignatureReportPart report)
   {
     assertThat(report.getVr()).isNotNull();

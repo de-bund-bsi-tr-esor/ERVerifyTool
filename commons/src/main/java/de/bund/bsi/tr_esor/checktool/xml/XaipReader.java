@@ -132,8 +132,7 @@ public class XaipReader
     {
       for ( var data : dataSection.getDataObject() )
       {
-        if (!hasDetachedSignature(data) && (lXaipReader.isValidLXaipElement(data, data.getDataObjectID())
-                                            || data.getBinaryData() != null))
+        if ((lXaipReader.isValidLXaipElement(data, data.getDataObjectID()) || data.getBinaryData() != null))
         {
           results.add(new InlineSignedDataObject(new Reference(data.getDataObjectID()), lXaipReader, data));
         }
@@ -146,8 +145,7 @@ public class XaipReader
     {
       for ( var meta : metaDataSection.getMetaDataObject() )
       {
-        if (!hasDetachedSignature(meta) && (lXaipReader.isValidLXaipElement(meta, meta.getMetaDataID())
-                                            || meta.getBinaryMetaData() != null))
+        if ((lXaipReader.isValidLXaipElement(meta, meta.getMetaDataID()) || meta.getBinaryMetaData() != null))
         {
           results.add(new InlineSignedMetaDataObject(new Reference(meta.getMetaDataID()), lXaipReader, meta));
         }

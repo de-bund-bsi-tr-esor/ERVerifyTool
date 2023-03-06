@@ -77,6 +77,12 @@ public class ECardInlineSignatureValidator
   }
 
   @Override
+  protected String noSignatureFoundMessage()
+  {
+    return "No inline signature found in data object. Detached signatures might be present.";
+  }
+
+  @Override
   protected Class<InlineSignatureValidationContext> getRequiredContextClass()
   {
     return InlineSignatureValidationContext.class;

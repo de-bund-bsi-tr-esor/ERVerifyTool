@@ -109,6 +109,12 @@ public class ECardDetachedSignatureValidator
   }
 
   @Override
+  protected String noSignatureFoundMessage()
+  {
+    return "No signature found in credential.";
+  }
+
+  @Override
   protected Class<DetachedSignatureValidationContext> getRequiredContextClass()
   {
     return DetachedSignatureValidationContext.class;
