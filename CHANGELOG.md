@@ -6,15 +6,21 @@
 
 - All ResultMajor codes provided by the tool have been reworked to suit the technical standards.
 - Individual Reports now have a ResultMajor as defined in OASIS DSS Core (Success, InsufficientInformation, RequesterError or ResponderError)
-- Requests through S4 now have ResultMajor codes as defined in BSI eCard specification (ok, warning or error)
+- Requests through S4 now have ResultMajor codes as defined in BSI eCard specification (ok, warning or error).
+- Data objects that have a detaches signature are now also checked for inline signatures.
+- The result major when unsupported data is given to the application is now a RequesterError.
 
 **Enhancements:**
 
 - The embedded server can now be bound to addresses other than localhost using the host parameter.
+- An additional check for the AOID attribute of embedded Evidence Records has been implemented.
+- When an output folder is specified in the CLI, credentials are loaded from LXAIP data object references and included in the folder.
+- A clear error message is generated if older XAIPs according to TR-ESOR 1.1 or 1.2 are checked.
 
 **Closed Issues:**
 
 - A validation failure during the validation of a binary data object with a provided output folder has been resolved.
+- In some cases, when using the -out parameter of the CLI with LXAIPs, instead of the content, the XML data of a data object reference was written into the output folder.
 
 ## v1.3.3
 
