@@ -718,6 +718,28 @@ public class TestMain extends TestBase
   }
 
   /**
+   * Asserts that a XAIP with a detached evidence record embedded into a CMS structure can be validated.
+   */
+  @Test
+  public void xaipWithDetachedErInCms() throws Exception
+  {
+    var ers = createDecodedTempFile("/xaip/xaip-cades-det-er-emb.png_er.p7s.b64").getAbsolutePath();
+
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-profile",
+                          "Basis-ERS",
+                          "-data",
+                          RES_DIR + "/xaip/xaip-cades-det-er-emb.xml",
+                          "-er",
+                          ers);
+    assertNumberElements(report, "IndividualReport", 3);
+    assertNumberElements(report, "HashValue", 2);
+    assertFirstMajor(report, "InsufficientInformation");
+    Assertions.assertThat(report).contains("hashValueMismatch");
+  }
+
+  /**
    * Asserts that S4 web server can be started using the command line parameters "-server" and "-port".
    */
   @Test(timeout = 30_000)

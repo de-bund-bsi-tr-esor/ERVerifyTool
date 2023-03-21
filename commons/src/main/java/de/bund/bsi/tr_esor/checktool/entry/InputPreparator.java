@@ -79,28 +79,32 @@ public class InputPreparator
       return;
     }
 
-    if (params.getXaip() != null)
+    var xaip = params.getXaip();
+    if (xaip != null)
     {
       scanXaipForEvidenceRecords();
       scanXaipForInlineSignatures();
       scanXaipForDetachedSignatures();
     }
-    else if (params.getCmsDocument() != null)
+
+    var cmsDocument = params.getCmsDocument();
+    if (cmsDocument != null)
     {
-      var reader = new CmsSignedDataReader(params.getCmsDocument(), params.getCmsRef());
+      var reader = new CmsSignedDataReader(cmsDocument, params.getCmsRef());
       reader.getEmbeddedErs().forEach((r, v) -> createContextForErInCMS(r, v, reader));
     }
-    else
+
+    if (xaip == null && cmsDocument == null)
     {
       createContextForDetachedEr(this::addProtectedDataFromBinaryDocuments);
     }
 
-    if (params.getUnsupportedRef() != null)
+    var unsupportedRef = params.getUnsupportedRef();
+    if (unsupportedRef != null)
     {
       var message = params.getUnsupportedData() != null ? params.getUnsupportedData().getMessage()
         : "illegal or unsupported data format";
-      var noVerificationContext = new NoVerificationContext(params.getUnsupportedRef(),
-                                                            params.getProfileName(), message);
+      var noVerificationContext = new NoVerificationContext(unsupportedRef, params.getProfileName(), message);
       validations.add(noVerificationContext);
     }
   }
