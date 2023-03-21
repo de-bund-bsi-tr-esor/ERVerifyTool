@@ -717,6 +717,36 @@ public class TestMain extends TestBase
                             "Governikus CA".getBytes(StandardCharsets.US_ASCII));
   }
 
+  @Test
+  public void mismatchWhenTooManyProtectedPointers() throws Exception
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_ok_sig_ok_v1_extra_pp_v2.xml");
+
+    assertNumberElements(report, "IndividualReport", 7);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertNumberElements(report, "HashValue", 5);
+    assertThat(report, containsString("Too many protected elements"));
+  }
+
+  @Test
+  public void mismatchWhenTooManyProtectedPointersWithProfileBoth() throws Exception
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-profile",
+                          "both",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_ok_sig_ok_v1_extra_pp_v2.xml");
+
+    assertNumberElements(report, "IndividualReport", 7);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertNumberElements(report, "HashValue", 5);
+    assertThat(report, containsString("Too many protected elements"));
+  }
+
   /**
    * Asserts that a XAIP with a detached evidence record embedded into a CMS structure can be validated.
    */

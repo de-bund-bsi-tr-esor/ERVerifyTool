@@ -366,7 +366,6 @@ public class ArchiveTimeStampValidator
   private void checkProtectedElements(List<byte[]> atsHashes)
   {
     var hashSortingMode = requiredCoveredDigestValues.getHashSortingMode();
-
     if (!requiredCoveredDigestValues.isEmpty() && hashSortingMode == HashSortingMode.BOTH)
     {
       var missingDigestIds = missingDigestsForHashmodeBoth(atsHashes);
@@ -377,6 +376,15 @@ public class ArchiveTimeStampValidator
     }
     else if (!requiredCoveredDigestValues.isEmpty())
     {
+      if (atsHashes.size() < requiredCoveredDigestValues.streamHashes().count())
+      {
+        formatOk.updateCodes(ValidationResultMajor.INVALID,
+                             ValidationResultMinor.HASH_VALUE_MISMATCH.toString(),
+                             MinorPriority.MOST_IMPORTANT,
+                             "Too many protected elements",
+                             atsReport.getReference().newChild("protectedElements"));
+      }
+
       var missingDigestIds = missingDigestsForDefaultHashMode(atsHashes);
       if (!missingDigestIds.isEmpty())
       {
