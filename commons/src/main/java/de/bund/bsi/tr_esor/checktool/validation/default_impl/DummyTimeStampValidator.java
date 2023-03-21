@@ -22,10 +22,10 @@
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
 import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Arrays;
 import java.util.Collection;
 
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
@@ -181,7 +181,7 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
     var hashInTimestamp = toCheck.getTimeStampInfo().getMessageImprintDigest();
     var calculatedHash = new LocalHashCreator().calculateHash(sourceOfRootHash,
                                                               hashAlgorithm.getAlgorithm().getId());
-    return Arrays.equals(hashInTimestamp, calculatedHash);
+    return MessageDigest.isEqual(hashInTimestamp, calculatedHash);
   }
 
   private SignatureValidityType signatureValidityWithResult(VerificationResultType result)

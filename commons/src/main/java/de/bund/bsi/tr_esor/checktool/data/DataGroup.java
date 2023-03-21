@@ -132,6 +132,15 @@ public class DataGroup
   }
 
   /**
+   * Checks if the original data is needed for a check of single-hashed hash. For the double-hash, the
+   * original data is never needed.
+   */
+  public boolean needsDataForCheck()
+  {
+    return hashes.size() == 1;
+  }
+
+  /**
    * The sorted and concatenated hashes of this group, source for the hash of the next partial hashtree level
    */
   public byte[] sortedAndConcatenatedHashes()

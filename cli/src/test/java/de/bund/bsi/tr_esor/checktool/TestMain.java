@@ -46,6 +46,7 @@ import java.nio.file.Paths;
 
 import javax.net.SocketFactory;
 
+import org.assertj.core.api.Assertions;
 import org.junit.AssumptionViolatedException;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -260,6 +261,41 @@ public class TestMain extends TestBase
       assertNumberElements(report, "ArchiveTimeStamp", 1);
       assertFirstMajor(report, "InsufficientInformation");
     }
+  }
+
+  /**
+   * Assert that an ER containing a "double hash", i.e. the timestamp containing a hash of a hash can be
+   * checked.
+   */
+  @Test
+  public void doubleHashedErForBinary() throws IOException
+  {
+    var data = createDecodedTempFile("/bin/TXT_DATA.txt.b64").getAbsolutePath();
+    var ers = RES_DIR + "/bin/ER_DOUBLE_HASHED_FOR_TXT_DATA.ers";
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
+    assertNumberElements(report, "IndividualReport", 1);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertFirstMajor(report, "RequesterError");
+    Assertions.assertThat(report).doesNotContain("hashValueMismatch").doesNotContain("HASH_FAILURE");
+  }
+
+  /**
+   * Assert that XAIP with an ER containing a "double hash", i.e. the timestamp containing a hash of a hash
+   * can be checked.
+   */
+  @Test
+  public void doubleHashedErForXaip() throws Exception
+  {
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_double_hashed_er.xml",
+                          "-er",
+                          RES_DIR + "/xaip/xaip_double_hashed_er.ers");
+    assertNumberElements(report, "IndividualReport", 2);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertFirstMajor(report, "RequesterError");
+    Assertions.assertThat(report).doesNotContain("hashValueMismatch").doesNotContain("HASH_FAILURE");
   }
 
   /**

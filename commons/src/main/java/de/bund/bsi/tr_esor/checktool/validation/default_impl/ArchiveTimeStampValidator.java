@@ -112,6 +112,8 @@ public class ArchiveTimeStampValidator
 
   private DigestsToCover requiredCoveredDigestValues;
 
+  private boolean usesDoubleHash;
+
   private String hashOIDInPrevATS;
 
   @Override
@@ -227,21 +229,14 @@ public class ArchiveTimeStampValidator
   private byte[] sourceOfRootHash(ArchiveTimeStamp ats, Reference atsID)
   {
     // if a previous hash tree level exists, that is the source of the root hash
-    if (ats.numberOfPartialHashtrees() > 1
-        || ats.numberOfPartialHashtrees() == 1 && ats.getPartialHashtree(0).size() > 1)
+    var dataGroup = rootDataGroupOfReducedHashTree(ats);
+    if (dataGroup != null && (usesDoubleHash || !dataGroup.needsDataForCheck()))
     {
-      var dataGroup = rootDataGroupOfReducedHashTree(ats);
-      if (dataGroup != null)
-      {
-        return dataGroup.sortedAndConcatenatedHashes();
-      }
-      else
-      {
-        return null;
-      }
+      return dataGroup.sortedAndConcatenatedHashes();
     }
-    else // if there is only a single leaf in the hash tree, the root's hash source depends on the single data
-         // object or a previous timestamp
+    // if there is only a single leaf in the hash tree, the root's hash source depends on the single data
+    else if (ats.numberOfPartialHashtrees() == 1 && ats.getPartialHashtree(0).size() == 1)
+    // object or a previous timestamp
     {
       if (isFirstChain && isFirstInChain)
       {
@@ -259,6 +254,10 @@ public class ArchiveTimeStampValidator
       {
         return lastTimestampsContent;
       }
+    }
+    else
+    {
+      return null;
     }
   }
 
@@ -323,15 +322,18 @@ public class ArchiveTimeStampValidator
     var timeStampMessageHash = ats.getTimeStampToken().getTimeStampInfo().getMessageImprintDigest();
     // find out which is the actual hash construction method for the root hash and return the last data group
     // if any
-    List<Function<DataGroup, byte[]>> hashFunctions = List.of(DataGroup::getHash, DataGroup::getDoubleHash);
-    for ( var hashFunction : hashFunctions )
+    for ( var useDoubleHash : new boolean[]{true, false} )
     {
+      Function<DataGroup, byte[]> hashFunction = useDoubleHash ? DataGroup::getDoubleHash
+        : DataGroup::getHash;
       for ( var computeMissing : new boolean[]{true, false} )
       {
-        var lastGroup = rootDataGroup(ats, hashFunction, hashOID, computeMissing);
+        var lastGroup = rootDataGroup(ats, hashFunction, computeMissing);
         var lastGroupsHash = hashFunction.apply(lastGroup);
+
         if (Arrays.equals(lastGroupsHash, timeStampMessageHash))
         {
+          usesDoubleHash = useDoubleHash;
           return lastGroup;
         }
       }
@@ -500,13 +502,12 @@ public class ArchiveTimeStampValidator
    */
   private DataGroup rootDataGroup(ArchiveTimeStamp ats,
                                   Function<DataGroup, byte[]> hashFunction,
-                                  String digestOID,
                                   boolean handleHashesAsSet)
   {
     DataGroup lastGroup = null;
     for ( var i = 0 ; i < ats.numberOfPartialHashtrees() ; i++ )
     {
-      var group = new DataGroup(ats.getPartialHashtree(i), digestOID);
+      var group = new DataGroup(ats.getPartialHashtree(i), hashOID);
       group.setHandleHashesAsSet(handleHashesAsSet);
       if (lastGroup != null)
       {
