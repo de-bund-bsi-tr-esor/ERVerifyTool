@@ -9,6 +9,9 @@
 - Requests through S4 now have ResultMajor codes as defined in BSI eCard specification (ok, warning or error).
 - Data objects that have a detaches signature are now also checked for inline signatures.
 - The result major when unsupported data is given to the application is now a RequesterError.
+- Support for double hashing in both online and offline tsp check.
+- Support for validation of a XAIP with a detached evidence record embedded into a CMS structure.
+- Missing hash value in an evidence record results in ValidationResultMajor.INVALID and ValidationResultMajor.HASH_VALUE_MISMATCH in report.
 
 **Enhancements:**
 
