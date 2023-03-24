@@ -264,6 +264,96 @@ public class TestMain extends TestBase
   }
 
   /**
+   * Assert that a binary with evidence record can be validated using Basis-ERS profile.
+   */
+  @Test
+  public void erForBinaryRfc4998() throws IOException
+  {
+    var ers = createDecodedTempFile("/bin/erDataMSOS-001.ers.b64").getAbsolutePath();
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-profile",
+                          "Basis-ERS",
+                          "-data",
+                          RES_DIR + "/bin/erDataMSOS-001.bin",
+                          "-er",
+                          ers);
+
+    assertNumberElements(report, "IndividualReport", 1);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertFirstMajor(report, "RequesterError");
+    assertThat("report",
+               report,
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
+  }
+
+  /**
+   * Assert that a xaip with evidence record can be validated using Basis-ERS profile.
+   */
+  @Test
+  public void detachedErForXaipRfc4998() throws IOException
+  {
+    var ers = createDecodedTempFile("/bin/erDataMSOS-001.ers.b64").getAbsolutePath();
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-profile",
+                          "Basis-ERS",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_erDataMSOS-001.xml",
+                          "-er",
+                          ers);
+
+    assertNumberElements(report, "IndividualReport", 2);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertFirstMajor(report, "RequesterError");
+    assertThat("report",
+               report,
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
+  }
+
+  /**
+   * Assert that a binary with evidence record containing initial timestamp without reduced hashtree can be
+   * validated.
+   */
+  @Test
+  public void erForBinaryNoReducedHashtree() throws Exception
+  {
+    var data = createDecodedTempFile("/bin/TXT_DATA.txt.b64").getAbsolutePath();
+    var ers = RES_DIR + "/bin/ER_SHA256-DGN_XAIP_OK_SC1.ers";
+    var report = callMain("-conf", RES_DIR + "config.xml", "-data", data, "-er", ers);
+
+    assertNumberElements(report, "IndividualReport", 1);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertFirstMajor(report, "RequesterError");
+    assertThat("report",
+               report,
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
+  }
+
+  /**
+   * Assert that a xaip with evidence record containing initial timestamp without reduced hashtree can be
+   * validated.
+   */
+  @Test
+  public void detachedErForXaipNoReducedHashtree() throws Exception
+  {
+    var ers = RES_DIR + "/bin/ER_SHA256-DGN_XAIP_OK_SC1.ers";
+    var report = callMain("-conf",
+                          RES_DIR + "config.xml",
+                          "-data",
+                          RES_DIR + "/xaip/xaip_erDataMSOS-001.xml",
+                          "-er",
+                          ers);
+
+    assertNumberElements(report, "IndividualReport", 2);
+    assertNumberElements(report, "ArchiveTimeStamp", 1);
+    assertFirstMajor(report, "RequesterError");
+    assertThat("report",
+               report,
+               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
+  }
+
+  /**
    * Assert that an ER containing a "double hash", i.e. the timestamp containing a hash of a hash can be
    * checked.
    */
@@ -753,14 +843,14 @@ public class TestMain extends TestBase
   @Test
   public void xaipWithDetachedErInCms() throws Exception
   {
-    var ers = createDecodedTempFile("/xaip/xaip-cades-det-er-emb.png_er.p7s.b64").getAbsolutePath();
+    var ers = createDecodedTempFile("/xaip/xaip_cades-det-er-emb.png_er.p7s.b64").getAbsolutePath();
 
     var report = callMain("-conf",
                           RES_DIR + "config.xml",
                           "-profile",
                           "Basis-ERS",
                           "-data",
-                          RES_DIR + "/xaip/xaip-cades-det-er-emb.xml",
+                          RES_DIR + "/xaip/xaip_cades-det-er-emb.xml",
                           "-er",
                           ers);
     assertNumberElements(report, "IndividualReport", 3);

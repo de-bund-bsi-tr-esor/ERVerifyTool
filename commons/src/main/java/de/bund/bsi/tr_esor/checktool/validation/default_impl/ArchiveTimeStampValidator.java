@@ -329,12 +329,15 @@ public class ArchiveTimeStampValidator
       for ( var computeMissing : new boolean[]{true, false} )
       {
         var lastGroup = rootDataGroup(ats, hashFunction, computeMissing);
-        var lastGroupsHash = hashFunction.apply(lastGroup);
-
-        if (Arrays.equals(lastGroupsHash, timeStampMessageHash))
+        if (lastGroup != null)
         {
-          usesDoubleHash = useDoubleHash;
-          return lastGroup;
+          var lastGroupsHash = hashFunction.apply(lastGroup);
+
+          if (Arrays.equals(lastGroupsHash, timeStampMessageHash))
+          {
+            usesDoubleHash = useDoubleHash;
+            return lastGroup;
+          }
         }
       }
     }
@@ -504,7 +507,6 @@ public class ArchiveTimeStampValidator
    *
    * @param hashFunction Defines how to compute a hash value of a data group. This method can handle different
    *          cases of handling data groups with exactly one contained hash value.
-   * @param digestOID specifies digest algorithm
    * @param handleHashesAsSet handles hashes in data groups as set (thus only considering one hash of multiple
    *          equal hashes for the group hash)
    */
