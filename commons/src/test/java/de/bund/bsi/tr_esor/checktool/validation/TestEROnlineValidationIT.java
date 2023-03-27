@@ -7,6 +7,7 @@ import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.nullValue;
 
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
@@ -119,10 +120,13 @@ public class TestEROnlineValidationIT
                      containsString("detached_content_file_missing")));
   }
 
-  private static FileParameterFinder fileParameterFinder(Path protectedData, String er) throws IOException
+  private static FileParameterFinder fileParameterFinder(Path protectedData, String er)
+    throws URISyntaxException, IOException
   {
     return new FileParameterFinder(protectedData,
-                                   Path.of(TestErValidation.class.getClassLoader().getResource(er).getFile()),
+                                   Path.of(TestEROnlineValidationIT.class.getClassLoader()
+                                                                         .getResource(er)
+                                                                         .toURI()),
                                    "custom");
   }
 

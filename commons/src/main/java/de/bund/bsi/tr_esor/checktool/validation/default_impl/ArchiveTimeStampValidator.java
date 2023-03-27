@@ -235,14 +235,13 @@ public class ArchiveTimeStampValidator
       return dataGroup.sortedAndConcatenatedHashes();
     }
     // if there is only a single leaf in the hash tree, the root's hash source depends on the single data
-    else if (ats.numberOfPartialHashtrees() == 1 && ats.getPartialHashtree(0).size() == 1)
-    // object or a previous timestamp
+    else if (isFirstChain && isFirstInChain)
     {
-      if (isFirstChain && isFirstInChain)
-      {
-        return ctx.singleProtectedData();
-      }
-      else if (!isFirstChain && isFirstInChain)
+      return ctx.singleProtectedData();
+    }
+    else if (ats.numberOfPartialHashtrees() == 1 && ats.getPartialHashtree(0).size() == 1)
+    {
+      if (!isFirstChain && isFirstInChain)
       {
         return Concatenation.concat(computeHash(() -> ctx.singleProtectedData(),
                                                 ats.getOidFromTimeStamp(),
