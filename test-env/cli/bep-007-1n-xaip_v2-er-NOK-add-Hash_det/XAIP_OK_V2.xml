@@ -1,0 +1,43 @@
+<esor:XAIP XAIPVersion="1.3.0" xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip">
+	<esor:packageHeader packageID="x373f4e59-69dc-4a77-9ea6-75e91a74bfc4">
+		<esor:AOID>40387ca1-4497-40fa-acfa-9976132b1769</esor:AOID>
+		<esor:versionManifest VersionID="V002">
+			<esor:preservationInfo>
+				<esor:retentionPeriod>2100-01-01+01:00</esor:retentionPeriod>
+			</esor:preservationInfo>
+			<esor:submissionInfo>
+				<esor:clientID>remotebean_esor12</esor:clientID>
+				<esor:submissionTime>2017-02-10T14:43:26.898+01:00</esor:submissionTime>
+			</esor:submissionInfo>
+			<esor:packageInfoUnit packageUnitID="_idxVersions_V001_V002">
+				<esor:protectedObjectPointer>DO-01</esor:protectedObjectPointer>
+				<esor:protectedObjectPointer>DO-02</esor:protectedObjectPointer>
+				<esor:protectedObjectPointer>DO-03</esor:protectedObjectPointer>
+			</esor:packageInfoUnit>
+		</esor:versionManifest>
+		<ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+	</esor:packageHeader>
+	<esor:dataObjectsSection>
+		<esor:dataObject dataObjectID="DO-01">
+			<esor:binaryData>Y29udGVudCBvZiBkYXRhIG9iamVjdCBETy0wMQ==</esor:binaryData>
+			<esor:checkSum>
+				<esor:checkSumAlgorithm>SHA-256</esor:checkSumAlgorithm>
+				<esor:checkSum>EECC4D3352C0E965FD88795EDFD1A60C5AC09B3C1100C052EBB6AE0BD3432B26</esor:checkSum>
+			</esor:checkSum>
+		</esor:dataObject>
+		<esor:dataObject dataObjectID="DO-02">
+			<esor:binaryData>Y29udGVudCBvZiBkYXRhIG9iamVjdCBETy0wMg==</esor:binaryData>
+			<esor:checkSum>
+				<esor:checkSumAlgorithm>SHA-256</esor:checkSumAlgorithm>
+				<esor:checkSum>9CE2D7D350F9418407439F0CA11DCC12AB9F7CDB15F9ECC5ECA935482602B872</esor:checkSum>
+			</esor:checkSum>
+		</esor:dataObject>
+		<esor:dataObject dataObjectID="DO-03">
+			<esor:binaryData>Y29udGVudCBvZiBkYXRhIG9iamVjdCBETy0wMw==</esor:binaryData>
+			<esor:checkSum>
+				<esor:checkSumAlgorithm>SHA-256</esor:checkSumAlgorithm>
+				<esor:checkSum>4763AA264F1EE50B14ED78C43DB96C4F8EF67E259F9EE649FFD73BC5FCD73C2E</esor:checkSum>
+			</esor:checkSum>
+		</esor:dataObject>
+	</esor:dataObjectsSection>
+</esor:XAIP>

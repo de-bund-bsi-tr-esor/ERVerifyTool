@@ -1,0 +1,5 @@
+{
+  "/ns1:VerificationReport/ns1:IndividualReport/ns3:Result/ns3:ResultMajor":"urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError",
+  "/ns1:VerificationReport/ns1:IndividualReport/ns3:Result/ns3:ResultMinor":"http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError",
+  "/ns1:VerificationReport/ns1:IndividualReport/ns3:Result/ns3:ResultMessage":"Given XAIP does not match AOID EIN-FALSCHER-AOID addressed in xaip:evidenceRecord."  
+}

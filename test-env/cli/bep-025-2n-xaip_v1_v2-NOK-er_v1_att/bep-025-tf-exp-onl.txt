@@ -1,0 +1,26 @@
+{
+  "//ns9:EvidenceRecordReport/../../ns3:Result/ns3:ResultMajor":"urn:oasis:names:tc:dss:1.0:resultmajor:Success",
+  
+  "//ns9:EvidenceRecordReport/ns9:FormatOK/ns1:ResultMajor":"urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:Version":"urn:ietf:rfc:4998",
+  "//ns9:EvidenceRecordReport/ns9:DigestAlgorithm/ns1:Suitability/ns1:ResultMajor":"urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:FormatOK/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:DigestAlgorithm/ns1:Suitability/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:FormatOK/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+	
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:MessageHashAlgorithm/ns1:Suitability/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+	
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:SignatureOK/ns1:SigMathOK/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:CertificatePathValidity/ns1:PathValiditySummary/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid"
+}

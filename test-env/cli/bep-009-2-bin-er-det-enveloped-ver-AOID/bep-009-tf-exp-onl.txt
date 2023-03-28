@@ -1,0 +1,6 @@
+{
+  "/ns1:VerificationReport/ns1:IndividualReport/ns3:Result[1]/ns3:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError",
+  "/ns1:VerificationReport/ns1:IndividualReport/ns3:Result[1]/ns3:ResultMinor":
+    "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"
+}

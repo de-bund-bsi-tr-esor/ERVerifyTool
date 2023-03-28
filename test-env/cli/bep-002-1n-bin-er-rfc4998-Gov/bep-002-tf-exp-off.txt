@@ -1,0 +1,26 @@
+{
+  "//ns9:EvidenceRecordReport/../../ns3:Result/ns3:ResultMajor":"urn:oasis:names:tc:dss:1.0:resultmajor:RequesterError",
+  "//ns9:EvidenceRecordReport/../../ns3:Result/ns3:ResultMinor":"http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat",
+  
+  "//ns9:EvidenceRecordReport/ns9:FormatOK/ns1:ResultMajor":"urn:oasis:names:tc:dss:1.0:detail:valid", 
+  "//ns9:EvidenceRecordReport/ns9:Version":"urn:ietf:rfc:4998",
+  "//ns9:EvidenceRecordReport/ns9:DigestAlgorithm/ns1:Suitability/ns1:ResultMajor":"urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:FormatOK/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:DigestAlgorithm/ns1:Suitability/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid", 
+	
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:FormatOK/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:invalid",
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:FormatOK/ns1:ResultMinor":
+    "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat",
+	
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:SignatureOK/ns1:SigMathOK/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:valid",
+  
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:CertificatePathValidity/ns1:PathValiditySummary/ns1:ResultMajor":
+    "urn:oasis:names:tc:dss:1.0:detail:indetermined",
+  "//ns9:EvidenceRecordReport/ns9:ArchiveTimeStampSequence/ns9:ArchiveTimeStampChain/ns9:ArchiveTimeStamp/ns1:TimeStamp/ns1:CertificatePathValidity/ns1:PathValiditySummary/ns1:ResultMinor":
+    "http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported"
+}
