@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bsi.bund.de/tr-esor/checktool/1.2 file:///C:/Projects/BSI/ErTestTool/65.Build/230222/ERVerifyTool/all/build/install/config/Config.xsd">
+	<General>
+		<VerifierID>urn:BSI-Test-007</VerifierID>
+		<DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
+	</General>
+	<Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="c:\Projects\BSI\ErTestTool\LXAIP" hashMode="sorted">
+  </Profile>
+</Configuration>

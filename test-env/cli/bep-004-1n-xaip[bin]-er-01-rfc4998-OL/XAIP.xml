@@ -1,0 +1,23 @@
+<esor:XAIP XAIPVersion="1.3.0" xmlns:esor="http://www.bsi.bund.de/tr-esor/xaip">
+	<esor:packageHeader packageID="x78fea42d-88c8-4559-9f75-2b6e873c2ac4">
+		<esor:AOID>2660725e-8eef-4645-986a-1a51af7e8265</esor:AOID>
+		<esor:versionManifest VersionID="V001">
+			<esor:preservationInfo>
+				<esor:retentionPeriod>2100-01-01+01:00</esor:retentionPeriod>
+			</esor:preservationInfo>
+			<esor:submissionInfo>
+				<esor:clientID>remotebean_esor12</esor:clientID>
+				<esor:submissionTime>2017-02-10T15:07:42.821+01:00</esor:submissionTime>
+			</esor:submissionInfo>
+			<esor:packageInfoUnit packageUnitID="_idx_DO-01_V001">
+				<esor:protectedObjectPointer>DO-01</esor:protectedObjectPointer>
+			</esor:packageInfoUnit>
+		</esor:versionManifest>
+		<ds:CanonicalizationMethod xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/>
+	</esor:packageHeader>
+	<esor:dataObjectsSection>
+		<esor:dataObject dataObjectID="DO-01">
+			<esor:binaryData>blAhJy24T5hpesby6bmCLPymQaZZez6y+A3Cqtza</esor:binaryData>
+		</esor:dataObject>
+	</esor:dataObjectsSection>
+</esor:XAIP>
