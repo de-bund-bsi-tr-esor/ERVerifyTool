@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+<Appenders>
+    <File name="default.file" fileName="ERVerifyTool.log">
+        <PatternLayout>
+            <Pattern>%d{ISO8601} %-5p [%c{1}] - %m%n</Pattern>
+        </PatternLayout>
+    </File>
+</Appenders>
+<Loggers>
+    <Logger name="de.bund" level="info" additivity="false">
+        <AppenderRef ref="default.file"/>
+    </Logger>
+    <Root level="error">
+        <AppenderRef ref="default.file"/>
+    </Root>
+</Loggers>
+</Configuration>
