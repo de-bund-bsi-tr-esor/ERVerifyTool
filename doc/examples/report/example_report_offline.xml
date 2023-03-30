@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<VerificationReport xmlns="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#" xmlns:ns10="http://uri.etsi.org/19102/v1.2.1#" xmlns:ns11="http://uri.etsi.org/02231/v2#" xmlns:ns2="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns3="http://www.w3.org/2000/09/xmldsig#" xmlns:ns4="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns5="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#" xmlns:ns6="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns7="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns8="http://www.setcce.org/schemas/ers" xmlns:ns9="http://www.bsi.bund.de/tr-esor/vr">
+	<ns2:VerificationTimeInfo>
+		<ns2:VerificationTime>2023-03-28T14:29:51.662+02:00</ns2:VerificationTime>
+	</ns2:VerificationTimeInfo>
+	<VerifierIdentity>
+		<SAMLv2Identifier>urn:BSI-Test-007</SAMLv2Identifier>
+	</VerifierIdentity>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="command line parameter data/evidenceRecord:ER-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMessage xml:lang="en">atss/0/0/tsp: no online validation of time stamp done</ns2:ResultMessage>
+		</ns2:Result>
+		<Details>
+			<ns2:EvidenceRecordReport ReportVersion="1.3.0" xmlns:ns12="http://www.governikus.de/ecard/ext" xmlns:ns2="http://www.bsi.bund.de/tr-esor/vr" xmlns:ns3="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns4="http://www.w3.org/2000/09/xmldsig#" xmlns:ns5="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns6="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#" xmlns:ns7="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns8="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns9="http://www.setcce.org/schemas/ers">
+				<ns2:FormatOK>
+					<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+				</ns2:FormatOK>
+				<ns2:Version>urn:ietf:rfc:4998</ns2:Version>
+				<ns2:DigestAlgorithm>
+					<Algorithm>2.16.840.1.101.3.4.2.1</Algorithm>
+					<Suitability>
+						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+					</Suitability>
+				</ns2:DigestAlgorithm>
+				<ns2:ArchiveTimeStampSequence>
+					<ns2:ArchiveTimeStampChain>
+						<ns2:ArchiveTimeStamp>
+							<FormatOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</FormatOK>
+							<DigestAlgorithm>
+								<Algorithm>2.16.840.1.101.3.4.2.1</Algorithm>
+								<Suitability>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</Suitability>
+							</DigestAlgorithm>
+							<ReducedHashTree>
+								<PartialHashTree>
+									<HashValue>
+										<HashValue>70F31311F166B36CBF524CD3E7F814A87235598FE3491F806CDA3D4144A6DAB6</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>9F53019CC67F21FE8BD6C38D2E08BBA9A704278C6F3B75A89B2C945F462A1F4A</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>C32FED6D9F6A9CC17C4A098A72F30928283255924FDA4FC64D88DC964E5F7C29</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>CFAF87F65D62C57061847A5AD2F618A406C9DF23DF4B9DF1CAE8723013DDC3AF</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>F3889F717B46869F281BEA692F17899FD13A55DB224C919A117C4A3B26FACBE0</HashValue>
+									</HashValue>
+								</PartialHashTree>
+							</ReducedHashTree>
+							<TimeStamp>
+								<FormatOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</FormatOK>
+								<SignatureOK>
+									<SigMathOK>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+									</SigMathOK>
+								</SignatureOK>
+								<CertificatePathValidity>
+									<PathValiditySummary>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined</ResultMajor>
+										<ResultMinor>http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported</ResultMinor>
+										<ResultMessage xml:lang="en-en">Checking certificate paths is not supported by this tool. To check signatures comprehensively, configure an online eCard validation service.</ResultMessage>
+									</PathValiditySummary>
+									<CertificateIdentifier>
+										<ns4:X509IssuerName>unknown</ns4:X509IssuerName>
+										<ns4:X509SerialNumber>0</ns4:X509SerialNumber>
+									</CertificateIdentifier>
+								</CertificatePathValidity>
+							</TimeStamp>
+						</ns2:ArchiveTimeStamp>
+					</ns2:ArchiveTimeStampChain>
+				</ns2:ArchiveTimeStampSequence>
+			</ns2:EvidenceRecordReport>
+		</Details>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="DO-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported</ns2:ResultMinor>
+			<ns2:ResultMessage xml:lang="en">No online validation of a potential signature was possible as no validation service is configured in the active profile.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="DO-02"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported</ns2:ResultMinor>
+			<ns2:ResultMessage xml:lang="en">No online validation of a potential signature was possible as no validation service is configured in the active profile.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="DO-03"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported</ns2:ResultMinor>
+			<ns2:ResultMessage xml:lang="en">No online validation of a potential signature was possible as no validation service is configured in the active profile.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="MDO-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported</ns2:ResultMinor>
+			<ns2:ResultMessage xml:lang="en">No online validation of a potential signature was possible as no validation service is configured in the active profile.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="CR-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported</ns2:ResultMinor>
+			<ns2:ResultMessage xml:lang="en">No online validation of a potential signature was possible as no validation service is configured in the active profile.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="CR-02"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported</ns2:ResultMinor>
+			<ns2:ResultMessage xml:lang="en">No online validation of a potential signature was possible as no validation service is configured in the active profile.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+</VerificationReport>

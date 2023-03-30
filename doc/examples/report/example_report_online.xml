@@ -1,0 +1,1215 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<VerificationReport xmlns="urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#" xmlns:ns10="http://uri.etsi.org/19102/v1.2.1#" xmlns:ns11="http://uri.etsi.org/02231/v2#" xmlns:ns2="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns3="http://www.w3.org/2000/09/xmldsig#" xmlns:ns4="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns5="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#" xmlns:ns6="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns7="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns8="http://www.setcce.org/schemas/ers" xmlns:ns9="http://www.bsi.bund.de/tr-esor/vr">
+	<ns2:VerificationTimeInfo>
+		<ns2:VerificationTime>2023-03-28T14:29:47.956+02:00</ns2:VerificationTime>
+	</ns2:VerificationTimeInfo>
+	<VerifierIdentity>
+		<SAMLv2Identifier>urn:BSI-Test-007</SAMLv2Identifier>
+	</VerifierIdentity>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="command line parameter data/evidenceRecord:ER-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:Success</ns2:ResultMajor>
+		</ns2:Result>
+		<Details>
+			<ns2:EvidenceRecordReport ReportVersion="1.3.0" xmlns:ns12="http://www.governikus.de/ecard/ext" xmlns:ns2="http://www.bsi.bund.de/tr-esor/vr" xmlns:ns3="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns4="http://www.w3.org/2000/09/xmldsig#" xmlns:ns5="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns6="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#" xmlns:ns7="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns8="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns9="http://www.setcce.org/schemas/ers">
+				<ns2:FormatOK>
+					<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+				</ns2:FormatOK>
+				<ns2:Version>urn:ietf:rfc:4998</ns2:Version>
+				<ns2:DigestAlgorithm>
+					<Algorithm>2.16.840.1.101.3.4.2.1</Algorithm>
+					<Suitability>
+						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+					</Suitability>
+				</ns2:DigestAlgorithm>
+				<ns2:ArchiveTimeStampSequence>
+					<ns2:ArchiveTimeStampChain>
+						<ns2:ArchiveTimeStamp>
+							<FormatOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</FormatOK>
+							<DigestAlgorithm>
+								<Algorithm>2.16.840.1.101.3.4.2.1</Algorithm>
+								<Suitability>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</Suitability>
+							</DigestAlgorithm>
+							<ReducedHashTree>
+								<PartialHashTree>
+									<HashValue>
+										<HashValue>70F31311F166B36CBF524CD3E7F814A87235598FE3491F806CDA3D4144A6DAB6</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>9F53019CC67F21FE8BD6C38D2E08BBA9A704278C6F3B75A89B2C945F462A1F4A</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>C32FED6D9F6A9CC17C4A098A72F30928283255924FDA4FC64D88DC964E5F7C29</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>CFAF87F65D62C57061847A5AD2F618A406C9DF23DF4B9DF1CAE8723013DDC3AF</HashValue>
+									</HashValue>
+									<HashValue>
+										<HashValue>F3889F717B46869F281BEA692F17899FD13A55DB224C919A117C4A3B26FACBE0</HashValue>
+									</HashValue>
+								</PartialHashTree>
+							</ReducedHashTree>
+							<TimeStamp>
+								<FormatOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</FormatOK>
+								<MessageHashAlgorithm>
+									<Algorithm>http://www.w3.org/2001/04/xmlenc#sha256</Algorithm>
+									<Suitability>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+										<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+									</Suitability>
+								</MessageHashAlgorithm>
+								<SignatureOK>
+									<SigMathOK>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+									</SigMathOK>
+									<SignatureAlgorithm>
+										<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+										<Suitability>
+											<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+										</Suitability>
+									</SignatureAlgorithm>
+								</SignatureOK>
+								<CertificatePathValidity>
+									<PathValiditySummary>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+									</PathValiditySummary>
+									<CertificateIdentifier>
+										<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,OU=Governikus CA,CN=Governikus CA 8:PN</ns4:X509IssuerName>
+										<ns4:X509SerialNumber>7921302047188757424</ns4:X509SerialNumber>
+									</CertificateIdentifier>
+									<PathValidityDetail>
+										<CertificateValidity>
+											<CertificateIdentifier>
+												<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,OU=Governikus CA,CN=Governikus CA 8:PN</ns4:X509IssuerName>
+												<ns4:X509SerialNumber>7921302047188757424</ns4:X509SerialNumber>
+											</CertificateIdentifier>
+											<Subject>C=de,O=Governikus KG,OU=Testcertificate Governikus SC,CN=Gov-Testtimestamp-LZA</Subject>
+											<ChainingOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												<ResultMessage xml:lang="en">The quality of the certificate chain for the timestamp was determined as: https://www.governikus.de/val-uri/timestamp-level-types/DTST</ResultMessage>
+											</ChainingOK>
+											<ValidityPeriodOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</ValidityPeriodOK>
+											<ExtensionsOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</ExtensionsOK>
+											<SignatureOK>
+												<SigMathOK>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</SigMathOK>
+												<SignatureAlgorithm>
+													<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+													<Suitability>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+													</Suitability>
+												</SignatureAlgorithm>
+											</SignatureOK>
+											<CertificateStatus>
+												<CertStatusOK>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</CertStatusOK>
+												<RevocationEvidence>
+													<OCSPValidity>
+														<OCSPIdentifier>
+															<ns5:ResponderID>
+																<ns5:ByName>CN=OCSP Sign Governikus CA 8</ns5:ByName>
+															</ns5:ResponderID>
+															<ns5:ProducedAt>2023-03-28T14:29:00.000+02:00</ns5:ProducedAt>
+														</OCSPIdentifier>
+														<SignatureOK>
+															<SigMathOK>
+																<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															</SigMathOK>
+															<SignatureAlgorithm>
+																<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																<Suitability>
+																	<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																</Suitability>
+															</SignatureAlgorithm>
+														</SignatureOK>
+														<CertificatePathValidity>
+															<PathValiditySummary>
+																<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															</PathValiditySummary>
+															<CertificateIdentifier>
+																<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,OU=Governikus CA,CN=Governikus CA 8:PN</ns4:X509IssuerName>
+																<ns4:X509SerialNumber>860609026660103503</ns4:X509SerialNumber>
+															</CertificateIdentifier>
+															<PathValidityDetail>
+																<CertificateValidity>
+																	<CertificateIdentifier>
+																		<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,OU=Governikus CA,CN=Governikus CA 8:PN</ns4:X509IssuerName>
+																		<ns4:X509SerialNumber>860609026660103503</ns4:X509SerialNumber>
+																	</CertificateIdentifier>
+																	<Subject>CN=OCSP Sign Governikus CA 8</Subject>
+																	<ChainingOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ChainingOK>
+																	<ValidityPeriodOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ValidityPeriodOK>
+																	<ExtensionsOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ExtensionsOK>
+																	<SignatureOK>
+																		<SigMathOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																		</SigMathOK>
+																		<SignatureAlgorithm>
+																			<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																			<Suitability>
+																				<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																				<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																			</Suitability>
+																		</SignatureAlgorithm>
+																	</SignatureOK>
+																	<CertificateStatus>
+																		<CertStatusOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																			<ResultMessage xml:lang="EN">revocation_values_ocsp_no_check</ResultMessage>
+																		</CertStatusOK>
+																	</CertificateStatus>
+																</CertificateValidity>
+																<CertificateValidity>
+																	<CertificateIdentifier>
+																		<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																		<ns4:X509SerialNumber>1747460482863709531</ns4:X509SerialNumber>
+																	</CertificateIdentifier>
+																	<Subject>C=DE,L=Bremen,O=Governikus KG,OU=Governikus CA,CN=Governikus CA 8:PN</Subject>
+																	<ChainingOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ChainingOK>
+																	<ValidityPeriodOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ValidityPeriodOK>
+																	<ExtensionsOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ExtensionsOK>
+																	<SignatureOK>
+																		<SigMathOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																		</SigMathOK>
+																		<SignatureAlgorithm>
+																			<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																			<Suitability>
+																				<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																				<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																			</Suitability>
+																		</SignatureAlgorithm>
+																	</SignatureOK>
+																	<CertificateStatus>
+																		<CertStatusOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																		</CertStatusOK>
+																		<RevocationEvidence>
+																			<OCSPValidity>
+																				<OCSPIdentifier>
+																					<ns5:ResponderID>
+																						<ns5:ByName>CN=Governikus Root 3 OCSP Sign</ns5:ByName>
+																					</ns5:ResponderID>
+																					<ns5:ProducedAt>2023-03-28T14:28:51.000+02:00</ns5:ProducedAt>
+																				</OCSPIdentifier>
+																				<SignatureOK>
+																					<SigMathOK>
+																						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																					</SigMathOK>
+																					<SignatureAlgorithm>
+																						<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																						<Suitability>
+																							<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																						</Suitability>
+																					</SignatureAlgorithm>
+																				</SignatureOK>
+																				<CertificatePathValidity>
+																					<PathValiditySummary>
+																						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																					</PathValiditySummary>
+																					<CertificateIdentifier>
+																						<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																						<ns4:X509SerialNumber>7897265021568875685</ns4:X509SerialNumber>
+																					</CertificateIdentifier>
+																					<PathValidityDetail>
+																						<CertificateValidity>
+																							<CertificateIdentifier>
+																								<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																								<ns4:X509SerialNumber>7897265021568875685</ns4:X509SerialNumber>
+																							</CertificateIdentifier>
+																							<Subject>CN=Governikus Root 3 OCSP Sign</Subject>
+																							<ChainingOK>
+																								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							</ChainingOK>
+																							<ValidityPeriodOK>
+																								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							</ValidityPeriodOK>
+																							<ExtensionsOK>
+																								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							</ExtensionsOK>
+																							<SignatureOK>
+																								<SigMathOK>
+																									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																								</SigMathOK>
+																								<SignatureAlgorithm>
+																									<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																									<Suitability>
+																										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																										<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																									</Suitability>
+																								</SignatureAlgorithm>
+																							</SignatureOK>
+																							<CertificateStatus>
+																								<CertStatusOK>
+																									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																									<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																								</CertStatusOK>
+																							</CertificateStatus>
+																						</CertificateValidity>
+																						<CertificateValidity>
+																							<CertificateIdentifier>
+																								<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																								<ns4:X509SerialNumber>168382993326304049</ns4:X509SerialNumber>
+																							</CertificateIdentifier>
+																							<Subject>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</Subject>
+																							<ChainingOK>
+																								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							</ChainingOK>
+																							<ValidityPeriodOK>
+																								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							</ValidityPeriodOK>
+																							<ExtensionsOK>
+																								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							</ExtensionsOK>
+																							<SignatureOK>
+																								<SigMathOK>
+																									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																								</SigMathOK>
+																								<SignatureAlgorithm>
+																									<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																									<Suitability>
+																										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																										<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																									</Suitability>
+																								</SignatureAlgorithm>
+																							</SignatureOK>
+																							<CertificateStatus>
+																								<CertStatusOK>
+																									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																									<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																								</CertStatusOK>
+																							</CertificateStatus>
+																						</CertificateValidity>
+																						<TSLValidity>
+																							<ns12:TLReferences>
+																								<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE/SHA-256_e531759a60448552dd3783ed870202b9a59522c4eae6bdbd77bdf9435e3a84d3</ns12:URL>
+																								<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE_EXTENSION/SHA-256_bf7db701edfb53931ecb77130bf12b5f5f400b30889a329e051d9f3ccb886e5d</ns12:ExtensionURL>
+																							</ns12:TLReferences>
+																						</TSLValidity>
+																						<TrustAnchor>
+																							<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																							<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+																						</TrustAnchor>
+																					</PathValidityDetail>
+																				</CertificatePathValidity>
+																			</OCSPValidity>
+																		</RevocationEvidence>
+																	</CertificateStatus>
+																</CertificateValidity>
+																<CertificateValidity>
+																	<CertificateIdentifier>
+																		<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																		<ns4:X509SerialNumber>168382993326304049</ns4:X509SerialNumber>
+																	</CertificateIdentifier>
+																	<Subject>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</Subject>
+																	<ChainingOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ChainingOK>
+																	<ValidityPeriodOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ValidityPeriodOK>
+																	<ExtensionsOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ExtensionsOK>
+																	<SignatureOK>
+																		<SigMathOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																		</SigMathOK>
+																		<SignatureAlgorithm>
+																			<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																			<Suitability>
+																				<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																				<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																			</Suitability>
+																		</SignatureAlgorithm>
+																	</SignatureOK>
+																	<CertificateStatus>
+																		<CertStatusOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																			<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																		</CertStatusOK>
+																	</CertificateStatus>
+																</CertificateValidity>
+																<TSLValidity>
+																	<ns12:TLReferences>
+																		<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE/SHA-256_e531759a60448552dd3783ed870202b9a59522c4eae6bdbd77bdf9435e3a84d3</ns12:URL>
+																		<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE_EXTENSION/SHA-256_bf7db701edfb53931ecb77130bf12b5f5f400b30889a329e051d9f3ccb886e5d</ns12:ExtensionURL>
+																	</ns12:TLReferences>
+																</TSLValidity>
+																<TrustAnchor>
+																	<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+																</TrustAnchor>
+															</PathValidityDetail>
+														</CertificatePathValidity>
+													</OCSPValidity>
+												</RevocationEvidence>
+											</CertificateStatus>
+										</CertificateValidity>
+										<CertificateValidity>
+											<CertificateIdentifier>
+												<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+												<ns4:X509SerialNumber>1747460482863709531</ns4:X509SerialNumber>
+											</CertificateIdentifier>
+											<Subject>C=DE,L=Bremen,O=Governikus KG,OU=Governikus CA,CN=Governikus CA 8:PN</Subject>
+											<ChainingOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												<ResultMessage xml:lang="en">The quality of the certificate chain for the timestamp was determined as: https://www.governikus.de/val-uri/timestamp-level-types/DTST</ResultMessage>
+											</ChainingOK>
+											<ValidityPeriodOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</ValidityPeriodOK>
+											<ExtensionsOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</ExtensionsOK>
+											<SignatureOK>
+												<SigMathOK>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</SigMathOK>
+												<SignatureAlgorithm>
+													<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+													<Suitability>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+													</Suitability>
+												</SignatureAlgorithm>
+											</SignatureOK>
+											<CertificateStatus>
+												<CertStatusOK>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</CertStatusOK>
+												<RevocationEvidence>
+													<OCSPValidity>
+														<OCSPIdentifier>
+															<ns5:ResponderID>
+																<ns5:ByName>CN=Governikus Root 3 OCSP Sign</ns5:ByName>
+															</ns5:ResponderID>
+															<ns5:ProducedAt>2023-03-28T14:28:51.000+02:00</ns5:ProducedAt>
+														</OCSPIdentifier>
+														<SignatureOK>
+															<SigMathOK>
+																<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															</SigMathOK>
+															<SignatureAlgorithm>
+																<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																<Suitability>
+																	<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																</Suitability>
+															</SignatureAlgorithm>
+														</SignatureOK>
+														<CertificatePathValidity>
+															<PathValiditySummary>
+																<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															</PathValiditySummary>
+															<CertificateIdentifier>
+																<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																<ns4:X509SerialNumber>7897265021568875685</ns4:X509SerialNumber>
+															</CertificateIdentifier>
+															<PathValidityDetail>
+																<CertificateValidity>
+																	<CertificateIdentifier>
+																		<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																		<ns4:X509SerialNumber>7897265021568875685</ns4:X509SerialNumber>
+																	</CertificateIdentifier>
+																	<Subject>CN=Governikus Root 3 OCSP Sign</Subject>
+																	<ChainingOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ChainingOK>
+																	<ValidityPeriodOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ValidityPeriodOK>
+																	<ExtensionsOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ExtensionsOK>
+																	<SignatureOK>
+																		<SigMathOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																		</SigMathOK>
+																		<SignatureAlgorithm>
+																			<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																			<Suitability>
+																				<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																				<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																			</Suitability>
+																		</SignatureAlgorithm>
+																	</SignatureOK>
+																	<CertificateStatus>
+																		<CertStatusOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																			<ResultMessage xml:lang="EN">revocation_values_ocsp_no_check</ResultMessage>
+																		</CertStatusOK>
+																	</CertificateStatus>
+																</CertificateValidity>
+																<CertificateValidity>
+																	<CertificateIdentifier>
+																		<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+																		<ns4:X509SerialNumber>168382993326304049</ns4:X509SerialNumber>
+																	</CertificateIdentifier>
+																	<Subject>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</Subject>
+																	<ChainingOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ChainingOK>
+																	<ValidityPeriodOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ValidityPeriodOK>
+																	<ExtensionsOK>
+																		<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	</ExtensionsOK>
+																	<SignatureOK>
+																		<SigMathOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																		</SigMathOK>
+																		<SignatureAlgorithm>
+																			<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+																			<Suitability>
+																				<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																				<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																			</Suitability>
+																		</SignatureAlgorithm>
+																	</SignatureOK>
+																	<CertificateStatus>
+																		<CertStatusOK>
+																			<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																			<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+																		</CertStatusOK>
+																	</CertificateStatus>
+																</CertificateValidity>
+																<TSLValidity>
+																	<ns12:TLReferences>
+																		<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE/SHA-256_e531759a60448552dd3783ed870202b9a59522c4eae6bdbd77bdf9435e3a84d3</ns12:URL>
+																		<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE_EXTENSION/SHA-256_bf7db701edfb53931ecb77130bf12b5f5f400b30889a329e051d9f3ccb886e5d</ns12:ExtensionURL>
+																	</ns12:TLReferences>
+																</TSLValidity>
+																<TrustAnchor>
+																	<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+																	<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+																</TrustAnchor>
+															</PathValidityDetail>
+														</CertificatePathValidity>
+													</OCSPValidity>
+												</RevocationEvidence>
+											</CertificateStatus>
+										</CertificateValidity>
+										<CertificateValidity>
+											<CertificateIdentifier>
+												<ns4:X509IssuerName>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</ns4:X509IssuerName>
+												<ns4:X509SerialNumber>168382993326304049</ns4:X509SerialNumber>
+											</CertificateIdentifier>
+											<Subject>C=DE,L=Bremen,O=Governikus KG,CN=Governikus Root CA 3:PN</Subject>
+											<ChainingOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												<ResultMessage xml:lang="en">The quality of the certificate chain for the timestamp was determined as: https://www.governikus.de/val-uri/timestamp-level-types/DTST</ResultMessage>
+											</ChainingOK>
+											<ValidityPeriodOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</ValidityPeriodOK>
+											<ExtensionsOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</ExtensionsOK>
+											<SignatureOK>
+												<SigMathOK>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</SigMathOK>
+												<SignatureAlgorithm>
+													<Algorithm>http://www.w3.org/2001/04/xmldsig-more#rsa-sha256</Algorithm>
+													<Suitability>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+													</Suitability>
+												</SignatureAlgorithm>
+											</SignatureOK>
+											<CertificateStatus>
+												<CertStatusOK>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													<ResultMessage xml:lang="EN">not_validated_because_of_policy</ResultMessage>
+												</CertStatusOK>
+											</CertificateStatus>
+										</CertificateValidity>
+										<TSLValidity>
+											<ns12:TLReferences>
+												<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE/SHA-256_e531759a60448552dd3783ed870202b9a59522c4eae6bdbd77bdf9435e3a84d3</ns12:URL>
+												<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/GOVERNIKUS_TL_DE_EXTENSION/SHA-256_bf7db701edfb53931ecb77130bf12b5f5f400b30889a329e051d9f3ccb886e5d</ns12:ExtensionURL>
+											</ns12:TLReferences>
+										</TSLValidity>
+										<TrustAnchor>
+											<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+										</TrustAnchor>
+									</PathValidityDetail>
+								</CertificatePathValidity>
+							</TimeStamp>
+						</ns2:ArchiveTimeStamp>
+					</ns2:ArchiveTimeStampChain>
+				</ns2:ArchiveTimeStampSequence>
+			</ns2:EvidenceRecordReport>
+		</Details>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="DO-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:Success</ns2:ResultMajor>
+			<ns2:ResultMessage xml:lang="en">No inline signature found in data object. Detached signatures might be present.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="DO-02"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:Success</ns2:ResultMajor>
+			<ns2:ResultMessage xml:lang="en">No inline signature found in data object. Detached signatures might be present.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="DO-03"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:Success</ns2:ResultMajor>
+			<ns2:ResultMessage xml:lang="en">No inline signature found in data object. Detached signatures might be present.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="MDO-01"/>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:Success</ns2:ResultMajor>
+			<ns2:ResultMessage xml:lang="en">No inline signature found in data object. Detached signatures might be present.</ns2:ResultMessage>
+		</ns2:Result>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="CR-01">
+			<ns3:SignatureValue>papPUQkXkkVFJ6xfJaOKJmOYw7VLAmIgKNOe4YUwOyLeOQcsmuVK/F7n/4v68c/UKK1w6M0CGHtPKXDe1ByA7ofBZa+CZw8rrbanioX2n9soKAFZrlYALdqbpyxFwmhdPWQFUzkHCW38cpUALokM4A5XlKqHrkYJVkWvZROp1fjHI2rFYXuFwV1/lw4OzM8uOcz1lJYl351ww7X/Z/V0lMuG7sVoo1byuBYh3D6ETchJw5Zf0temMFkX464pDR6n2ew/4ybmajowYG54TOorEBdgiYbEMQA72H3PuB47s3/G+9AgqnSorqvsF7BMC/1+3fTxASfn8Zjkdi7KuXFncA==</ns3:SignatureValue>
+		</SignedObjectIdentifier>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>urn:oasis:names:tc:dss:1.0:resultminor:GeneralError</ns2:ResultMinor>
+		</ns2:Result>
+		<Details>
+			<DetailedSignatureReport xmlns:ns12="http://www.governikus.de/ecard/ext" xmlns:ns2="http://www.bsi.bund.de/tr-esor/vr" xmlns:ns3="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns4="http://www.w3.org/2000/09/xmldsig#" xmlns:ns5="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns6="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#" xmlns:ns7="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns8="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns9="http://www.setcce.org/schemas/ers">
+				<FormatOK>
+					<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+				</FormatOK>
+				<Properties>
+					<SignedProperties>
+						<SignedSignatureProperties>
+							<ns5:SigningTime>2019-10-25T13:45:12.000+02:00</ns5:SigningTime>
+							<ns5:SigningCertificate>
+								<ns5:Cert>
+									<ns5:CertDigest>
+										<ns4:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+										<ns4:DigestValue>KInZEIRsEpX2A322YnYsOzHx3hVJX3/zD75foNmF8GU=</ns4:DigestValue>
+									</ns5:CertDigest>
+									<ns5:IssuerSerial>
+										<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+										<ns4:X509SerialNumber>29703443259652204509275324291419817872</ns4:X509SerialNumber>
+									</ns5:IssuerSerial>
+								</ns5:Cert>
+							</ns5:SigningCertificate>
+						</SignedSignatureProperties>
+						<SignedDataObjectProperties/>
+					</SignedProperties>
+					<UnsignedProperties/>
+				</Properties>
+				<SignatureOK>
+					<SigMathOK>
+						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+					</SigMathOK>
+					<SignatureAlgorithm>
+						<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</Algorithm>
+						<Suitability>
+							<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+						</Suitability>
+					</SignatureAlgorithm>
+				</SignatureOK>
+				<CertificatePathValidity>
+					<PathValiditySummary>
+						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined</ResultMajor>
+						<ResultMinor>GENERIC</ResultMinor>
+						<ResultMessage xml:lang="EN">revocation_value_trust_invalid</ResultMessage>
+					</PathValiditySummary>
+					<CertificateIdentifier>
+						<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+						<ns4:X509SerialNumber>29703443259652204509275324291419817872</ns4:X509SerialNumber>
+					</CertificateIdentifier>
+					<PathValidityDetail>
+						<CertificateValidity>
+							<CertificateIdentifier>
+								<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+								<ns4:X509SerialNumber>29703443259652204509275324291419817872</ns4:X509SerialNumber>
+							</CertificateIdentifier>
+							<Subject>2.5.4.5=#1314445452574d373330323837313135353532333232,CN=Interoperabilitätstester TR-ESOR:PN,C=DE</Subject>
+							<ChainingOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ChainingOK>
+							<ValidityPeriodOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ValidityPeriodOK>
+							<ExtensionsOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ExtensionsOK>
+							<CertificateValue>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</CertificateValue>
+							<CertificateContent>
+								<Version>3</Version>
+								<SerialNumber>29703443259652204509275324291419817872</SerialNumber>
+								<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+								<Issuer>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</Issuer>
+								<ValidityPeriod>
+									<NotBefore>2018-01-09T06:42:11.000+01:00</NotBefore>
+									<NotAfter>2021-01-19T06:42:11.000+01:00</NotAfter>
+								</ValidityPeriod>
+								<Subject>2.5.4.5=#1314445452574d373330323837313135353532333232,CN=Interoperabilitätstester TR-ESOR:PN,C=DE</Subject>
+							</CertificateContent>
+							<SignatureOK>
+								<SigMathOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</SigMathOK>
+								<SignatureAlgorithm>
+									<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</Algorithm>
+									<Suitability>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+									</Suitability>
+								</SignatureAlgorithm>
+							</SignatureOK>
+							<CertificateStatus>
+								<CertStatusOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined</ResultMajor>
+									<ResultMinor>GENERIC</ResultMinor>
+									<ResultMessage xml:lang="EN">revocation_value_trust_invalid</ResultMessage>
+								</CertStatusOK>
+								<RevocationEvidence>
+									<OCSPValidity>
+										<OCSPIdentifier>
+											<ns5:ResponderID>
+												<ns5:ByName>C=DE,O=D-Trust GmbH,CN=D-TRUST OCSP 1 3-21-1 2021,organizationIdentifier=NTRDE-HRB74346</ns5:ByName>
+											</ns5:ResponderID>
+											<ns5:ProducedAt>2023-03-28T14:29:47.000+02:00</ns5:ProducedAt>
+										</OCSPIdentifier>
+										<OCSPValue>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</OCSPValue>
+										<OCSPContent>
+											<Version>1</Version>
+											<ResponderID>C=DE,O=D-Trust GmbH,CN=D-TRUST OCSP 1 3-21-1 2021,organizationIdentifier=NTRDE-HRB74346</ResponderID>
+											<producedAt>2023-03-28T14:29:47.000+02:00</producedAt>
+											<Responses>
+												<SingleResponse>
+													<CertID>
+														<HashAlgorithm>1.3.14.3.2.26</HashAlgorithm>
+														<IssuerNameHash>06E699CA7C80EE818CFFA87C5D5701ED6AC58F71</IssuerNameHash>
+														<IssuerKeyHash>AD0B8B19ADF5FD9989657270E35C6FC942810946</IssuerKeyHash>
+														<SerialNumber>29703443259652204509275324291419817872</SerialNumber>
+													</CertID>
+													<CertStatus>
+														<ResultMajor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:certstatus:good</ResultMajor>
+													</CertStatus>
+													<ThisUpdate>2023-03-28T14:29:47.000+02:00</ThisUpdate>
+													<NextUpdate>2023-03-28T15:29:47.000+02:00</NextUpdate>
+												</SingleResponse>
+											</Responses>
+										</OCSPContent>
+										<SignatureOK>
+											<SigMathOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</SigMathOK>
+											<SignatureAlgorithm>
+												<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</Algorithm>
+												<Suitability>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</Suitability>
+											</SignatureAlgorithm>
+										</SignatureOK>
+										<CertificatePathValidity>
+											<PathValiditySummary>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</PathValiditySummary>
+											<CertificateIdentifier>
+												<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+												<ns4:X509SerialNumber>116495401045737649742029276586287721935</ns4:X509SerialNumber>
+											</CertificateIdentifier>
+											<PathValidityDetail>
+												<CertificateValidity>
+													<CertificateIdentifier>
+														<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+														<ns4:X509SerialNumber>116495401045737649742029276586287721935</ns4:X509SerialNumber>
+													</CertificateIdentifier>
+													<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST OCSP 1 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													<ChainingOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ChainingOK>
+													<ValidityPeriodOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ValidityPeriodOK>
+													<ExtensionsOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ExtensionsOK>
+													<CertificateValue>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</CertificateValue>
+													<CertificateContent>
+														<Version>3</Version>
+														<SerialNumber>116495401045737649742029276586287721935</SerialNumber>
+														<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+														<Issuer>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</Issuer>
+														<ValidityPeriod>
+															<NotBefore>2021-08-24T13:08:17.000+02:00</NotBefore>
+															<NotAfter>2036-02-17T11:14:59.000+01:00</NotAfter>
+														</ValidityPeriod>
+														<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST OCSP 1 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													</CertificateContent>
+													<SignatureOK>
+														<SigMathOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														</SigMathOK>
+														<SignatureAlgorithm>
+															<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</Algorithm>
+															<Suitability>
+																<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															</Suitability>
+														</SignatureAlgorithm>
+													</SignatureOK>
+													<CertificateStatus>
+														<CertStatusOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															<ResultMessage xml:lang="EN">revocation_values_ocsp_no_check</ResultMessage>
+														</CertStatusOK>
+													</CertificateStatus>
+												</CertificateValidity>
+												<CertificateValidity>
+													<CertificateIdentifier>
+														<ns4:X509IssuerName>CN=D-TRUST Root CA 3 2021,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+														<ns4:X509SerialNumber>140839943732056033119928910116350453550</ns4:X509SerialNumber>
+													</CertificateIdentifier>
+													<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													<ChainingOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+													</ChainingOK>
+													<ValidityPeriodOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ValidityPeriodOK>
+													<ExtensionsOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ExtensionsOK>
+													<CertificateValue>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</CertificateValue>
+													<CertificateContent>
+														<Version>3</Version>
+														<SerialNumber>140839943732056033119928910116350453550</SerialNumber>
+														<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+														<Issuer>CN=D-TRUST Root CA 3 2021,O=D-Trust GmbH,C=DE</Issuer>
+														<ValidityPeriod>
+															<NotBefore>2021-04-27T10:25:59.000+02:00</NotBefore>
+															<NotAfter>2036-02-17T11:14:59.000+01:00</NotAfter>
+														</ValidityPeriod>
+														<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													</CertificateContent>
+													<SignatureOK>
+														<SigMathOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														</SigMathOK>
+													</SignatureOK>
+													<CertificateStatus>
+														<CertStatusOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														</CertStatusOK>
+													</CertificateStatus>
+												</CertificateValidity>
+												<TSLValidity>
+													<ns12:TLReferences>
+														<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_d52af05ab94bf92e749014969bccc12355872f57e77c7d66ef0de0cbe2389c51</ns12:URL>
+														<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_a913b1a06a06a08c2b1e77c71c5542517a7b2e1ba5742a9b593d356a4ab1663d</ns12:ExtensionURL>
+													</ns12:TLReferences>
+												</TSLValidity>
+												<TrustAnchor>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+													<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+												</TrustAnchor>
+											</PathValidityDetail>
+										</CertificatePathValidity>
+									</OCSPValidity>
+								</RevocationEvidence>
+							</CertificateStatus>
+						</CertificateValidity>
+						<CertificateValidity>
+							<CertificateIdentifier>
+								<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST Root CA 3 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+								<ns4:X509SerialNumber>1041526</ns4:X509SerialNumber>
+							</CertificateIdentifier>
+							<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</Subject>
+							<ChainingOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+							</ChainingOK>
+							<ValidityPeriodOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ValidityPeriodOK>
+							<ExtensionsOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ExtensionsOK>
+							<CertificateValue>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</CertificateValue>
+							<CertificateContent>
+								<Version>3</Version>
+								<SerialNumber>1041526</SerialNumber>
+								<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+								<Issuer>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST Root CA 3 2016,O=D-Trust GmbH,C=DE</Issuer>
+								<ValidityPeriod>
+									<NotBefore>2016-10-26T10:36:38.000+02:00</NotBefore>
+									<NotAfter>2031-10-26T09:36:50.000+01:00</NotAfter>
+								</ValidityPeriod>
+								<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</Subject>
+							</CertificateContent>
+							<SignatureOK>
+								<SigMathOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</SigMathOK>
+							</SignatureOK>
+							<CertificateStatus>
+								<CertStatusOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</CertStatusOK>
+							</CertificateStatus>
+						</CertificateValidity>
+						<TSLValidity>
+							<ns12:TLReferences>
+								<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_d52af05ab94bf92e749014969bccc12355872f57e77c7d66ef0de0cbe2389c51</ns12:URL>
+								<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_a913b1a06a06a08c2b1e77c71c5542517a7b2e1ba5742a9b593d356a4ab1663d</ns12:ExtensionURL>
+							</ns12:TLReferences>
+						</TSLValidity>
+						<TrustAnchor>
+							<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+							<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+						</TrustAnchor>
+					</PathValidityDetail>
+				</CertificatePathValidity>
+			</DetailedSignatureReport>
+		</Details>
+	</IndividualReport>
+	<IndividualReport>
+		<SignedObjectIdentifier FieldName="CR-02">
+			<ns3:SignatureValue>d2bUv5cQfY1C03QBxIbA8Z9lxMd7RmZuohItXVUIMqYIUGGRB2opMLI70kt334ILizvYn1PGgv4Et7A6Xlot41ZX6kUX28gb7UCJudL6J3PZUv80ZGRY6X3sEkqhqK9IjOod2SCaM7PQbkxHUy8IMscP6n1HhjflklJ4h7QfIiyb/GzyyFsrqnEqtAKNtHYxr8N5afBfMP3LoWRw+0j+ecCrDsDWAE2lS17RjF86JHwSG4HawWgruYHup5Ck3J/f8UtTgBWwVlwrqAMFKyeb6TGCqhGPSS9HZ8uF6eBKZHc/qDOzijAp/GmuejWfLZVoR97OF59Po0OoqWIzHLOtRg==</ns3:SignatureValue>
+		</SignedObjectIdentifier>
+		<ns2:Result>
+			<ns2:ResultMajor>urn:oasis:names:tc:dss:1.0:resultmajor:InsufficientInformation</ns2:ResultMajor>
+			<ns2:ResultMinor>urn:oasis:names:tc:dss:1.0:resultminor:GeneralError</ns2:ResultMinor>
+		</ns2:Result>
+		<Details>
+			<DetailedSignatureReport xmlns:ns12="http://www.governikus.de/ecard/ext" xmlns:ns2="http://www.bsi.bund.de/tr-esor/vr" xmlns:ns3="urn:oasis:names:tc:dss:1.0:core:schema" xmlns:ns4="http://www.w3.org/2000/09/xmldsig#" xmlns:ns5="http://uri.etsi.org/01903/v1.3.2#" xmlns:ns6="urn:oasis:names:tc:dss-x:1.0:profiles:encryption:schema#" xmlns:ns7="http://www.bsi.bund.de/ecard/api/1.1" xmlns:ns8="urn:iso:std:iso-iec:24727:tech:schema" xmlns:ns9="http://www.setcce.org/schemas/ers">
+				<FormatOK>
+					<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+				</FormatOK>
+				<Properties>
+					<SignedProperties>
+						<SignedSignatureProperties>
+							<ns5:SigningTime>2019-10-25T13:52:28.000+02:00</ns5:SigningTime>
+							<ns5:SigningCertificate>
+								<ns5:Cert>
+									<ns5:CertDigest>
+										<ns4:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/>
+										<ns4:DigestValue>KInZEIRsEpX2A322YnYsOzHx3hVJX3/zD75foNmF8GU=</ns4:DigestValue>
+									</ns5:CertDigest>
+									<ns5:IssuerSerial>
+										<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+										<ns4:X509SerialNumber>29703443259652204509275324291419817872</ns4:X509SerialNumber>
+									</ns5:IssuerSerial>
+								</ns5:Cert>
+							</ns5:SigningCertificate>
+						</SignedSignatureProperties>
+						<SignedDataObjectProperties/>
+					</SignedProperties>
+					<UnsignedProperties/>
+				</Properties>
+				<SignatureOK>
+					<SigMathOK>
+						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+					</SigMathOK>
+					<SignatureAlgorithm>
+						<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</Algorithm>
+						<Suitability>
+							<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+						</Suitability>
+					</SignatureAlgorithm>
+				</SignatureOK>
+				<CertificatePathValidity>
+					<PathValiditySummary>
+						<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined</ResultMajor>
+						<ResultMinor>GENERIC</ResultMinor>
+						<ResultMessage xml:lang="EN">revocation_value_trust_invalid</ResultMessage>
+					</PathValiditySummary>
+					<CertificateIdentifier>
+						<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+						<ns4:X509SerialNumber>29703443259652204509275324291419817872</ns4:X509SerialNumber>
+					</CertificateIdentifier>
+					<PathValidityDetail>
+						<CertificateValidity>
+							<CertificateIdentifier>
+								<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+								<ns4:X509SerialNumber>29703443259652204509275324291419817872</ns4:X509SerialNumber>
+							</CertificateIdentifier>
+							<Subject>2.5.4.5=#1314445452574d373330323837313135353532333232,CN=Interoperabilitätstester TR-ESOR:PN,C=DE</Subject>
+							<ChainingOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ChainingOK>
+							<ValidityPeriodOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ValidityPeriodOK>
+							<ExtensionsOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ExtensionsOK>
+							<CertificateValue>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</CertificateValue>
+							<CertificateContent>
+								<Version>3</Version>
+								<SerialNumber>29703443259652204509275324291419817872</SerialNumber>
+								<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+								<Issuer>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</Issuer>
+								<ValidityPeriod>
+									<NotBefore>2018-01-09T06:42:11.000+01:00</NotBefore>
+									<NotAfter>2021-01-19T06:42:11.000+01:00</NotAfter>
+								</ValidityPeriod>
+								<Subject>2.5.4.5=#1314445452574d373330323837313135353532333232,CN=Interoperabilitätstester TR-ESOR:PN,C=DE</Subject>
+							</CertificateContent>
+							<SignatureOK>
+								<SigMathOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</SigMathOK>
+								<SignatureAlgorithm>
+									<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</Algorithm>
+									<Suitability>
+										<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+									</Suitability>
+								</SignatureAlgorithm>
+							</SignatureOK>
+							<CertificateStatus>
+								<CertStatusOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:indetermined</ResultMajor>
+									<ResultMinor>GENERIC</ResultMinor>
+									<ResultMessage xml:lang="EN">revocation_value_trust_invalid</ResultMessage>
+								</CertStatusOK>
+								<RevocationEvidence>
+									<OCSPValidity>
+										<OCSPIdentifier>
+											<ns5:ResponderID>
+												<ns5:ByName>C=DE,O=D-Trust GmbH,CN=D-TRUST OCSP 1 3-21-1 2021,organizationIdentifier=NTRDE-HRB74346</ns5:ByName>
+											</ns5:ResponderID>
+											<ns5:ProducedAt>2023-03-28T14:29:47.000+02:00</ns5:ProducedAt>
+										</OCSPIdentifier>
+										<OCSPValue>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</OCSPValue>
+										<OCSPContent>
+											<Version>1</Version>
+											<ResponderID>C=DE,O=D-Trust GmbH,CN=D-TRUST OCSP 1 3-21-1 2021,organizationIdentifier=NTRDE-HRB74346</ResponderID>
+											<producedAt>2023-03-28T14:29:47.000+02:00</producedAt>
+											<Responses>
+												<SingleResponse>
+													<CertID>
+														<HashAlgorithm>1.3.14.3.2.26</HashAlgorithm>
+														<IssuerNameHash>06E699CA7C80EE818CFFA87C5D5701ED6AC58F71</IssuerNameHash>
+														<IssuerKeyHash>AD0B8B19ADF5FD9989657270E35C6FC942810946</IssuerKeyHash>
+														<SerialNumber>29703443259652204509275324291419817872</SerialNumber>
+													</CertID>
+													<CertStatus>
+														<ResultMajor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:certstatus:good</ResultMajor>
+													</CertStatus>
+													<ThisUpdate>2023-03-28T14:29:47.000+02:00</ThisUpdate>
+													<NextUpdate>2023-03-28T15:29:47.000+02:00</NextUpdate>
+												</SingleResponse>
+											</Responses>
+										</OCSPContent>
+										<SignatureOK>
+											<SigMathOK>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</SigMathOK>
+											<SignatureAlgorithm>
+												<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha256-rsa-MGF1</Algorithm>
+												<Suitability>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+												</Suitability>
+											</SignatureAlgorithm>
+										</SignatureOK>
+										<CertificatePathValidity>
+											<PathValiditySummary>
+												<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+											</PathValiditySummary>
+											<CertificateIdentifier>
+												<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+												<ns4:X509SerialNumber>116495401045737649742029276586287721935</ns4:X509SerialNumber>
+											</CertificateIdentifier>
+											<PathValidityDetail>
+												<CertificateValidity>
+													<CertificateIdentifier>
+														<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+														<ns4:X509SerialNumber>116495401045737649742029276586287721935</ns4:X509SerialNumber>
+													</CertificateIdentifier>
+													<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST OCSP 1 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													<ChainingOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ChainingOK>
+													<ValidityPeriodOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ValidityPeriodOK>
+													<ExtensionsOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ExtensionsOK>
+													<CertificateValue>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</CertificateValue>
+													<CertificateContent>
+														<Version>3</Version>
+														<SerialNumber>116495401045737649742029276586287721935</SerialNumber>
+														<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+														<Issuer>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</Issuer>
+														<ValidityPeriod>
+															<NotBefore>2021-08-24T13:08:17.000+02:00</NotBefore>
+															<NotAfter>2036-02-17T11:14:59.000+01:00</NotAfter>
+														</ValidityPeriod>
+														<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST OCSP 1 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													</CertificateContent>
+													<SignatureOK>
+														<SigMathOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														</SigMathOK>
+														<SignatureAlgorithm>
+															<Algorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</Algorithm>
+															<Suitability>
+																<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															</Suitability>
+														</SignatureAlgorithm>
+													</SignatureOK>
+													<CertificateStatus>
+														<CertStatusOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+															<ResultMessage xml:lang="EN">revocation_values_ocsp_no_check</ResultMessage>
+														</CertStatusOK>
+													</CertificateStatus>
+												</CertificateValidity>
+												<CertificateValidity>
+													<CertificateIdentifier>
+														<ns4:X509IssuerName>CN=D-TRUST Root CA 3 2021,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+														<ns4:X509SerialNumber>140839943732056033119928910116350453550</ns4:X509SerialNumber>
+													</CertificateIdentifier>
+													<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													<ChainingOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+													</ChainingOK>
+													<ValidityPeriodOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ValidityPeriodOK>
+													<ExtensionsOK>
+														<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													</ExtensionsOK>
+													<CertificateValue>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</CertificateValue>
+													<CertificateContent>
+														<Version>3</Version>
+														<SerialNumber>140839943732056033119928910116350453550</SerialNumber>
+														<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+														<Issuer>CN=D-TRUST Root CA 3 2021,O=D-Trust GmbH,C=DE</Issuer>
+														<ValidityPeriod>
+															<NotBefore>2021-04-27T10:25:59.000+02:00</NotBefore>
+															<NotAfter>2036-02-17T11:14:59.000+01:00</NotAfter>
+														</ValidityPeriod>
+														<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-21-1 2021,O=D-Trust GmbH,C=DE</Subject>
+													</CertificateContent>
+													<SignatureOK>
+														<SigMathOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														</SigMathOK>
+													</SignatureOK>
+													<CertificateStatus>
+														<CertStatusOK>
+															<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+														</CertStatusOK>
+													</CertificateStatus>
+												</CertificateValidity>
+												<TSLValidity>
+													<ns12:TLReferences>
+														<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_d52af05ab94bf92e749014969bccc12355872f57e77c7d66ef0de0cbe2389c51</ns12:URL>
+														<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_a913b1a06a06a08c2b1e77c71c5542517a7b2e1ba5742a9b593d356a4ab1663d</ns12:ExtensionURL>
+													</ns12:TLReferences>
+												</TSLValidity>
+												<TrustAnchor>
+													<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+													<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+													<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+												</TrustAnchor>
+											</PathValidityDetail>
+										</CertificatePathValidity>
+									</OCSPValidity>
+								</RevocationEvidence>
+							</CertificateStatus>
+						</CertificateValidity>
+						<CertificateValidity>
+							<CertificateIdentifier>
+								<ns4:X509IssuerName>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST Root CA 3 2016,O=D-Trust GmbH,C=DE</ns4:X509IssuerName>
+								<ns4:X509SerialNumber>1041526</ns4:X509SerialNumber>
+							</CertificateIdentifier>
+							<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</Subject>
+							<ChainingOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+							</ChainingOK>
+							<ValidityPeriodOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ValidityPeriodOK>
+							<ExtensionsOK>
+								<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							</ExtensionsOK>
+							<CertificateValue>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</CertificateValue>
+							<CertificateContent>
+								<Version>3</Version>
+								<SerialNumber>1041526</SerialNumber>
+								<SignatureAlgorithm>http://www.w3.org/2007/05/xmldsig-more#sha512-rsa-MGF1</SignatureAlgorithm>
+								<Issuer>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST Root CA 3 2016,O=D-Trust GmbH,C=DE</Issuer>
+								<ValidityPeriod>
+									<NotBefore>2016-10-26T10:36:38.000+02:00</NotBefore>
+									<NotAfter>2031-10-26T09:36:50.000+01:00</NotAfter>
+								</ValidityPeriod>
+								<Subject>2.5.4.97=#130e4e545244452d4852423734333436,CN=D-TRUST CA 3-1 2016,O=D-Trust GmbH,C=DE</Subject>
+							</CertificateContent>
+							<SignatureOK>
+								<SigMathOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</SigMathOK>
+							</SignatureOK>
+							<CertificateStatus>
+								<CertStatusOK>
+									<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+								</CertStatusOK>
+							</CertificateStatus>
+						</CertificateValidity>
+						<TSLValidity>
+							<ns12:TLReferences>
+								<ns12:URL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE/SHA-256_d52af05ab94bf92e749014969bccc12355872f57e77c7d66ef0de0cbe2389c51</ns12:URL>
+								<ns12:ExtensionURL>https://cvs-test.governikus-asp.de/Filemanager/rest/resources/OFFICIAL_TL_DE_EXTENSION/SHA-256_a913b1a06a06a08c2b1e77c71c5542517a7b2e1ba5742a9b593d356a4ab1663d</ns12:ExtensionURL>
+							</ns12:TLReferences>
+						</TSLValidity>
+						<TrustAnchor>
+							<ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid</ResultMajor>
+							<ResultMinor>urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:trustanchor:other</ResultMinor>
+							<ResultMessage xml:lang="EN">cert_as_trusted_anchor_by_tsl</ResultMessage>
+						</TrustAnchor>
+					</PathValidityDetail>
+				</CertificatePathValidity>
+			</DetailedSignatureReport>
+		</Details>
+	</IndividualReport>
+</VerificationReport>
