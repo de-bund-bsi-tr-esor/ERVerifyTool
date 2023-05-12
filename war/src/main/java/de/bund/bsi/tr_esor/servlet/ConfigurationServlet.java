@@ -61,6 +61,10 @@ public class ConfigurationServlet extends HttpServlet
 
   private static final Path CONFIG_DIR = Path.of(System.getenv("CATALINA_BASE"), "conf");
 
+  private static final String OUTPUT_YES = "yes";
+
+  private static final String OUTPUT_NO = "no";
+
   static Path configFile = CONFIG_DIR.resolve("ErVerifyTool.xml");
 
   private final SimpleDateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm:ss", Locale.GERMANY);
@@ -135,13 +139,24 @@ public class ConfigurationServlet extends HttpServlet
     result.setErrorMessage(errorMessage);
     if (configLoad != null)
     {
+      var configuration = Configurator.getInstance();
+      var profileName = configuration.getDefaultProfileName();
+
       result.setConfigurationLoadTime(df.format(configLoad));
-      result.setConfigurationUpToDate(configLoad.after(new Date(configFile.toFile().lastModified())) ? "yes"
-        : "no");
-      result.setCurrentProfile(Configurator.getInstance().getDefaultProfileName());
-      result.setVerififerId(Configurator.getInstance().getVerifierID());
-      var availableProfiles = Configurator.getInstance().getSupportedProfileNames().toString();
+      result.setConfigurationUpToDate(configLoad.after(new Date(configFile.toFile().lastModified()))
+        ? OUTPUT_YES : OUTPUT_NO);
+      result.setCurrentProfile(profileName);
+      result.setVerififerId(configuration.getVerifierID());
+      var availableProfiles = configuration.getSupportedProfileNames().toString();
       result.setAvailableProfiles(availableProfiles.substring(1, availableProfiles.length() - 1));
+      result.setHashMode(configuration.hashSortingMode(profileName)
+                                      .toString()
+                                      .toLowerCase(Locale.getDefault()));
+      result.setValidationService(Optional.ofNullable(configuration.getVerificationServiceURL(profileName))
+                                          .orElse("(not configured)"));
+      result.setRequireQualifiedTimestamps(configuration.requiresQualifiedTimestamps(profileName) ? OUTPUT_YES
+        : OUTPUT_NO);
+      result.setLxaipDataDirectory(configuration.getLXaipDataDirectory(profileName).toString());
     }
     return result;
   }
