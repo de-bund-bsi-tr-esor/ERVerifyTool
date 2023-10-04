@@ -51,7 +51,6 @@ import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.BsiResultMinor;
 import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 import de.bund.bsi.tr_esor.checktool.validation.signatures.ECardResultMinor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
@@ -76,11 +75,6 @@ public class DummyTimeStampValidator extends BaseTimeStampValidator
     checkUnsignedAttributes(toCheck, formatOk);
     tsReport.getFormatted().setCertificatePathValidity(mockCertificatePathValidity());
     tsReport.getFormatted().setSignatureOK(validateSigMathOK(toCheck));
-    tsReport.updateCodes(ValidationResultMajor.INDETERMINED,
-                         null,
-                         MinorPriority.NORMAL,
-                         "no online validation of time stamp done",
-                         ref);
     tsReport.setFormatOk(formatOk);
     return tsReport;
   }
