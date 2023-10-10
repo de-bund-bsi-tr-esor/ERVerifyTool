@@ -21,7 +21,6 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
-import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.cms.ContentInfo;
 import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
@@ -76,8 +75,8 @@ public abstract class BaseTimeStampValidator
     if (!requiredCMSVersion.equals(signedData.getVersion()))
     {
       var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
-              signedData.getVersion().getValue().intValue(),
-              requiredCMSVersion.getValue().intValue());
+                                  signedData.getVersion().getValue().intValue(),
+                                  requiredCMSVersion.getValue().intValue());
       formatOk.invalidate(message, formatOk.getReference());
     }
     if (!reader.hasCertificateValues()
