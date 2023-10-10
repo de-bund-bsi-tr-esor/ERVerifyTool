@@ -21,7 +21,10 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import org.bouncycastle.asn1.ASN1Integer;
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.tsp.TimeStampToken;
 
@@ -52,15 +55,31 @@ public abstract class BaseTimeStampValidator
   {
     var signedData = SignedData.getInstance(ContentInfo.getInstance(ts.toCMSSignedData().toASN1Structure())
                                                        .getContent());
-    if (!ContentInfoChecker.SUPPORTED_CMS_VERSION.equals(signedData.getVersion()))
+    var requiredCMSVersion = ContentInfoChecker.SUPPORTED_CMS_VERSION;
+    var reader = new CAdESReader(ts.toCMSSignedData());
+    if (signedData.getCRLs() != null && signedData.getCRLs().size() != 0)
+    {
+      var choices = signedData.getCRLs().iterator();
+      for ( var revCount = 0 ; choices.hasNext() ; revCount++ )
+      {
+        var ric = choices.next();
+        Object asn1Object = ric instanceof ASN1TaggedObject ? ((ASN1TaggedObject)ric).getObject() : null;
+        OtherRevocationInfoFormat orif = OtherRevocationInfoFormat.getInstance(asn1Object);
+
+        if (orif != null)
+        {
+          requiredCMSVersion = ContentInfoChecker.SUPPORTED_CMS_VERSION_5;
+          break;
+        }
+      }
+    }
+    if (!requiredCMSVersion.equals(signedData.getVersion()))
     {
       var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
-                                  signedData.getVersion().getValue().intValue(),
-                                  ContentInfoChecker.SUPPORTED_CMS_VERSION.getValue().intValue());
+              signedData.getVersion().getValue().intValue(),
+              requiredCMSVersion.getValue().intValue());
       formatOk.invalidate(message, formatOk.getReference());
     }
-
-    var reader = new CAdESReader(ts.toCMSSignedData());
     if (!reader.hasCertificateValues()
         && (signedData.getCertificates() == null || signedData.getCertificates().size() == 0))
     {

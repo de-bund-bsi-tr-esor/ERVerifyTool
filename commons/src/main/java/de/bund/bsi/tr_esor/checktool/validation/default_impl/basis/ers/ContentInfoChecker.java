@@ -85,6 +85,8 @@ public class ContentInfoChecker
 
   public static final ASN1Integer SUPPORTED_CMS_VERSION = new ASN1Integer(3L);
 
+  public static final ASN1Integer SUPPORTED_CMS_VERSION_5 = new ASN1Integer(5L);
+
   private final List<AlgorithmIdentifier> digestIdentifiers = new ArrayList<>();
 
   private final FormatOkReport formatOk;
@@ -133,11 +135,28 @@ public class ContentInfoChecker
    */
   void checkSignedData(Reference ref, SignedData signedData)
   {
-    if (!SUPPORTED_CMS_VERSION.equals(signedData.getVersion()))
+    var requiredCMSVersion = ContentInfoChecker.SUPPORTED_CMS_VERSION;
+    if (signedData.getCRLs() != null && signedData.getCRLs().size() != 0)
+    {
+      var choices = signedData.getCRLs().iterator();
+      for ( var revCount = 0 ; choices.hasNext() ; revCount++ )
+      {
+        var ric = choices.next();
+        Object asn1Object = ric instanceof ASN1TaggedObject ? ((ASN1TaggedObject)ric).getObject() : null;
+        OtherRevocationInfoFormat orif = OtherRevocationInfoFormat.getInstance(asn1Object);
+
+        if (orif != null)
+        {
+          requiredCMSVersion = ContentInfoChecker.SUPPORTED_CMS_VERSION_5;
+          break;
+        }
+      }
+    }
+    if (!requiredCMSVersion.equals(signedData.getVersion()))
     {
       var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
                                   signedData.getVersion().getValue().intValue(),
-                                  SUPPORTED_CMS_VERSION.getValue().intValue());
+                                  requiredCMSVersion.getValue().intValue());
       formatOk.invalidate(message, ref.newChild("version"));
     }
 
