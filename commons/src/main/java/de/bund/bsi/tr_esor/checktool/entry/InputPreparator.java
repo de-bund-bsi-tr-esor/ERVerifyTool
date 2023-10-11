@@ -83,8 +83,8 @@ public class InputPreparator
     if (xaip != null)
     {
       scanXaipForEvidenceRecords();
-      scanXaipForInlineSignatures();
-      scanXaipForDetachedSignatures();
+      //scanXaipForInlineSignatures();
+      //scanXaipForDetachedSignatures();
     }
 
     var cmsDocument = params.getCmsDocument();
