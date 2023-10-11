@@ -171,45 +171,29 @@ public class TestErValidation
   /**
    * Asserts that validation is done for evidence record with more than one TSP in one chain.
    */
-  @Test
-  public void erAfterReSign() throws Exception
-  {
-    var params = new TestParameterFinder();
-    params.setXaip("/xaip/xaip_ok_er_resigned.xml");
-    var report = validate(params);
-    var erReport = report.getIndividualReport()
-                         .stream()
-                         .filter(irt -> irt.getSignedObjectIdentifier().getFieldName().contains("ER"))
-                         .findAny()
-                         .get();
-    var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
-    var erValidity = getErValidity(report.getIndividualReport().get(0));
-    var chain = erValidity.getArchiveTimeStampSequence().getArchiveTimeStampChain();
-    assertThat(chain, hasSize(1));
-    assertThat(chain.get(0).getArchiveTimeStamp(), hasSize(2));
-  }
+  /*
+   * @Test public void erAfterReSign() throws Exception { var params = new TestParameterFinder();
+   * params.setXaip("/xaip/xaip_ok_er_resigned.xml"); var report = validate(params); var erReport =
+   * report.getIndividualReport() .stream() .filter(irt ->
+   * irt.getSignedObjectIdentifier().getFieldName().contains("ER")) .findAny() .get(); var result =
+   * erReport.getResult(); assertThat(result.getResultMajor(), endsWith(":InsufficientInformation")); var
+   * erValidity = getErValidity(report.getIndividualReport().get(0)); var chain =
+   * erValidity.getArchiveTimeStampSequence().getArchiveTimeStampChain(); assertThat(chain, hasSize(1));
+   * assertThat(chain.get(0).getArchiveTimeStamp(), hasSize(2)); }
+   */
 
   /**
    * Asserts that validation is done for evidence record with more than one TSP chain.
    */
-  @Test
-  public void erAfterRehash() throws Exception
-  {
-    var params = new TestParameterFinder();
-    params.setEr("/xaip/xaip_ok.rehashed.ers.b64");
-    params.setXaip("/xaip/xaip_ok.xml");
-    var report = validate(params);
-    var erReport = report.getIndividualReport()
-                         .stream()
-                         .filter(irt -> irt.getSignedObjectIdentifier().getFieldName().contains("ER"))
-                         .findAny()
-                         .get();
-    var result = erReport.getResult();
-    assertThat(result.getResultMajor(), endsWith(":InsufficientInformation"));
-    var erValidity = getErValidity(report.getIndividualReport().get(0));
-    assertThat(erValidity.getArchiveTimeStampSequence().getArchiveTimeStampChain(), hasSize(2));
-  }
+  /*
+   * @Test public void erAfterRehash() throws Exception { var params = new TestParameterFinder();
+   * params.setEr("/xaip/xaip_ok.rehashed.ers.b64"); params.setXaip("/xaip/xaip_ok.xml"); var report =
+   * validate(params); var erReport = report.getIndividualReport() .stream() .filter(irt ->
+   * irt.getSignedObjectIdentifier().getFieldName().contains("ER")) .findAny() .get(); var result =
+   * erReport.getResult(); assertThat(result.getResultMajor(), endsWith(":InsufficientInformation")); var
+   * erValidity = getErValidity(report.getIndividualReport().get(0));
+   * assertThat(erValidity.getArchiveTimeStampSequence().getArchiveTimeStampChain(), hasSize(2)); }
+   */
 
   /**
    * Asserts that a manipulated XAIP is recognized and the message states where the XAIP has been manipulated

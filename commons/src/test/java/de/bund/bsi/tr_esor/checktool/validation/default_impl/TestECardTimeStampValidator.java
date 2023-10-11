@@ -341,7 +341,7 @@ public class TestECardTimeStampValidator
   {
     var tst = someTimeStampToken();
     var encoded = tst.getEncoded();
-    assertThat("The 21st byte is the correct CMS version", encoded[21], is((byte)3));
+    assertThat("The 21st byte is the correct CMS version", encoded[21], is((byte)5));
     // Manipulate the CMS version in the ASN.1-structure
     encoded[21] = 2;
     var signedData = new CMSSignedData(encoded);
@@ -354,7 +354,7 @@ public class TestECardTimeStampValidator
     assertThat(report.getOverallResult().getResultMajor(), is("urn:oasis:names:tc:dss:1.0:detail:invalid"));
     assertThat(report.getOverallResult().getResultMinor(),
                is("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
-    var expectedMessage = "Invalid CMS version 2 in timestamp, the supported version is 3";
+    var expectedMessage = "Invalid CMS version 2 in timestamp, the supported version is 5";
     assertThat(report.getFormatted().getFormatOK().getResultMessage().getValue(),
                containsString(expectedMessage));
   }

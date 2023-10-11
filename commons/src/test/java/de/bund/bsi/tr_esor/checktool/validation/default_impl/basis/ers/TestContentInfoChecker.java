@@ -121,7 +121,7 @@ public class TestContentInfoChecker
     systemUnderTest.checkContentInfo(REF, mockContentInfo(false, false));
     assertThat(formatOk.getOverallResult().getResultMajor(), endsWith(":invalid"));
     var msgs = new String[]{"contentType OID of time stamp is not " + ContentInfoChecker.OID_PKCS7_SIGNEDDATA,
-                            "Invalid CMS version 4 in timestamp, the supported version is 3",
+                            "Invalid CMS version 4 in timestamp, the supported version is 5",
                             "digestAlgorithms must be filled", "encapContentInfo must be filled",
                             "certificates must be filled",
                             "certs from BasicOCSPResponse must contain at least one element",
@@ -186,7 +186,7 @@ public class TestContentInfoChecker
   public void testCheckSignedData() throws Exception
   {
     SignedData signedData = when(mock(SignedData.class).getCRLs()).thenReturn(new BERSet()).getMock();
-    when(signedData.getVersion()).thenReturn(new ASN1Integer(3));
+    when(signedData.getVersion()).thenReturn(new ASN1Integer(5));
     var formatOk = new FormatOkReport(REF);
     var systemUnderTest = new ContentInfoChecker(formatOk);
     systemUnderTest.checkSignedData(REF, signedData);
@@ -269,7 +269,7 @@ public class TestContentInfoChecker
   private SignedData mockValidSignedData(boolean valid, boolean wrongElement) throws Exception
   {
     var signedData = mock(SignedData.class);
-    when(signedData.getVersion()).thenReturn(new ASN1Integer(valid ? 3L : 4L));
+    when(signedData.getVersion()).thenReturn(new ASN1Integer(valid ? 5L : 4L));
     ASN1Set certSet = new DERSet(wrongElement ? mock(ASN1Integer.class) : mock(Certificate.class));
     ASN1Set revSet = new DERSet(mockRevocationFormat(valid, wrongElement));
     var singletonSet = mock(ASN1Set.class);

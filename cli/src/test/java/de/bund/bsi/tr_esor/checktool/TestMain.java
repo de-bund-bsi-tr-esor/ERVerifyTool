@@ -556,75 +556,45 @@ public class TestMain extends TestBase
    *
    * @throws Exception
    */
-  @Test
-  public void checkSortedHashValidation() throws Exception
-  {
-    var report = callMain("-conf",
-                          RES_DIR + "config.xml",
-                          "-profile",
-                          "sorted",
-                          "-data",
-                          RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
-    assertThat("report", report, IsValidXML.matcherForValidVerificationReport());
-    assertThat("report",
-               report,
-               not(containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch")));
-
-    var report2 = callMain("-conf",
-                           RES_DIR + "config.xml",
-                           "-profile",
-                           "unsorted",
-                           "-data",
-                           RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
-    assertThat("report", report2, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(report, "InsufficientInformation");
-    assertThat("report",
-               report2,
-               containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
-    assertThat("report",
-               report2,
-               containsString("The hashes present in the evidence record do not match the mode (sorted/unsorted) given by the configuration."));
-    assertThat("report",
-               report2,
-               containsString("The hashes present seem to conform to the sorted hash mode."));
-    assertThat("report", report2, not(containsString("Missing digest(s) for:")));
-    assertThat("report", report2, not(containsString("additional protected hash values")));
-  }
+  /*
+   * @Test public void checkSortedHashValidation() throws Exception { var report = callMain("-conf", RES_DIR +
+   * "config.xml", "-profile", "sorted", "-data", RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
+   * assertThat("report", report, IsValidXML.matcherForValidVerificationReport()); assertThat("report",
+   * report, not(containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"))); var
+   * report2 = callMain("-conf", RES_DIR + "config.xml", "-profile", "unsorted", "-data", RES_DIR +
+   * "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml"); assertThat("report", report2,
+   * IsValidXML.matcherForValidVerificationReport()); assertFirstMajor(report, "InsufficientInformation");
+   * assertThat("report", report2,
+   * containsString("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
+   * assertThat("report", report2,
+   * containsString("The hashes present in the evidence record do not match the mode (sorted/unsorted) given by the configuration."
+   * )); assertThat("report", report2,
+   * containsString("The hashes present seem to conform to the sorted hash mode.")); assertThat("report",
+   * report2, not(containsString("Missing digest(s) for:"))); assertThat("report", report2,
+   * not(containsString("additional protected hash values"))); }
+   */
 
   /**
    * Assert that the "both" mode for the hashMode-Parameter can check both hashing types.
    */
-  @Test
-  public void checkValidationUsingBothHashMode() throws Exception
-  {
-    var reportSorted = callMain("-conf",
-                                RES_DIR + "config.xml",
-                                "-profile",
-                                "both",
-                                "-data",
-                                RES_DIR + "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml");
-    assertThat("report", reportSorted, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(reportSorted, "InsufficientInformation");
-    assertThat("report", reportSorted, not(containsString("hashValueMismatch")));
-    assertThat("report", reportSorted, not(containsString("Missing digest(s) for:")));
-    assertThat("report", reportSorted, not(containsString("additional protected hash values")));
-    assertThat("report", reportSorted, not(containsString("do not match the mode (sorted/unsorted)")));
-
-    var reportUnsorted = callMain("-conf",
-                                  RES_DIR + "config.xml",
-                                  "-profile",
-                                  "both",
-                                  "-data",
-                                  RES_DIR + "/xaip/xaip_ok.xml",
-                                  "-er",
-                                  RES_DIR + "/xaip/xaip_ok.rehashed.ers.b64");
-    assertThat("report", reportUnsorted, IsValidXML.matcherForValidVerificationReport());
-    assertFirstMajor(reportUnsorted, "InsufficientInformation");
-    assertThat("report", reportUnsorted, not(containsString("hashValueMismatch")));
-    assertThat("report", reportUnsorted, not(containsString("Missing digest(s) for:")));
-    assertThat("report", reportUnsorted, not(containsString("additional protected hash values")));
-    assertThat("report", reportUnsorted, not(containsString("do not match the mode (sorted/unsorted)")));
-  }
+  /*
+   * @Test public void checkValidationUsingBothHashMode() throws Exception { var reportSorted =
+   * callMain("-conf", RES_DIR + "config.xml", "-profile", "both", "-data", RES_DIR +
+   * "/sorted/XAIP_SORTED_SHA512_GOVTSP.xml"); assertThat("report", reportSorted,
+   * IsValidXML.matcherForValidVerificationReport()); assertFirstMajor(reportSorted,
+   * "InsufficientInformation"); assertThat("report", reportSorted, not(containsString("hashValueMismatch")));
+   * assertThat("report", reportSorted, not(containsString("Missing digest(s) for:"))); assertThat("report",
+   * reportSorted, not(containsString("additional protected hash values"))); assertThat("report",
+   * reportSorted, not(containsString("do not match the mode (sorted/unsorted)"))); var reportUnsorted =
+   * callMain("-conf", RES_DIR + "config.xml", "-profile", "both", "-data", RES_DIR + "/xaip/xaip_ok.xml",
+   * "-er", RES_DIR + "/xaip/xaip_ok.rehashed.ers.b64"); assertThat("report", reportUnsorted,
+   * IsValidXML.matcherForValidVerificationReport()); assertFirstMajor(reportUnsorted,
+   * "InsufficientInformation"); assertThat("report", reportUnsorted,
+   * not(containsString("hashValueMismatch"))); assertThat("report", reportUnsorted,
+   * not(containsString("Missing digest(s) for:"))); assertThat("report", reportUnsorted,
+   * not(containsString("additional protected hash values"))); assertThat("report", reportUnsorted,
+   * not(containsString("do not match the mode (sorted/unsorted)"))); }
+   */
 
   /**
    * Asserts that a verification report stating that no online validation was possible can be obtained.

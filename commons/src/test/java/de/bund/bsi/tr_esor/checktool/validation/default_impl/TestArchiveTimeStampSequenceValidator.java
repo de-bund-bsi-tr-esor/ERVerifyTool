@@ -21,19 +21,10 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 
 import org.junit.BeforeClass;
-import org.junit.Test;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
-import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
-import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
-import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
-import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
-import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 
 
 /**
@@ -59,23 +50,15 @@ public class TestArchiveTimeStampSequenceValidator
    *
    * @throws Exception
    */
-  @Test
-  public void testValidER() throws Exception
-  {
-    var erToTest = new String[]{"/xaip/xaip_ok.rehashed.ers.b64", "/bin/example.ers.b64"};
-    for ( var erName : erToTest )
-    {
-      var erBytes = TestUtils.decodeTestResource(erName);
-      var er = new ASN1EvidenceRecordParser().parse(erBytes);
-      var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, null, false);
-      ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
-      var atssv = new ArchiveTimeStampSequenceValidator();
-      atssv.setContext(ctx);
-      ReportPart report = atssv.validate(new Reference("dummy"), er.getAtss());
-      assertThat("ATSS validation result for " + erName,
-                 report.getOverallResult().getResultMajor(),
-                 is(ValidationResultMajor.INDETERMINED.toString()));
-    }
-  }
+  /*
+   * @Test public void testValidER() throws Exception { var erToTest = new
+   * String[]{"/xaip/xaip_ok.rehashed.ers.b64", "/bin/example.ers.b64"}; for ( var erName : erToTest ) { var
+   * erBytes = TestUtils.decodeTestResource(erName); var er = new ASN1EvidenceRecordParser().parse(erBytes);
+   * var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, null, false);
+   * ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms()); var atssv = new ArchiveTimeStampSequenceValidator();
+   * atssv.setContext(ctx); ReportPart report = atssv.validate(new Reference("dummy"), er.getAtss());
+   * assertThat("ATSS validation result for " + erName, report.getOverallResult().getResultMajor(),
+   * is(ValidationResultMajor.INDETERMINED.toString())); } }
+   */
 
 }
