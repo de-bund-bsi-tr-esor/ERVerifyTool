@@ -34,6 +34,7 @@ import org.apache.xml.security.exceptions.XMLSecurityException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
@@ -83,8 +84,11 @@ public class InputPreparator
     if (xaip != null)
     {
       scanXaipForEvidenceRecords();
-      scanXaipForInlineSignatures();
-      scanXaipForDetachedSignatures();
+      if (Configurator.getInstance().verifySignatures(params.getProfileName()))
+      {
+        scanXaipForInlineSignatures();
+        scanXaipForDetachedSignatures();
+      }
     }
 
     var cmsDocument = params.getCmsDocument();
@@ -199,7 +203,6 @@ public class InputPreparator
       }
     }
   }
-
 
   private boolean verifyReferencedVersionAndAoidForEvidenceRecord(Entry<Reference, CredentialType> credEntry,
                                                                   String aoid)

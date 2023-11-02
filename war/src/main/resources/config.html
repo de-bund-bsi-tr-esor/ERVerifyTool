@@ -1,26 +1,28 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     <link rel="stylesheet" href="css/verify.css"/>
 </head>
 <body>
 <h1>BSI Verify Tool for Evidence Records</h1>
-<p><label>Application version</label>  <span>{{version}}</span></p>
-<p><label>Path to the configuration file</label>  <span>{{pathToConfiguration}}</span></p>
-<p><label>Configuration file was loaded at</label>  <span>{{configurationLoadTime}}</span></p>
-<p><label>Loaded configuration is up to date</label>  <span>{{configurationUpToDate}}</span></p>
-<p><label>Reload configuration</label>  <a href="{{reloadConfigurationUrl}}">reload now</a></p>
-<p><label>Available Profiles</label>  <span>{{availableProfiles}}</span></p>
-<p><label>Default Profile</label>  <span>{{currentProfile}}</span></p>
-<p><label>Hash mode</label>  <span>{{hashMode}}</span></p>
-<p><label>Validation service</label>  <span>{{validationService}}</span></p>
-<p><label>Qualified timestamps are required</label>  <span>{{requireQualifiedTimestamps}}</span></p>
-<p><label>LXAIP directory</label>  <span>{{lxaipDataDirectory}}</span></p>
-<p><label>Verifier ID</label>  <span>{{verififerId}}</span></p>
+<p><label>Application version</label> <span>{{version}}</span></p>
+<p><label>Path to the configuration file</label> <span>{{pathToConfiguration}}</span></p>
+<p><label>Configuration file was loaded at</label> <span>{{configurationLoadTime}}</span></p>
+<p><label>Loaded configuration is up to date</label> <span>{{configurationUpToDate}}</span></p>
+<p><label>Reload configuration</label> <a href="{{reloadConfigurationUrl}}">reload now</a></p>
+<p><label>Available Profiles</label> <span>{{availableProfiles}}</span></p>
+<p><label>Default Profile</label> <span>{{currentProfile}}</span></p>
+<p><label>Hash mode</label> <span>{{hashMode}}</span></p>
+<p><label>Validation service</label> <span>{{validationService}}</span></p>
+<p><label>Verify signatures</label> <span>{{verifySignatures}}</span></p>
+<p><label>Qualified timestamps are required</label> <span>{{requireQualifiedTimestamps}}</span></p>
+<p><label>LXAIP directory</label> <span>{{lxaipDataDirectory}}</span></p>
+<p><label>Verifier ID</label> <span>{{verififerId}}</span></p>
 <p><label>TR-ESOR S.4 web service</label> <a target="_blank" href="esor13/exec?wsdl">WSDL</a></p>
 <p>
-Call the application by sending a VerifyRequest according to TR-ESOR version 1.3 to the URL specified in the WSDL file.
+    Call the application by sending a VerifyRequest according to TR-ESOR version 1.3 to the URL specified in the WSDL
+    file.
 </p>
 </body>
 </html>

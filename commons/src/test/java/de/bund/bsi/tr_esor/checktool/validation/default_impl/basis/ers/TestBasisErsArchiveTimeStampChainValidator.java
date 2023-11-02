@@ -60,8 +60,6 @@ public class TestBasisErsArchiveTimeStampChainValidator
 
   /**
    * Loads test configuration.
-   *
-   * @throws Exception
    */
   @BeforeClass
   public static void setUpClass() throws Exception
@@ -72,8 +70,6 @@ public class TestBasisErsArchiveTimeStampChainValidator
   /**
    * Asserts that {@link BasisErsArchiveTimeStampChainValidator} invalidates formatOk if
    * {@link ArchiveTimeStampChain} has no {@link ArchiveTimeStamp}.
-   *
-   * @throws Exception
    */
   @Test
   public void noArchiveTimeStamps() throws Exception
@@ -89,13 +85,12 @@ public class TestBasisErsArchiveTimeStampChainValidator
    * Asserts that {@link BasisErsArchiveTimeStampChainValidator} keeps formatOk in context valid if
    * {@link ArchiveTimeStampChain} has some {@link ArchiveTimeStamp}. The checked ArchiveTimeStampChain is
    * indetermined, because no online time stamp check was done.
-   *
-   * @throws Exception
    */
   @Test
   public void someArchiveTimeStamps() throws Exception
   {
     var report = validate(er -> er.getAtss().get(0));
+
     assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
     assertThat("summarized Message",
                report.getSummarizedMessage(),
@@ -103,7 +98,6 @@ public class TestBasisErsArchiveTimeStampChainValidator
     report.getFormatted()
           .getArchiveTimeStamp()
           .forEach(ats -> assertThat(ats.getFormatOK().getResultMajor(), endsWith(":valid")));
-
   }
 
   private ATSChainReport validate(Function<EvidenceRecord, ArchiveTimeStampChain> getChainFor)

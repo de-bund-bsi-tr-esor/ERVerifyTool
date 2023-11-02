@@ -4,7 +4,7 @@
     <VerifierID>ERVerifyTool for Basis-ERS</VerifierID>
     <DefaultProfileName>Basis-ERS</DefaultProfileName>
   </General>
-  <Profile lxaipDataDirectory="/data/lxaip/" name="Basis-ERS" requireQualifiedTimestamps="true" validationService="https://validation-service.de/validation/eCard?wsdl">
+  <Profile lxaipDataDirectory="/data/lxaip/" name="Basis-ERS" requireQualifiedTimestamps="true" validationService="https://validation-service.de/validation/eCard?wsdl" verifySignatures="false">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator</className>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>

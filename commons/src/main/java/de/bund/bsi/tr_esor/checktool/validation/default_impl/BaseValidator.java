@@ -40,10 +40,10 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
 /**
  * Base class with common methods for validation.
  *
- * @author MO
  * @param <T> class to be validated
  * @param <C> context to be used by this validator
  * @param <R> report part to be generated
+ * @author MO
  */
 public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends ReportPart>
   implements Validator<T, C, R>
@@ -73,9 +73,6 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
 
   /**
    * Performs the actual validation after generic check(s) has been done.
-   *
-   * @param ref
-   * @param toCheck
    */
   protected abstract R validateInternal(Reference ref, T toCheck);
 
@@ -130,11 +127,6 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
   /**
    * Convenience for {@link #callValidator(Object, Reference, Consumer, Supplier, Class)} in case of report
    * part has constructor using only {@link Reference} parameter.
-   *
-   * @param toValidate
-   * @param ref
-   * @param prepareValidator
-   * @param reportType
    */
   protected <RP extends ReportPart, TP> RP callValidator(TP toValidate,
                                                          Reference ref,
@@ -147,10 +139,6 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
   /**
    * Convenience for {@link #callValidator(Object, Reference, Consumer, Class)} in case no preparation of the
    * validator is necessary.
-   *
-   * @param toValidate
-   * @param ref
-   * @param reportType
    */
   protected <RP extends ReportPart, TP> RP callValidator(TP toValidate, Reference ref, Class<RP> reportType)
   {
@@ -186,10 +174,6 @@ public abstract class BaseValidator<T, C extends ValidationContext<?>, R extends
    * Returns calculated hash provided by supplier with the given hashOID. If computation fails the result of
    * report is updated according to the occurred exception.
    *
-   * @param supplier
-   * @param hashOID
-   * @param ref
-   * @param report
    * @return <code>null</code> if computation failed
    */
   @SuppressWarnings("PMD.ReturnEmptyArrayRatherThanNull")
