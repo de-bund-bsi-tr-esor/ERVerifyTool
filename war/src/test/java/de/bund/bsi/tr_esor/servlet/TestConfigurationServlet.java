@@ -91,7 +91,7 @@ public class TestConfigurationServlet
   {
     testConfiguration("valid config",
                       VALID_CONFIG,
-                      "<p><label>Default Profile</label>  <span>https://tools.ietf.org/html/rfc4998</span></p>");
+                      "<p><label>Default Profile</label> <span>https://tools.ietf.org/html/rfc4998</span></p>");
     testConfiguration("missing config",
                       Path.of("mich_gibt_es_nicht.xml"),
                       "The configuration has been loaded from the application war file.");
@@ -108,7 +108,7 @@ public class TestConfigurationServlet
     FakedConfigConfiguration.setConfigFile(Path.of("inexistent"));
 
     makeRequestAndAssert("config from classpath",
-                         "<p><label>Default Profile</label>  <span>https://tools.ietf.org/html/rfc4998</span></p>",
+                         "<p><label>Default Profile</label> <span>https://tools.ietf.org/html/rfc4998</span></p>",
                          systemUnderTest);
 
   }

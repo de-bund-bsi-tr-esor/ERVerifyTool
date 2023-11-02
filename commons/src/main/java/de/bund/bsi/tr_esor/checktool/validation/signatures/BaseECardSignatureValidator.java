@@ -172,8 +172,11 @@ public abstract class BaseECardSignatureValidator<T, C extends ValidationContext
     {
       return null;
     }
-
-    var eCardURL = Configurator.getInstance().getVerificationServiceOrFail(ctx.getProfileName());
+    var eCardURL = Configurator.getInstance().getVerificationServiceOrNull(ctx.getProfileName());
+    if (eCardURL == null)
+    {
+      return null;
+    }
     if (eCardWebService == null)
     {
       LOG.info("init eCard service ({})", eCardURL);

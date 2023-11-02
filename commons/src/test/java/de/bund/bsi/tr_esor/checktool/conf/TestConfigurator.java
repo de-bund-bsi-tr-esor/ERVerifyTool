@@ -24,6 +24,8 @@ package de.bund.bsi.tr_esor.checktool.conf;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -186,6 +188,47 @@ public class TestConfigurator
                         EvidenceRecord.class.getName(),
                         "<parameter name=\"dummy\">ignored</parameter>",
                         "Missing constructor with Map parameter in class:");
+  }
+
+  /**
+   * Asserts that loading a configuration without verifySignatures attribute throws an exception.
+   */
+  @Test
+  public void unmarshalExceptionWhenVerifySignaturesIsMissingInConfig()
+  {
+    assertThrows(UnmarshalException.class, () -> {
+      load(sut, readFile("/configWithoutVerifySignaturesAttribute.xml"));
+    });
+  }
+
+  @Test
+  public void verifySignaturesReturnTrueWhenAttributeSetToTrue() throws Exception
+  {
+    load(sut, readFile("/config.xml"));
+
+    var result = sut.verifySignatures("Basis-ERS");
+
+    assertThat(result, is(true));
+  }
+
+  @Test
+  public void verifySignaturesReturnFalseWhenNoProfileFound() throws Exception
+  {
+    load(sut, readFile("/config.xml"));
+
+    var result = sut.verifySignatures("notExisting");
+
+    assertThat(result, is(false));
+  }
+
+  @Test
+  public void getVerificationServiceOrNullReturnsNullWhenECardIsNull() throws Exception
+  {
+    load(sut, readFile("/config.xml"));
+
+    var verificationURL = sut.getVerificationServiceOrNull("notExistingName");
+
+    assertNull(verificationURL);
   }
 
   private void checkWrongValidator(String valClazz, String targetClazz, String params, String expectedMessage)
