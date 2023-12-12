@@ -102,7 +102,7 @@ public final class CreateHtml
         var replacement = "";
         if (val instanceof String)
         {
-          replacement = ((String)val).replace("\\", "\\\\");
+          replacement = (String)val;
         }
         html = html.replaceAll("\\{\\{" + property.getName() + "\\}\\}", replacement);
       }

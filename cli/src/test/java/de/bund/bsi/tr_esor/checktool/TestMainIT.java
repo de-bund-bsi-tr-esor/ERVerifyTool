@@ -405,8 +405,7 @@ public class TestMainIT extends TestBase
 
     var reportDetachedSignature = individualReports.get("detachedSignature");
     var result = reportDetachedSignature.getResult();
-    assertThat(result.getResultMajor()).satisfiesAnyOf(x -> assertThat(x).isEqualTo(OasisDssResultMajor.REQUESTER_ERROR.toString()),
-                                                       x -> assertThat(x).isEqualTo(OasisDssResultMajor.RESPONDER_ERROR.toString()));
+    assertThat(result.getResultMajor()).isEqualTo(OasisDssResultMajor.RESPONDER_ERROR.toString());
     assertThat(result.getResultMinor()).satisfiesAnyOf(x -> assertThat(x).isEqualTo(OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri()),
                                                        x -> assertThat(x).isEqualTo(OasisDssResultMinor.SUCCESS_INVALID_SIGNATURE.getUri()));
 

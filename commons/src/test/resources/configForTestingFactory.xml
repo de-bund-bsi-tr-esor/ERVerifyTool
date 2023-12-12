@@ -8,7 +8,7 @@
     </HashCreator>
     <ConfiguredObjects />
   </General>
-  <Profile name="test_profile" hashMode="unsorted" verifySignatures="true">
+  <Profile name="test_profile" hashMode="unsorted">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.TestValidatorFactory$OtherErValidator</className>
       <targetType>de.bund.bsi.tr_esor.checktool.data.EvidenceRecord</targetType>

@@ -14,33 +14,32 @@ instructions how to fill in this file.
 
   <!-- Use the TR-ESOR profile to comprehensively check timestamps and require qualified timestamps to be used.
   An online validation service is required for this profile.
-  All other profile attributes can be added to this profile as well.
-  VerifySignatures is mandatory and enables the possibility to verify signatures in XAIPs -->
+  All other profile attributes can be added to this profile as well.-->
   <!--
-  <Profile name="TR-ESOR" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl" requireQualifiedTimestamps="true" verifySignatures="false">
+  <Profile name="TR-ESOR" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl" requireQualifiedTimestamps="true">
    </Profile>
   -->
 
   <!-- You may specify a directory LXAIP data object references should resolve to -->
   <!--
-  <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="/path/to/lxaip/data" verifySignatures="false">
+  <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="/path/to/lxaip/data">
   </Profile>
   -->
   <!-- You may use sorted hashes (binary ascending) according to RFC 6283 (section 4.2.2, point 6), see schema definition -->
   <!--
-  <Profile name="https://tools.ietf.org/html/rfc4998" hashMode="sorted" verifySignatures="false">
+  <Profile name="https://tools.ietf.org/html/rfc4998" hashMode="sorted">
   </Profile>
   -->
   <!-- For online verification of time stamps, fix URL and activate: -->
   <!--
-  <Profile name="https://tools.ietf.org/html/rfc4998" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl" verifySignatures="false">
+  <Profile name="https://tools.ietf.org/html/rfc4998" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl>
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
     </Validator>
   </Profile>
   <Profile
-    name="Basis-ERS" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl" verifySignatures="false">
+    name="Basis-ERS" validationService="http://<HOSTNAME>:<PORT>/ECardService/eCard?wsdl">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator
       </className>

@@ -46,6 +46,7 @@ import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.Verificatio
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.ws.WebServiceException;
 
+import org.assertj.core.api.Assertions;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.etsi.uri._19102.v1_2.SignatureQualityType;
@@ -78,22 +79,19 @@ public class TestECardTimeStampValidator
   {
     var sut = sut("invalid");
     sut.setContext(new ErValidationContext(new Reference("dummy"), "", ""));
-    var result = sut.validate(new Reference("dummy"), someTimeStampToken());
-
-    assertThat(result.getSummarizedMessage(), containsString("no online validation of time stamp done"));
+    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+              .isThrownBy(() -> sut.validate(new Reference("dummy"), someTimeStampToken()));
   }
 
   /**
    * Tests for unreachable eCard responder.
    */
-  @Test
+  @Test(expected = IllegalArgumentException.class)
   public void testUnreachableResponder() throws Exception
   {
     var sut = sut("http://unreachable:8080/eCard/eCard?wsdl");
     sut.setContext(new ErValidationContext(new Reference("dummy"), "", ""));
     ReportPart result = sut.validate(new Reference("dummy"), someTimeStampToken());
-
-    assertThat(result.getSummarizedMessage(), containsString("no online validation of time stamp done"));
   }
 
   @Test
@@ -359,18 +357,6 @@ public class TestECardTimeStampValidator
     var expectedMessage = "Invalid CMS version 2 in timestamp, the supported version is 3";
     assertThat(report.getFormatted().getFormatOK().getResultMessage().getValue(),
                containsString(expectedMessage));
-  }
-
-  @Test
-  public void noValidationWhenECardPortIsNull() throws Exception
-  {
-    var sut = sut((ECard)null);
-    var timeStamp = someTimeStampToken();
-    var ref = new Reference("dummy");
-
-    var report = sut.validateInternal(ref, timeStamp);
-
-    assertThat(report.getSummarizedMessage(), containsString("no online validation of time stamp done"));
   }
 
   /**

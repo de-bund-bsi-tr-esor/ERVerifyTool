@@ -355,8 +355,7 @@ public final class Configurator
   }
 
   /**
-   * @return whether the hashes should be sorted (according to RFC 4998) or should be unsorted (according to
-   *         RFC 6283) for a certain profile, or if both is allowed.
+   * @return true if the hashes should be sorted for a certain profile.
    */
   public HashSortingMode hashSortingMode(String profileName)
   {
@@ -383,18 +382,14 @@ public final class Configurator
     return Paths.get(profile.getLxaipDataDirectory());
   }
 
-  /**
-   * check if qualified timestamps are required
-   */
+  /** check if qualified timestamps are required */
   public boolean requiresQualifiedTimestamps(String profileName)
   {
     var profile = getProfile(profileName);
     return profile != null && profile.isRequireQualifiedTimestamps();
   }
 
-  /**
-   * check if a verification service URL is configured
-   */
+  /** check if a verification service URL is configured */
   public boolean hasVerificationService(String profileName)
   {
     var profile = getProfile(profileName);
@@ -422,14 +417,14 @@ public final class Configurator
   }
 
   /**
-   * @return the verification service URL, may be null
+   * @return the verification service URL, fail with an IllegalArgumentException if it is not a valid URL
    */
-  public URL getVerificationServiceOrNull(String profileName)
+  public URL getVerificationServiceOrFail(String profileName)
   {
     var eCardUrl = getVerificationServiceURL(profileName);
     if (eCardUrl == null)
     {
-      return null;
+      throw new IllegalArgumentException("A valid URL to an eCard webservice must be passed as profile attribute 'validationService'");
     }
     try
     {
@@ -437,8 +432,8 @@ public final class Configurator
     }
     catch (MalformedURLException e)
     {
-      LOG.error("Malformed URL " + eCardUrl + " passed as profile attribute 'validationService'", e);
-      return null;
+      throw new IllegalArgumentException("Malformed URL " + eCardUrl
+                                         + " passed as profile attribute 'validationService'", e);
     }
   }
 
@@ -467,7 +462,7 @@ public final class Configurator
    */
   private void assertConfigLoaded()
   {
-    Objects.requireNonNull(config, "Config has not been loaded successfully.");
+    Objects.requireNonNull(config, "Config has not been loaded succuessfully.");
   }
 
   /**
@@ -476,21 +471,6 @@ public final class Configurator
   public ValidatorRepository getValidators()
   {
     return validators;
-  }
-
-  /**
-   * Returns whether the verifySignatures attribute in the profile, specified by profileName, is set to true
-   * or false.
-   */
-  public boolean verifySignatures(String profileName)
-  {
-    assertConfigLoaded();
-    var profile = getProfile(profileName);
-    if (profile == null)
-    {
-      return false;
-    }
-    return profile.isVerifySignatures();
   }
 
 }

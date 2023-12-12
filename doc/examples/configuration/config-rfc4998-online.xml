@@ -4,7 +4,7 @@
     <VerifierID>ERVerifyTool for RFC4998 with online check</VerifierID>
     <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
   </General>
-  <Profile lxaipDataDirectory="/data/lxaip/" name="https://tools.ietf.org/html/rfc4998" requireQualifiedTimestamps="false" validationService="https://validation-service.de/validation/eCard?wsdl" verifySignatures="false" >
+  <Profile lxaipDataDirectory="/data/lxaip/" name="https://tools.ietf.org/html/rfc4998" requireQualifiedTimestamps="false" validationService="https://validation-service.de/validation/eCard?wsdl">
     <Validator>
       <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
       <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>

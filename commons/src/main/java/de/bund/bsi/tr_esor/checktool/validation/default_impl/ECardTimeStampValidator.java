@@ -57,7 +57,6 @@ import de.bund.bsi.ecard.api._1.ECard;
 import de.bund.bsi.ecard.api._1.ECard_Service;
 import de.bund.bsi.ecard.api._1.SignatureObject;
 import de.bund.bsi.ecard.api._1.VerifyRequest;
-import de.bund.bsi.ecard.api._1.VerifyResponse;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.data.TspQuality;
 import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
@@ -93,7 +92,7 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
   public ECardTimeStampValidator()
   {
     this.eCard = () -> eCardPort(Configurator.getInstance()
-                                             .getVerificationServiceOrNull(ctx.getProfileName()));
+                                             .getVerificationServiceOrFail(ctx.getProfileName()));
   }
 
   /**
@@ -106,10 +105,6 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
 
   private static ECard eCardPort(URL url)
   {
-    if (url == null)
-    {
-      return null;
-    }
     var port = new ECard_Service(url).getECard();
     ((BindingProvider)port).getRequestContext()
                            .put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, url.toString());
@@ -125,21 +120,40 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
   @Override
   public TimeStampReport validateInternal(Reference ref, TimeStampToken toCheck)
   {
-    var eCardPort = this.eCard.get();
-    if (eCardPort == null)
-    {
-      return createTimeStampReportForNoValidation(ref, toCheck);
-    }
+    var tsr = new TimeStampReport(ref);
     try
     {
       var request = sourceOfRootHash == null ? verifyRequest(toCheck, ctx)
         : verifyRequest(toCheck, sourceOfRootHash, ctx);
-      var response = eCardPort.verifyRequest(request);
-      return createIndividualTimeStampReport(response, ref, toCheck);
+      var response = eCard.get().verifyRequest(request);
+
+      var irt = extractTimestampIndividualReportFromAny(response.getOptionalOutputs(), ref, tsr);
+      if (irt == null)
+      {
+        var minor = response.getResult().getResultMinor() != null ? response.getResult().getResultMinor()
+          : MINOR_PARAMETER_ERROR;
+        var err = response.getResult().getResultMessage() == null ? ""
+          : "Response error was: " + response.getResult().getResultMessage().getValue();
+        tsr.updateCodes(ValidationResultMajor.INDETERMINED,
+                        minor,
+                        MinorPriority.NORMAL,
+                        "eCard request failed. " + err,
+                        ref);
+      }
+      else
+      {
+        tsr = createTimestampReportFromIndividualReport(irt, ref, tsr);
+        checkSignatureQuality(irt, tsr, ref);
+      }
     }
     catch (WebServiceException e)
     {
-      return createReportForWebServiceUnreachable(ref, e, toCheck);
+      LOG.error("eCard webservice unreachable: {}", e.getMessage());
+      tsr.updateCodes(ValidationResultMajor.INDETERMINED,
+                      MINOR_INTERNAL_ERROR,
+                      MinorPriority.NORMAL,
+                      "eCard webservice is unreachable. Message was: " + e.getMessage(),
+                      ref);
     }
     catch (RuntimeException e)
     {
@@ -147,87 +161,17 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
     }
     catch (Exception e)
     {
-      return createReportForRequestFailed(ref, e, toCheck);
+      LOG.error("eCard request failed", e);
+      tsr.updateCodes(ValidationResultMajor.INDETERMINED,
+                      MINOR_INTERNAL_ERROR,
+                      MinorPriority.NORMAL,
+                      "eCard request failed. Error was: " + e.getMessage(),
+                      ref);
     }
-
-  }
-
-  private TimeStampReport createReportForRequestFailed(Reference ref, Exception e, TimeStampToken toCheck)
-  {
-    LOG.error("eCard request failed", e);
-    var timeStampReport = new TimeStampReport(ref);
-    timeStampReport.updateCodes(ValidationResultMajor.INDETERMINED,
-                                MINOR_INTERNAL_ERROR,
-                                MinorPriority.NORMAL,
-                                "eCard request failed. Error was: " + e.getMessage(),
-                                ref);
-    updateFormatOK(ref, toCheck, timeStampReport);
-    return timeStampReport;
-  }
-
-  private TimeStampReport createReportForWebServiceUnreachable(Reference ref,
-                                                               WebServiceException e,
-                                                               TimeStampToken toCheck)
-  {
-    LOG.error("eCard webservice unreachable: {}", e.getMessage());
-    var timeStampReport = new TimeStampReport(ref);
-    timeStampReport.updateCodes(ValidationResultMajor.INDETERMINED,
-                                MINOR_INTERNAL_ERROR,
-                                MinorPriority.NORMAL,
-                                "eCard webservice is unreachable. Message was: " + e.getMessage(),
-                                ref);
-    updateFormatOK(ref, toCheck, timeStampReport);
-    return timeStampReport;
-  }
-
-  private void updateFormatOK(Reference ref, TimeStampToken toCheck, TimeStampReport tsr)
-  {
     var formatOk = Optional.ofNullable(tsr.getParsedFormatOk()).orElse(new FormatOkReport(ref));
     checkUnsignedAttributes(toCheck, formatOk);
     tsr.setFormatOk(formatOk);
-  }
-
-
-  private TimeStampReport createIndividualTimeStampReport(VerifyResponse response,
-                                                          Reference ref,
-                                                          TimeStampToken toCheck)
-  {
-    var timeStampReport = new TimeStampReport(ref);
-    var irt = extractTimestampIndividualReportFromAny(response.getOptionalOutputs(), ref, timeStampReport);
-    if (irt == null)
-    {
-      var minor = response.getResult().getResultMinor() != null ? response.getResult().getResultMinor()
-        : MINOR_PARAMETER_ERROR;
-      var err = response.getResult().getResultMessage() == null ? ""
-        : "Response error was: " + response.getResult().getResultMessage().getValue();
-      timeStampReport.updateCodes(ValidationResultMajor.INDETERMINED,
-                                  minor,
-                                  MinorPriority.NORMAL,
-                                  "eCard request failed. " + err,
-                                  ref);
-    }
-    else
-    {
-      timeStampReport = createTimestampReportFromIndividualReport(irt, ref, timeStampReport);
-      checkSignatureQuality(irt, timeStampReport, ref);
-    }
-    updateFormatOK(ref, toCheck, timeStampReport);
-    return timeStampReport;
-  }
-
-
-  private TimeStampReport createTimeStampReportForNoValidation(Reference ref, TimeStampToken toCheck)
-  {
-    LOG.error("no online validation of time stamp done");
-
-    var timeStampReport = new TimeStampReport(ref);
-    timeStampReport.updateCodes(ValidationResultMajor.INDETERMINED,
-                                MINOR_INTERNAL_ERROR,
-                                MinorPriority.NORMAL,
-                                "no online validation of time stamp done",
-                                ref);
-    updateFormatOK(ref, toCheck, timeStampReport);
-    return timeStampReport;
+    return tsr;
   }
 
   IndividualReportType extractTimestampIndividualReportFromAny(AnyType any,

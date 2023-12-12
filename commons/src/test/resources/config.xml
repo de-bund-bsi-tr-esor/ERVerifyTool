@@ -1,55 +1,47 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2">
-    <General>
-        <VerifierID>urn:Beispiel</VerifierID>
-        <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
-        <!-- This is how to add a validator to all profiles: -->
-        <!--
-        <ConfiguredObjects>
-          <Validator>
-            <className>de.bund.bsi.tr_esor.checktool.MyTimestampValidator</className>
-            <parameter name="URL">http://localhost:3232/ecard/VI</parameter>
-            <parameter name="clientId">ID47234863482223214423122</parameter>
-            <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
-          </Validator>
-        </ConfiguredObjects>
-        -->
-    </General>
-    <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="../commons/src/test/resources/lxaip"
-             verifySignatures="true">
-    </Profile>
+  <General>
+    <VerifierID>urn:Beispiel</VerifierID>
+    <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
+    <!-- This is how to add a validator to all profiles: -->
+    <!--
+    <ConfiguredObjects>
+      <Validator>
+        <className>de.bund.bsi.tr_esor.checktool.MyTimestampValidator</className>
+        <parameter name="URL">http://localhost:3232/ecard/VI</parameter>
+        <parameter name="clientId">ID47234863482223214423122</parameter>
+        <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+      </Validator>
+    </ConfiguredObjects>
+    -->
+  </General>
+  <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="../commons/src/test/resources/lxaip">
+  </Profile>
 
-    <!-- The TR-ESOR profile requires an online validation service and qualified timestamps -->
-    <Profile name="TR-ESOR" requireQualifiedTimestamps="true"
-             validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl"
-             verifySignatures="true">
-    </Profile>
+  <!-- The TR-ESOR profile requires an online validation service and qualified timestamps -->
+  <Profile name="TR-ESOR" requireQualifiedTimestamps="true" validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl">
+  </Profile>
 
-    <!-- Take away the comment from this part in order to allow online checks to be performed in the Basis-ERS profile -->
-    <!-- The Basis-ERS includes additional checks for conformity to the TR-ESOR-ERS specification -->
-    <Profile name="Basis-ERS" requireQualifiedTimestamps="false" verifySignatures="true">
-        <Validator>
-            <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator
-            </className>
-            <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
-        </Validator>
-    </Profile>
+  <!-- Take away the comment from this part in order to allow online checks to be performed in the Basis-ERS profile -->
+  <!-- The Basis-ERS includes additional checks for conformity to the TR-ESOR-ERS specification -->
+  <!--<Profile name="Basis-ERS" requireQualifiedTimestamps="false" validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl">
+    <Validator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.basis.ers.BasisErsECardTimeStampValidator</className>
+      <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+    </Validator>
+  </Profile>-->
 
-    <!-- You may specify own profiles with any number of new or replaced validators: -->
-    <Profile name="custom" hashMode="unsorted" lxaipDataDirectory="../commons/src/test/resources/lxaip"
-             validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl"
-             requireQualifiedTimestamps="false" verifySignatures="true">
-        <Validator>
-            <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
-            <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
-        </Validator>
-    </Profile>
-    <Profile name="unsorted" hashMode="unsorted" verifySignatures="true">
-    </Profile>
-    <Profile name="both" hashMode="both" verifySignatures="true">
-    </Profile>
-    <Profile name="sorted" hashMode="sorted" verifySignatures="true">
-    </Profile>
-    <Profile name="verifySignaturesFalse" hashMode="sorted" verifySignatures="false">
-    </Profile>
+  <!-- You may specify own profiles with any number of new or replaced validators: -->
+  <Profile name="custom" hashMode="unsorted" lxaipDataDirectory="../commons/src/test/resources/lxaip" validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl" requireQualifiedTimestamps="false">
+    <Validator>
+      <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
+      <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+    </Validator>
+  </Profile>
+  <Profile name="unsorted" hashMode="unsorted">
+  </Profile>
+  <Profile name="both" hashMode="both">
+  </Profile>
+  <Profile name="sorted" hashMode="sorted">
+  </Profile>
 </Configuration>
