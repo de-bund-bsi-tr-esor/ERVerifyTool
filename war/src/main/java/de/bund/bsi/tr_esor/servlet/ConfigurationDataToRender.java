@@ -45,6 +45,15 @@ public class ConfigurationDataToRender
 
   private String pathToConfiguration;
 
+  private String validationService;
+
+  private String requireQualifiedTimestamps;
+
+  private String lxaipDataDirectory;
+
+  private String hashMode;
+
+
   /**
    * Returns the current configuration load time.
    */
@@ -161,4 +170,55 @@ public class ConfigurationDataToRender
     return ConfigurationServlet.ROUTE_TO_RELOAD_CONFIGURATION;
   }
 
+  /**
+   * Returns hash mode.
+   */
+  public String getHashMode()
+  {
+    return hashMode;
+  }
+
+  public void setHashMode(String hashMode)
+  {
+    this.hashMode = hashMode;
+  }
+
+  /**
+   * Returns URL to validation service.
+   */
+  public String getValidationService()
+  {
+    return validationService;
+  }
+
+  public void setValidationService(String validationService)
+  {
+    this.validationService = validationService;
+  }
+
+  /**
+   * Returns whether qualified timestamps are required.
+   */
+  public String getRequireQualifiedTimestamps()
+  {
+    return requireQualifiedTimestamps;
+  }
+
+  public void setRequireQualifiedTimestamps(String requireQualifiedTimestamps)
+  {
+    this.requireQualifiedTimestamps = requireQualifiedTimestamps;
+  }
+
+  /**
+   * Returns path to LXAIP directory.
+   */
+  public String getLxaipDataDirectory()
+  {
+    return lxaipDataDirectory;
+  }
+
+  public void setLxaipDataDirectory(String lxaipDataDirectory)
+  {
+    this.lxaipDataDirectory = lxaipDataDirectory;
+  }
 }
