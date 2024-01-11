@@ -121,7 +121,7 @@ public class TestContentInfoChecker
     systemUnderTest.checkContentInfo(REF, mockContentInfo(false, false));
     assertThat(formatOk.getOverallResult().getResultMajor(), endsWith(":invalid"));
     var msgs = new String[]{"contentType OID of time stamp is not " + ContentInfoChecker.OID_PKCS7_SIGNEDDATA,
-                            "Invalid CMS version 4 in timestamp, the supported version is 3",
+                            "Invalid CMS version 4 in timestamp, the supported versions are 3 or 5",
                             "digestAlgorithms must be filled", "encapContentInfo must be filled",
                             "certificates must be filled",
                             "certs from BasicOCSPResponse must contain at least one element",

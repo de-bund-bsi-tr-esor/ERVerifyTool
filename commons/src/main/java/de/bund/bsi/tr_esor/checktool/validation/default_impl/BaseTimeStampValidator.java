@@ -21,7 +21,9 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
+import org.bouncycastle.asn1.ASN1TaggedObject;
 import org.bouncycastle.asn1.cms.ContentInfo;
+import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
 import org.bouncycastle.asn1.pkcs.SignedData;
 import org.bouncycastle.tsp.TimeStampToken;
 
@@ -54,10 +56,31 @@ public abstract class BaseTimeStampValidator
                                                        .getContent());
     if (!ContentInfoChecker.SUPPORTED_CMS_VERSION.equals(signedData.getVersion()))
     {
-      var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
-                                  signedData.getVersion().getValue().intValue(),
-                                  ContentInfoChecker.SUPPORTED_CMS_VERSION.getValue().intValue());
-      formatOk.invalidate(message, formatOk.getReference());
+      if (!ContentInfoChecker.SUPPORTED_CMS_VERSION_5.equals(signedData.getVersion()))
+      {
+        var message = String.format("Invalid CMS version %d in timestamp, the supported versions are %d or %d",
+                signedData.getVersion().getValue().intValue(),
+                ContentInfoChecker.SUPPORTED_CMS_VERSION.getValue().intValue(),
+                ContentInfoChecker.SUPPORTED_CMS_VERSION_5.getValue().intValue());
+        formatOk.invalidate(message, formatOk.getReference());
+      } else {
+        OtherRevocationInfoFormat orif = null;
+        var choices = signedData.getCRLs().iterator();
+        for ( var revCount = 0 ; choices.hasNext() ; revCount++ ) {
+          var ric = choices.next();
+          Object asn1Object = ric instanceof ASN1TaggedObject ? ((ASN1TaggedObject) ric).getObject() : null;
+          orif = OtherRevocationInfoFormat.getInstance(asn1Object);
+          if (null != orif)
+            break;
+        }
+        if (null == orif)
+        {
+          var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
+                  signedData.getVersion().getValue().intValue(),
+                  ContentInfoChecker.SUPPORTED_CMS_VERSION_5.getValue().intValue());
+          formatOk.invalidate(message, formatOk.getReference());
+        }
+      }
     }
 
     var reader = new CAdESReader(ts.toCMSSignedData());

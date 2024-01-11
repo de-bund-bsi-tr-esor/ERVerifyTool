@@ -356,7 +356,7 @@ public class TestECardTimeStampValidator
     assertThat(report.getOverallResult().getResultMajor(), is("urn:oasis:names:tc:dss:1.0:detail:invalid"));
     assertThat(report.getOverallResult().getResultMinor(),
                is("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat"));
-    var expectedMessage = "Invalid CMS version 2 in timestamp, the supported version is 3";
+    var expectedMessage = "Invalid CMS version 2 in timestamp, the supported versions are 3 or 5";
     assertThat(report.getFormatted().getFormatOK().getResultMessage().getValue(),
                containsString(expectedMessage));
   }

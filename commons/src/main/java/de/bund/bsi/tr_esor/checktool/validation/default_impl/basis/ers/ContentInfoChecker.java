@@ -85,6 +85,12 @@ public class ContentInfoChecker
 
   public static final ASN1Integer SUPPORTED_CMS_VERSION = new ASN1Integer(3L);
 
+  /** In some cases (embedded OCSP response in SignedData.crls) the cms version shall be 5 instead of 3.
+   * This is actually not covered by TR-ESOR-ERS version 1.3, but will be fixed in the next version of TR.
+   * In order to enable both variants (not all vendors do change version to 5 after embedding of OCSP
+   * responses in the TSP) the current version of this tool allows usage of both cms versions 3 und 5 in a such case */
+  public static final ASN1Integer SUPPORTED_CMS_VERSION_5 = new ASN1Integer(5L);
+
   private final List<AlgorithmIdentifier> digestIdentifiers = new ArrayList<>();
 
   private final FormatOkReport formatOk;
@@ -135,10 +141,31 @@ public class ContentInfoChecker
   {
     if (!SUPPORTED_CMS_VERSION.equals(signedData.getVersion()))
     {
-      var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
-                                  signedData.getVersion().getValue().intValue(),
-                                  SUPPORTED_CMS_VERSION.getValue().intValue());
-      formatOk.invalidate(message, ref.newChild("version"));
+      if (!SUPPORTED_CMS_VERSION_5.equals(signedData.getVersion()))
+      {
+        var message = String.format("Invalid CMS version %d in timestamp, the supported versions are %d or %d",
+                signedData.getVersion().getValue().intValue(),
+                SUPPORTED_CMS_VERSION.getValue().intValue(),
+                SUPPORTED_CMS_VERSION_5.getValue().intValue());
+        formatOk.invalidate(message, ref.newChild("version"));
+      } else {
+        OtherRevocationInfoFormat orif = null;
+        var choices = signedData.getCRLs().iterator();
+        for ( var revCount = 0 ; choices.hasNext() ; revCount++ ) {
+          var ric = choices.next();
+          Object asn1Object = ric instanceof ASN1TaggedObject ? ((ASN1TaggedObject) ric).getObject() : null;
+          orif = OtherRevocationInfoFormat.getInstance(asn1Object);
+          if (null != orif)
+            break;
+        }
+        if (null == orif)
+        {
+          var message = String.format("Invalid CMS version %d in timestamp, the supported version is %d",
+                  signedData.getVersion().getValue().intValue(),
+                  SUPPORTED_CMS_VERSION_5.getValue().intValue());
+          formatOk.invalidate(message, ref.newChild("version"));
+        }
+      }
     }
 
     var digestAlgos = ref.newChild("digestAlgorithms");
