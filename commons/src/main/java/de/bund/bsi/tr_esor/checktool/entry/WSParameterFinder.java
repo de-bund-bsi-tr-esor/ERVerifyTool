@@ -21,15 +21,26 @@
  */
 package de.bund.bsi.tr_esor.checktool.entry;
 
+import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ASIC;
+import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ECARD_EXT;
+import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ESOR_VR;
+import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ETSI;
+import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ETSI_SVR;
+import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_XAIP;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 import java.util.Optional;
 
+import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
 import org.bouncycastle.cms.CMSSignedData;
+import org.etsi.uri._02918.v1_2.DataObjectReferenceType;
 import org.w3._2000._09.xmldsig_.CanonicalizationMethodType;
+import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
@@ -38,13 +49,13 @@ import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.parser.XaipParser;
 import de.bund.bsi.tr_esor.checktool.validation.ParserFactory;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
-import de.bund.bsi.tr_esor.checktool.xml.BasicXaipSerializer;
 import de.bund.bsi.tr_esor.checktool.xml.ComprehensiveXaipSerializer;
 import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
 
+import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import oasis.names.tc.dss._1_0.core.schema.AnyType;
@@ -268,8 +279,9 @@ public class WSParameterFinder extends ParameterFinder
         // Usually the inlineXML object is already correctly deserialized...
         if (element instanceof JAXBElement && ((JAXBElement<?>)element).getValue() instanceof XAIPType)
         {
+            var document = marshal(element);
             var xaip = (XAIPType)((JAXBElement<?>)element).getValue();
-            serializer = new BasicXaipSerializer(determineCanonicalizationAlgorithm(xaip), lXaipReader);
+            serializer = new ComprehensiveXaipSerializer(document, determineCanonicalizationAlgorithm(xaip), lXaipReader, true);
             return xaip;
         }
         // If not, deserialize it now. This happens only if the VerifyRequest is directly passed to
@@ -285,6 +297,22 @@ public class WSParameterFinder extends ParameterFinder
             return xaip;
         }
         throw new IllegalArgumentException("InlineXML could not be parsed as XAIP");
+    }
+
+    private Document marshal(Object element) throws JAXBException
+    {
+        DOMResult res = new DOMResult();
+        var packages = List.of(FACTORY_XAIP.getClass().getPackage().getName(),
+            FACTORY_ESOR_VR.getClass().getPackage().getName(),
+            FACTORY_ECARD_EXT.getClass().getPackage().getName(),
+            FACTORY_ETSI_SVR.getClass().getPackage().getName(),
+            FACTORY_ETSI.getClass().getPackage().getName(),
+            FACTORY_ASIC.getClass().getPackage().getName());
+        var contextPath = String.join(":", packages);
+        var context = JAXBContext.newInstance(contextPath, getClass().getClassLoader());
+        var marshaller = context.createMarshaller();
+        marshaller.marshal(element, res);
+        return (Document)res.getNode();
     }
 
     private static String determineCanonicalizationAlgorithm(XAIPType xaip)

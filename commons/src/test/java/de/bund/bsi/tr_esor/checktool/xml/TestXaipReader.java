@@ -25,6 +25,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.startsWith;
 import static org.junit.Assert.assertThrows;
 
@@ -39,6 +40,7 @@ import org.junit.Test;
 import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
+import de.bund.bsi.tr_esor.checktool.parser.XaipParser;
 import de.bund.bsi.tr_esor.checktool.validation.VersionNotFoundException;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.xaip.CredentialType;
@@ -97,10 +99,16 @@ public class TestXaipReader
     @Test
     public void getsProtectedMetaDataObject() throws Exception
     {
-        sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
-        var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", null);
+        var parser = new XaipParser(null);
+        try (var input = getClass().getResourceAsStream("/xaip/xaip_ok_ers.xml"))
+        {
+            assertThat(input, notNullValue());
+            parser.setInput(input);
+            var xaip = parser.parse().getXaip();
+            sut = new XaipReader(xaip, REFERENCE, PROFILE_NAME);
+        }
 
-        var protectedElements = sut.prepareProtectedElements("V001", serializer);
+        var protectedElements = sut.prepareProtectedElements("V001", parser.createSerializer());
 
         checkElement(protectedElements, "metaDataID:Hundename_V001", containsString("TestData"));
     }
@@ -108,10 +116,16 @@ public class TestXaipReader
     @Test
     public void getsProtectedVersionManifestObject() throws Exception
     {
-        sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
-        var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", null);
+        var parser = new XaipParser(null);
+        try (var input = getClass().getResourceAsStream("/xaip/xaip_ok_ers.xml"))
+        {
+            assertThat(input, notNullValue());
+            parser.setInput(input);
+            var xaip = parser.parse().getXaip();
+            sut = new XaipReader(xaip, REFERENCE, PROFILE_NAME);
+        }
 
-        var protectedElements = sut.prepareProtectedElements("V001", serializer);
+        var protectedElements = sut.prepareProtectedElements("V001", parser.createSerializer());
 
         checkElement(protectedElements, "versionID:V001", startsWith("<xaip:versionManifest"));
     }
@@ -119,10 +133,16 @@ public class TestXaipReader
     @Test
     public void getsProtectedDataObjectFromXaip() throws Exception
     {
-        sut = new XaipReader(xaip("/xaip/xaip_ok_ers.xml"), REFERENCE, PROFILE_NAME);
-        var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", null);
+        var parser = new XaipParser(null);
+        try (var input = getClass().getResourceAsStream("/xaip/xaip_ok_ers.xml"))
+        {
+            assertThat(input, notNullValue());
+            parser.setInput(input);
+            var xaip = parser.parse().getXaip();
+            sut = new XaipReader(xaip, REFERENCE, PROFILE_NAME);
+        }
 
-        var protectedElements = sut.prepareProtectedElements("V001", serializer);
+        var protectedElements = sut.prepareProtectedElements("V001", parser.createSerializer());
 
         checkElement(protectedElements, "dataObjectID:HundesteuerAnmeldung_V001", startsWith("my name is"));
     }
@@ -130,11 +150,17 @@ public class TestXaipReader
     @Test
     public void getsProtectedDataObjectFromLXaip() throws Exception
     {
-        sut = new XaipReader(xaip("/lxaip/lxaip_ok.xml"), REFERENCE, PROFILE_NAME);
         var lXaipReader = new LXaipReader(Configurator.getInstance().getLXaipDataDirectory("TR-ESOR"));
-        var serializer = new BasicXaipSerializer("http://www.w3.org/TR/2001/REC-xml-c14n-20010315", lXaipReader);
+        var parser = new XaipParser(lXaipReader);
+        try (var input = getClass().getResourceAsStream("/lxaip/lxaip_ok.xml"))
+        {
+            assertThat(input, notNullValue());
+            parser.setInput(input);
+            var xaip = parser.parse().getXaip();
+            sut = new XaipReader(xaip, REFERENCE, PROFILE_NAME);
+        }
 
-        var protectedElements = sut.prepareProtectedElements("V001", serializer);
+        var protectedElements = sut.prepareProtectedElements("V001", parser.createSerializer());
 
         checkElement(protectedElements,
             "dataObjectID:HundesteuerAnmeldung_V001",
