@@ -38,43 +38,40 @@ import de.bund.bsi.tr_esor.checktool.xml.VRCreator;
 public final class ValidationScheduler
 {
 
-  private static ValidatorFactory factory = ValidatorFactory.getInstance();
+    private static ValidatorFactory factory = ValidatorFactory.getInstance();
 
-  private ValidationScheduler()
-  {
-    // static only
-  }
-
-  /**
-   * Validates all the given objects and their children and returns a verification report.
-   *
-   * @param contexts sorted out elements and required data to validate each one
-   */
-  @SuppressWarnings("PMD.NullAssignment")
-  public static VerificationReportType validate(List<ValidationContext<?>> contexts)
-  {
-    var reports = contexts.stream().map(ValidationScheduler::doValidation).collect(Collectors.toList());
-    return VRCreator.createReport(reports,
-                                  contexts.isEmpty() ? null : contexts.get(0).getReturnVerificationReport());
-  }
-
-  private static <T> ReportPart doValidation(ValidationContext<T> context)
-  {
-    try
+    private ValidationScheduler()
     {
-      if (!factory.isProfileSupported(context.getProfileName()))
-      {
-        return ReportPart.forNoProfile(context.getReference(), context.getProfileName());
-      }
-      Validator<T, ?, ReportPart> val = factory.getValidator(context.getTargetClass(),
-                                                             ReportPart.class,
-                                                             context);
-      return val.validate(context.getReference(), context.getObjectToValidate());
+        // static only
     }
-    catch (NoValidatorException e)
+
+    /**
+     * Validates all the given objects and their children and returns a verification report.
+     *
+     * @param contexts sorted out elements and required data to validate each one
+     */
+    @SuppressWarnings("PMD.NullAssignment")
+    public static VerificationReportType validate(List<ValidationContext<?>> contexts)
     {
-      // may happen after inconsistent extension of the application
-      return ReportPart.forNoValidator(context.getReference(), e);
+        var reports = contexts.stream().map(ValidationScheduler::doValidation).collect(Collectors.toList());
+        return VRCreator.createReport(reports, contexts.isEmpty() ? null : contexts.get(0).getReturnVerificationReport());
     }
-  }
+
+    private static <T> ReportPart doValidation(ValidationContext<T> context)
+    {
+        try
+        {
+            if (!factory.isProfileSupported(context.getProfileName()))
+            {
+                return ReportPart.forNoProfile(context.getReference(), context.getProfileName());
+            }
+            Validator<T, ?, ReportPart> val = factory.getValidator(context.getTargetClass(), ReportPart.class, context);
+            return val.validate(context.getReference(), context.getObjectToValidate());
+        }
+        catch (NoValidatorException e)
+        {
+            // may happen after inconsistent extension of the application
+            return ReportPart.forNoValidator(context.getReference(), e);
+        }
+    }
 }

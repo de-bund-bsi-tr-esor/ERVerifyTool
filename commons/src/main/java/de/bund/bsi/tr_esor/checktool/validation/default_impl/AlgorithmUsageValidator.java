@@ -36,76 +36,70 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
  *
  * @author KK, TT
  */
-public class AlgorithmUsageValidator
-  implements Validator<AlgorithmUsage, ValidationContext<?>, AlgorithmValidityReport>
+public class AlgorithmUsageValidator implements Validator<AlgorithmUsage, ValidationContext<?>, AlgorithmValidityReport>
 {
 
-  /**
-   * Minor codes for algorithm suitability.
-   */
-  protected enum ValidationResultMinor
-  {
-
-    /** Not suitable. */
-    HASH_ALGORITHM_NOT_SUITABLE("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/algorithm#hashAlgorithmNotSuitable"),
-    /** Unknown. */
-    HASH_ALGORITHM_NOT_SUPPORTED("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/algorithm#hashAlgorithmNotSupported"),
-    /** Internal error. */
-    INTERNAL_ERROR("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError"),
-    /** OK. */
-    NULL(null);
-
-    private final String value;
-
-    ValidationResultMinor(String uri)
+    @Override
+    public AlgorithmValidityReport validate(Reference ref, AlgorithmUsage toCheck)
     {
-      this.value = uri;
+        var report = new AlgorithmValidityReport(ref, toCheck.getOid());
+        var minor = check(toCheck);
+        var major = minor == ValidationResultMinor.NULL ? ValidationResultMajor.VALID : ValidationResultMajor.INVALID;
+        report.updateCodes(major, minor.toString(), MinorPriority.IMPORTANT, null, ref);
+        return report;
+    }
+
+    /**
+     * Checks if the given AlgorithmUsage is supported and suitable.
+     *
+     * @param algo
+     * @return a feasible ValidationResultMinor
+     */
+    protected ValidationResultMinor check(AlgorithmUsage algo)
+    {
+        var catalog = AlgorithmCatalog.getInstance();
+        var supportedAlgo = catalog.getSupportedAlgorithms().values().stream().filter(al -> al.getOids().contains(algo.getOid())).findAny();
+        if (supportedAlgo.isPresent())
+        {
+            return supportedAlgo.get().getValidity().getTime() > algo.getValidationDate().getTime()
+                ? ValidationResultMinor.NULL
+                : ValidationResultMinor.HASH_ALGORITHM_NOT_SUITABLE;
+        }
+        return ValidationResultMinor.HASH_ALGORITHM_NOT_SUPPORTED;
     }
 
     @Override
-    public String toString()
+    public void setContext(ValidationContext<?> context)
     {
-      return value;
+        // this validator does not need any context.
     }
-  }
 
-  @Override
-  public AlgorithmValidityReport validate(Reference ref, AlgorithmUsage toCheck)
-  {
-    var report = new AlgorithmValidityReport(ref, toCheck.getOid());
-    var minor = check(toCheck);
-    var major = minor == ValidationResultMinor.NULL ? ValidationResultMajor.VALID
-      : ValidationResultMajor.INVALID;
-    report.updateCodes(major, minor.toString(), MinorPriority.IMPORTANT, null, ref);
-    return report;
-  }
-
-
-  /**
-   * Checks if the given AlgorithmUsage is supported and suitable.
-   *
-   * @param algo
-   * @return a feasible ValidationResultMinor
-   */
-  protected ValidationResultMinor check(AlgorithmUsage algo)
-  {
-    var catalog = AlgorithmCatalog.getInstance();
-    var supportedAlgo = catalog.getSupportedAlgorithms()
-                               .values()
-                               .stream()
-                               .filter(al -> al.getOids().contains(algo.getOid()))
-                               .findAny();
-    if (supportedAlgo.isPresent())
+    /**
+     * Minor codes for algorithm suitability.
+     */
+    protected enum ValidationResultMinor
     {
-      return supportedAlgo.get().getValidity().getTime() > algo.getValidationDate().getTime()
-        ? ValidationResultMinor.NULL : ValidationResultMinor.HASH_ALGORITHM_NOT_SUITABLE;
-    }
-    return ValidationResultMinor.HASH_ALGORITHM_NOT_SUPPORTED;
-  }
 
-  @Override
-  public void setContext(ValidationContext<?> context)
-  {
-    // this validator does not need any context.
-  }
+        /** Not suitable. */
+        HASH_ALGORITHM_NOT_SUITABLE("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/algorithm#hashAlgorithmNotSuitable"),
+        /** Unknown. */
+        HASH_ALGORITHM_NOT_SUPPORTED("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/algorithm#hashAlgorithmNotSupported"),
+        /** Internal error. */
+        INTERNAL_ERROR("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#internalError"),
+        /** OK. */
+        NULL(null);
+
+        private final String value;
+
+        ValidationResultMinor(String uri)
+        {
+            this.value = uri;
+        }
+
+        @Override
+        public String toString()
+        {
+            return value;
+        }
+    }
 }

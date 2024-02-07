@@ -32,38 +32,37 @@ import java.io.IOException;
 public final class Checked
 {
 
-  private final Object object;
+    private final Object object;
 
-  private Checked(Object object)
-  {
-    this.object = object;
-  }
-
-  /**
-   * Creates a new instance for an object to be cast.
-   *
-   * @param object to cast
-   */
-  public static Checked cast(Object object)
-  {
-    return new Checked(object);
-  }
-
-  /**
-   * Casts object of this instance and throws {@link IOException} if that is not possible, instead of a
-   * {@link ClassCastException} which is no checked Exception.
-   *
-   * @param target
-   * @throws IOException
-   */
-  public <T> T to(Class<T> target) throws IOException
-  {
-    if (object != null && !target.isInstance(object))
+    private Checked(Object object)
     {
-      throw new IOException("expected instance of " + target.getSimpleName() + " but got "
-                            + object.getClass().getName());
+        this.object = object;
     }
-    return target.cast(object);
-  }
+
+    /**
+     * Creates a new instance for an object to be cast.
+     *
+     * @param object to cast
+     */
+    public static Checked cast(Object object)
+    {
+        return new Checked(object);
+    }
+
+    /**
+     * Casts object of this instance and throws {@link IOException} if that is not possible, instead of a {@link ClassCastException} which
+     * is no checked Exception.
+     *
+     * @param target
+     * @throws IOException
+     */
+    public <T> T to(Class<T> target) throws IOException
+    {
+        if (object != null && !target.isInstance(object))
+        {
+            throw new IOException("expected instance of " + target.getSimpleName() + " but got " + object.getClass().getName());
+        }
+        return target.cast(object);
+    }
 
 }

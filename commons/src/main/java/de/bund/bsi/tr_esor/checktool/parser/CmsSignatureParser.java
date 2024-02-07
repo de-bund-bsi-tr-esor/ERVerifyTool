@@ -37,78 +37,75 @@ import org.bouncycastle.cms.CMSSignedData;
 public class CmsSignatureParser implements Parser<CMSSignedData>
 {
 
-  private static final byte CONSTRUCTED_SEQUENCE = 0x30;
+    private static final byte CONSTRUCTED_SEQUENCE = 0x30;
 
-  private static final byte[] CMS_SIGNED_OBJECT_IDENTIFIER = {0x06, // object identifier
-                                                              0x09, // length of our OID
-                                                              // OID value 1.2.840.113549.1.7.2:
-                                                              0x2a, (byte)0x86, 0x48, (byte)0x86, (byte)0xf7,
-                                                              0x0d, 0x01, 0x07, 0x02};
+    private static final byte[] CMS_SIGNED_OBJECT_IDENTIFIER = {0x06, // object identifier
+        0x09, // length of our OID
+        // OID value 1.2.840.113549.1.7.2:
+        0x2a, (byte)0x86, 0x48, (byte)0x86, (byte)0xf7, 0x0d, 0x01, 0x07, 0x02};
 
-  private static final int BUF_SIZE = CMS_SIGNED_OBJECT_IDENTIFIER.length + 5;
+    private static final int BUF_SIZE = CMS_SIGNED_OBJECT_IDENTIFIER.length + 5;
 
-  private InputStream input;
+    private InputStream input;
 
-  @Override
-  public void setInput(InputStream input)
-  {
-    this.input = input;
-    if (!input.markSupported())
+    @Override
+    public void setInput(InputStream input)
     {
-      throw new IllegalArgumentException("can only handle streams which support mark/reset");
+        this.input = input;
+        if (!input.markSupported())
+        {
+            throw new IllegalArgumentException("can only handle streams which support mark/reset");
+        }
     }
-  }
 
-  @Override
-  public boolean canParse() throws IOException
-  {
-    input.mark(BUF_SIZE);
-    var buf = new byte[BUF_SIZE];
-    var len = input.read(buf, 0, BUF_SIZE);
-    input.reset();
-    if (len < BUF_SIZE || buf[0] != CONSTRUCTED_SEQUENCE)
+    @Override
+    public boolean canParse() throws IOException
     {
-      return false;
+        input.mark(BUF_SIZE);
+        var buf = new byte[BUF_SIZE];
+        var len = input.read(buf, 0, BUF_SIZE);
+        input.reset();
+        if (len < BUF_SIZE || buf[0] != CONSTRUCTED_SEQUENCE)
+        {
+            return false;
+        }
+        var numLenBytes = getNumLenBytes(buf[1]);
+        var foundOid = Arrays.copyOfRange(buf, 1 + numLenBytes, 1 + numLenBytes + CMS_SIGNED_OBJECT_IDENTIFIER.length);
+        return Arrays.equals(foundOid, CMS_SIGNED_OBJECT_IDENTIFIER);
     }
-    var numLenBytes = getNumLenBytes(buf[1]);
-    var foundOid = Arrays.copyOfRange(buf,
-                                      1 + numLenBytes,
-                                      1 + numLenBytes + CMS_SIGNED_OBJECT_IDENTIFIER.length);
-    return Arrays.equals(foundOid, CMS_SIGNED_OBJECT_IDENTIFIER);
-  }
 
-  @Override
-  public CMSSignedData parse() throws IOException
-  {
-    try
+    @Override
+    public CMSSignedData parse() throws IOException
     {
-      return new CMSSignedData(input);
+        try
+        {
+            return new CMSSignedData(input);
+        }
+        catch (CMSException e)
+        {
+            throw new IOException("CMS invalid format", e);
+        }
     }
-    catch (CMSException e)
-    {
-      throw new IOException("CMS invalid format", e);
-    }
-  }
 
-  /**
-   * Calculates the number of bytes which describe the content length of the constructed sequence. This is
-   * needed to get the offset where the content of the sequence starts.
-   * <p>
-   * The highest bit is set to zero if the first byte is enough to determine the content length. If the
-   * highest bit is set to one the other bits determine how many further bytes describe the content length.
-   *
-   * @param lengthByte the first byte of the length bytes of the constructed sequence
-   */
-  private int getNumLenBytes(byte lengthByte)
-  {
-    final var bit8Mask = 0b10000000;
-    final var numberFollowingMask = 0b01111111;
-    var numLenBytes = 1;
-    if ((lengthByte & bit8Mask) > 0)
+    /**
+     * Calculates the number of bytes which describe the content length of the constructed sequence. This is needed to get the offset where
+     * the content of the sequence starts.
+     * <p>
+     * The highest bit is set to zero if the first byte is enough to determine the content length. If the highest bit is set to one the
+     * other bits determine how many further bytes describe the content length.
+     *
+     * @param lengthByte the first byte of the length bytes of the constructed sequence
+     */
+    private int getNumLenBytes(byte lengthByte)
     {
-      numLenBytes += lengthByte & numberFollowingMask;
+        final var bit8Mask = 0b10000000;
+        final var numberFollowingMask = 0b01111111;
+        var numLenBytes = 1;
+        if ((lengthByte & bit8Mask) > 0)
+        {
+            numLenBytes += lengthByte & numberFollowingMask;
+        }
+        return numLenBytes;
     }
-    return numLenBytes;
-  }
 
 }

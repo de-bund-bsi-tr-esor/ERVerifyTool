@@ -36,7 +36,6 @@ import org.bouncycastle.asn1.DEROctetString;
 import org.bouncycastle.asn1.DERSequence;
 
 
-
 /**
  * Class to parse and analyze encryption info.
  *
@@ -45,49 +44,49 @@ import org.bouncycastle.asn1.DERSequence;
 public class EncryptionInfo implements ASN1Encodable
 {
 
-  /** OID of information. */
-  private final ASN1ObjectIdentifier oid;
+    /** OID of information. */
+    private final ASN1ObjectIdentifier oid;
 
-  /** Value of information. */
-  private final byte[] value;
+    /** Value of information. */
+    private final byte[] value;
 
-  /**
-   * Constructor (generate and initialize object).
-   *
-   * @param id OID of information
-   * @param val value of information
-   */
-  public EncryptionInfo(String id, byte[] val)
-  {
-    Objects.requireNonNull(val, "value may not be null");
-
-    oid = new ASN1ObjectIdentifier(id);
-    value = Arrays.copyOf(val, val.length);
-  }
-
-  /**
-   * Constructor (generated from input parameter).
-   *
-   * @param obj ASN.1 object
-   * @throws IOException
-   */
-  public EncryptionInfo(ASN1Object obj) throws IOException
-  {
-    if (!(obj instanceof ASN1Sequence) || ((ASN1Sequence)obj).size() != 2)
+    /**
+     * Constructor (generate and initialize object).
+     *
+     * @param id OID of information
+     * @param val value of information
+     */
+    public EncryptionInfo(String id, byte[] val)
     {
-      throw new IOException("not valid (EI-1)");
-    }
-    var s = (ASN1Sequence)obj;
-    oid = ASN1ObjectIdentifier.getInstance(s.getObjectAt(0));
-    value = s.getObjectAt(1).toASN1Primitive().getEncoded(ASN1Encoding.DER);
-  }
+        Objects.requireNonNull(val, "value may not be null");
 
-  @Override
-  public ASN1Primitive toASN1Primitive()
-  {
-    var v = new ASN1EncodableVector();
-    v.add(oid);
-    v.add(new DEROctetString(value));
-    return new DERSequence(v);
-  }
+        oid = new ASN1ObjectIdentifier(id);
+        value = Arrays.copyOf(val, val.length);
+    }
+
+    /**
+     * Constructor (generated from input parameter).
+     *
+     * @param obj ASN.1 object
+     * @throws IOException
+     */
+    public EncryptionInfo(ASN1Object obj) throws IOException
+    {
+        if (!(obj instanceof ASN1Sequence) || ((ASN1Sequence)obj).size() != 2)
+        {
+            throw new IOException("not valid (EI-1)");
+        }
+        var s = (ASN1Sequence)obj;
+        oid = ASN1ObjectIdentifier.getInstance(s.getObjectAt(0));
+        value = s.getObjectAt(1).toASN1Primitive().getEncoded(ASN1Encoding.DER);
+    }
+
+    @Override
+    public ASN1Primitive toASN1Primitive()
+    {
+        var v = new ASN1EncodableVector();
+        v.add(oid);
+        v.add(new DEROctetString(value));
+        return new DERSequence(v);
+    }
 }

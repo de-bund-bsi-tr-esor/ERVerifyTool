@@ -21,9 +21,9 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.AlgorithmValidityType;
-
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.AlgorithmValidityType;
 
 
 /**
@@ -34,31 +34,31 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class AlgorithmValidityReport extends ReportPart implements OutputCreator<AlgorithmValidityType>
 {
 
-  private final AlgorithmValidityType xmlReport;
+    private final AlgorithmValidityType xmlReport;
 
-  /**
-   * Creates a new instance.
-   *
-   * @param reference
-   */
-  public AlgorithmValidityReport(Reference reference, String oid)
-  {
-    super(reference);
-    xmlReport = XmlHelper.FACTORY_OASIS_VR.createAlgorithmValidityType();
-    xmlReport.setAlgorithm(oid);
-  }
+    /**
+     * Creates a new instance.
+     *
+     * @param reference
+     */
+    public AlgorithmValidityReport(Reference reference, String oid)
+    {
+        super(reference);
+        xmlReport = XmlHelper.FACTORY_OASIS_VR.createAlgorithmValidityType();
+        xmlReport.setAlgorithm(oid);
+    }
 
-  @Override
-  public AlgorithmValidityType getFormatted()
-  {
-    xmlReport.setSuitability(getOverallResult());
-    return xmlReport;
-  }
+    @Override
+    public AlgorithmValidityType getFormatted()
+    {
+        xmlReport.setSuitability(getOverallResult());
+        return xmlReport;
+    }
 
-  @Override
-  public Class<AlgorithmValidityType> getTargetClass()
-  {
-    return AlgorithmValidityType.class;
-  }
+    @Override
+    public Class<AlgorithmValidityType> getTargetClass()
+    {
+        return AlgorithmValidityType.class;
+    }
 
 }

@@ -47,200 +47,191 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class ErValidationContext extends ValidationContext<EvidenceRecord>
 {
 
-  private final Map<Reference, byte[]> protectedDataByID = new HashMap<>();
+    private final Map<Reference, byte[]> protectedDataByID = new HashMap<>();
 
-  private List<String> declaredDigestOIDs;
+    private final List<String> additionalMessages = new ArrayList<>();
 
-  private HashCreator hashCreator;
+    private final FormatOkReport formatOk;
 
-  private final List<String> additionalMessages = new ArrayList<>();
+    /**
+     * Key is algorithm OID, value is secured date of latest usage.
+     */
+    private final Map<String, Date> latestUsage = new HashMap<>();
 
-  private final FormatOkReport formatOk;
+    /**
+     * Key is ATS in evidence record, value is time when the ATS was secured by another ATS or now for the last one.
+     */
+    private final Map<ArchiveTimeStamp, Date> securedByDate = new IdentityHashMap<>();
 
-  private boolean checkForAdditionalHashes;
+    private List<String> declaredDigestOIDs;
 
-  /**
-   * Key is algorithm OID, value is secured date of latest usage.
-   */
-  private final Map<String, Date> latestUsage = new HashMap<>();
+    private HashCreator hashCreator;
 
-  /**
-   * Key is ATS in evidence record, value is time when the ATS was secured by another ATS or now for the last
-   * one.
-   */
-  private final Map<ArchiveTimeStamp, Date> securedByDate = new IdentityHashMap<>();
+    private boolean checkForAdditionalHashes;
 
-  /**
-   * Creates instance for a successfully parsed evidence record.
-   */
-  @SuppressWarnings("PMD.NullAssignment")
-  public ErValidationContext(Reference reference,
-                             EvidenceRecord objectToValidate,
-                             String profileName,
-                             ReturnVerificationReport returnVerificationReport,
-                             boolean checkForAdditionalHashes)
-    throws ReflectiveOperationException
-  {
-    super(reference, objectToValidate, profileName, returnVerificationReport);
-    this.hashCreator = ValidatorFactory.getInstance().getHashCreator();
-    this.formatOk = new FormatOkReport(reference);
-    this.checkForAdditionalHashes = checkForAdditionalHashes;
-  }
-
-  /**
-   * Creates instance in case the evidence record cannot be parsed.
-   */
-  @SuppressWarnings("PMD.NullAssignment")
-  public ErValidationContext(Reference reference, String parseFailMessage, String profileName)
-  {
-    super(reference, null, profileName, null);
-    this.additionalMessages.add(parseFailMessage);
-    this.formatOk = null;
-    this.checkForAdditionalHashes = false;
-  }
-
-  /**
-   * Adds protected data so that the hash is checked in the evidence record.
-   */
-  public void addProtectedData(Reference key, byte[] data)
-  {
-    if (protectedDataByID.containsKey(key))
+    /**
+     * Creates instance for a successfully parsed evidence record.
+     */
+    @SuppressWarnings("PMD.NullAssignment")
+    public ErValidationContext(Reference reference, EvidenceRecord objectToValidate, String profileName,
+        ReturnVerificationReport returnVerificationReport, boolean checkForAdditionalHashes) throws ReflectiveOperationException
     {
-      throw new IllegalArgumentException("duplicate key: " + key);
+        super(reference, objectToValidate, profileName, returnVerificationReport);
+        this.hashCreator = ValidatorFactory.getInstance().getHashCreator();
+        this.formatOk = new FormatOkReport(reference);
+        this.checkForAdditionalHashes = checkForAdditionalHashes;
     }
-    protectedDataByID.put(key, data);
-  }
 
-  /**
-   * Add a message that should be included in the result message
-   */
-  public void addAdditionalMessage(String info)
-  {
-    additionalMessages.add(info);
-  }
-
-  /**
-   * Get messages that should be included in the result message of the report
-   */
-  public List<String> getAdditionalMessages()
-  {
-    return additionalMessages;
-  }
-
-
-  /**
-   * Returns a map of digests of all protected data by a unique ID which can be used to report a missing
-   * digest.
-   */
-  public Map<Reference, byte[]> getRequiredDigests(String digestOID) throws NoSuchAlgorithmException
-  {
-    Map<Reference, byte[]> result = new HashMap<>();
-    for ( var entry : protectedDataByID.entrySet() )
+    /**
+     * Creates instance in case the evidence record cannot be parsed.
+     */
+    @SuppressWarnings("PMD.NullAssignment")
+    public ErValidationContext(Reference reference, String parseFailMessage, String profileName)
     {
-      result.put(entry.getKey(), hashCreator.calculateHash(entry.getValue(), digestOID));
+        super(reference, null, profileName, null);
+        this.additionalMessages.add(parseFailMessage);
+        this.formatOk = null;
+        this.checkForAdditionalHashes = false;
     }
-    return result;
-  }
 
-  /**
-   * Returns true if for this context, the completeness of the required digests should be checked. This means
-   * that if this returns true, only the digests returned by getRequiredDigests() should be present in an
-   * evidence record. If false is returned, other hashes in the evidence record are acceptable.
-   */
-  public boolean isCheckForAdditionalHashes()
-  {
-    return checkForAdditionalHashes;
-  }
-
-  /**
-   * Returns <code>true</code> if a specified digest has been declared in the algorithms section of the
-   * evidence record.
-   */
-  public boolean isAlgorithmDeclared(String digestOID)
-  {
-    return declaredDigestOIDs.contains(digestOID);
-  }
-
-  /**
-   * Returns a time after which the given algorithm is definitely not used in the ER.
-   */
-  public Date getLatestPossibleUsage(String algoOID)
-  {
-    return Optional.ofNullable(latestUsage.get(algoOID)).orElse(new Date());
-  }
-
-  /**
-   * Specifies a time after which the given algorithm is definitely not used in the ER.
-   */
-  public void setPossibleAlgorithmUsage(String algoOID, Date possibleUsage)
-  {
-    var known = latestUsage.get(algoOID);
-    if (known == null || known.after(possibleUsage))
+    /**
+     * Adds protected data so that the hash is checked in the evidence record.
+     */
+    public void addProtectedData(Reference key, byte[] data)
     {
-      latestUsage.put(algoOID, possibleUsage);
+        if (protectedDataByID.containsKey(key))
+        {
+            throw new IllegalArgumentException("duplicate key: " + key);
+        }
+        protectedDataByID.put(key, data);
     }
-  }
 
-  @Override
-  public Class<EvidenceRecord> getTargetClass()
-  {
-    return EvidenceRecord.class;
-  }
+    /**
+     * Add a message that should be included in the result message
+     */
+    public void addAdditionalMessage(String info)
+    {
+        additionalMessages.add(info);
+    }
 
-  @Override
-  public boolean isRestrictedValidation()
-  {
-    return false;
-  }
+    /**
+     * Get messages that should be included in the result message of the report
+     */
+    public List<String> getAdditionalMessages()
+    {
+        return additionalMessages;
+    }
 
-  /**
-   * Returns the formatOk result which must possibly be updated by different validators. Unfortunately, the
-   * XML verification report does not provide fields for certain problems in ATS, ATS chains and so on but
-   * uses the overall formatOk field for that purpose.
-   */
-  public FormatOkReport getFormatOk()
-  {
-    return formatOk;
-  }
 
-  /**
-   * Defines which digest algorithms are specified in the evidence record.
-   */
-  public void setDeclaredDigestOIDs(List<String> declaredDigestOIDs)
-  {
-    this.declaredDigestOIDs = declaredDigestOIDs;
-  }
+    /**
+     * Returns a map of digests of all protected data by a unique ID which can be used to report a missing digest.
+     */
+    public Map<Reference, byte[]> getRequiredDigests(String digestOID) throws NoSuchAlgorithmException
+    {
+        Map<Reference, byte[]> result = new HashMap<>();
+        for (var entry : protectedDataByID.entrySet())
+        {
+            result.put(entry.getKey(), hashCreator.calculateHash(entry.getValue(), digestOID));
+        }
+        return result;
+    }
 
-  /**
-   * Returns the time when the given ATS was secured.
-   */
-  public Date getSecureDate(ArchiveTimeStamp ats)
-  {
-    return securedByDate.get(ats);
-  }
+    /**
+     * Returns true if for this context, the completeness of the required digests should be checked. This means that if this returns true,
+     * only the digests returned by getRequiredDigests() should be present in an evidence record. If false is returned, other hashes in the
+     * evidence record are acceptable.
+     */
+    public boolean isCheckForAdditionalHashes()
+    {
+        return checkForAdditionalHashes;
+    }
 
-  /**
-   * Sets the given secure time for the given ATS.
-   */
-  public void setSecureData(ArchiveTimeStamp ats, Date date)
-  {
-    securedByDate.put(ats, date);
-  }
+    /**
+     * Returns <code>true</code> if a specified digest has been declared in the algorithms section of the evidence record.
+     */
+    public boolean isAlgorithmDeclared(String digestOID)
+    {
+        return declaredDigestOIDs.contains(digestOID);
+    }
 
-  /**
-   * Disable the additional hash check
-   */
-  public void disableCheckForAdditionalHashes()
-  {
-    this.checkForAdditionalHashes = false;
-  }
+    /**
+     * Returns a time after which the given algorithm is definitely not used in the ER.
+     */
+    public Date getLatestPossibleUsage(String algoOID)
+    {
+        return Optional.ofNullable(latestUsage.get(algoOID)).orElse(new Date());
+    }
 
-  /**
-   * Returns the single protected data (which is required in an edge case of the online timestamp validation)
-   * or null otherwise
-   */
-  public byte[] singleProtectedData()
-  {
-    return protectedDataByID.size() == 1 ? protectedDataByID.values().iterator().next() : null;
-  }
+    /**
+     * Specifies a time after which the given algorithm is definitely not used in the ER.
+     */
+    public void setPossibleAlgorithmUsage(String algoOID, Date possibleUsage)
+    {
+        var known = latestUsage.get(algoOID);
+        if (known == null || known.after(possibleUsage))
+        {
+            latestUsage.put(algoOID, possibleUsage);
+        }
+    }
+
+    @Override
+    public Class<EvidenceRecord> getTargetClass()
+    {
+        return EvidenceRecord.class;
+    }
+
+    @Override
+    public boolean isRestrictedValidation()
+    {
+        return false;
+    }
+
+    /**
+     * Returns the formatOk result which must possibly be updated by different validators. Unfortunately, the XML verification report does
+     * not provide fields for certain problems in ATS, ATS chains and so on but uses the overall formatOk field for that purpose.
+     */
+    public FormatOkReport getFormatOk()
+    {
+        return formatOk;
+    }
+
+    /**
+     * Defines which digest algorithms are specified in the evidence record.
+     */
+    public void setDeclaredDigestOIDs(List<String> declaredDigestOIDs)
+    {
+        this.declaredDigestOIDs = declaredDigestOIDs;
+    }
+
+    /**
+     * Returns the time when the given ATS was secured.
+     */
+    public Date getSecureDate(ArchiveTimeStamp ats)
+    {
+        return securedByDate.get(ats);
+    }
+
+    /**
+     * Sets the given secure time for the given ATS.
+     */
+    public void setSecureData(ArchiveTimeStamp ats, Date date)
+    {
+        securedByDate.put(ats, date);
+    }
+
+    /**
+     * Disable the additional hash check
+     */
+    public void disableCheckForAdditionalHashes()
+    {
+        this.checkForAdditionalHashes = false;
+    }
+
+    /**
+     * Returns the single protected data (which is required in an edge case of the online timestamp validation) or null otherwise
+     */
+    public byte[] singleProtectedData()
+    {
+        return protectedDataByID.size() == 1 ? protectedDataByID.values().iterator().next() : null;
+    }
 }

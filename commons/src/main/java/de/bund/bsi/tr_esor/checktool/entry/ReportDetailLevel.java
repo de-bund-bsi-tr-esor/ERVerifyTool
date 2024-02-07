@@ -29,25 +29,25 @@ package de.bund.bsi.tr_esor.checktool.entry;
 public enum ReportDetailLevel
 {
 
-  /** Only the final result. */
-  NO_DETAILS("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:noDetails"),
+    /** Only the final result. */
+    NO_DETAILS("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:noDetails"),
 
-  /** ReportDetailLevel for no path details. */
-  NO_PATH_DETAILS("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:noPathDetails"),
+    /** ReportDetailLevel for no path details. */
+    NO_PATH_DETAILS("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:noPathDetails"),
 
-  /** ReportDetailLevel for all details. (default) */
-  ALL_DETAILS("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:allDetails");
+    /** ReportDetailLevel for all details. (default) */
+    ALL_DETAILS("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:allDetails");
 
-  private final String value;
+    private final String value;
 
-  ReportDetailLevel(String value)
-  {
-    this.value = value;
-  }
+    ReportDetailLevel(String value)
+    {
+        this.value = value;
+    }
 
-  @Override
-  public String toString()
-  {
-    return value;
-  }
+    @Override
+    public String toString()
+    {
+        return value;
+    }
 }

@@ -30,18 +30,17 @@ import static org.hamcrest.core.Is.is;
 import java.net.URL;
 import java.util.UUID;
 
-import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
-
-import jakarta.xml.bind.JAXBElement;
-import jakarta.xml.bind.JAXBException;
-
 import org.junit.Test;
 
 import de.bund.bsi.tr_esor.api._1.S4_Service;
 import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.validation.report.OasisDssResultMajor;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+
+import jakarta.xml.bind.JAXBElement;
+import jakarta.xml.bind.JAXBException;
+import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
 
 /**
@@ -52,49 +51,48 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class WebServiceIT
 {
 
-  /**
-   * Calls the web service and checks that a verification report is received.
-   */
-  @Test
-  public void callWebService() throws Exception
-  {
-    var service = new S4_Service(new URL("http://localhost:8080/ErVerifyTool/esor13/exec?wsdl"));
-    var port = service.getS4();
-    var request = XmlHelper.FACTORY_DSS.createVerifyRequest();
-    request.setRequestID(UUID.randomUUID().toString());
-    addReturnVR(request, null);
-    request.setInputDocuments(XmlHelper.FACTORY_DSS.createInputDocuments());
-    var document = XmlHelper.FACTORY_DSS.createDocumentType();
-    request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash().add(document);
-    var data = XmlHelper.FACTORY_DSS.createBase64Data();
-    document.setBase64Data(data);
-    data.setValue(TestUtils.decodeTestResource("/bin/example.tif.b64"));
-    data.setMimeType("image/tiff");
-    var sig = XmlHelper.FACTORY_DSS.createSignatureObject();
-    request.setSignatureObject(sig);
-    var sigValue = XmlHelper.FACTORY_DSS.createBase64Signature();
-    sig.setBase64Signature(sigValue);
-    sigValue.setValue(TestUtils.decodeTestResource("/bin/example.ers.b64"));
+    /**
+     * Calls the web service and checks that a verification report is received.
+     */
+    @Test
+    public void callWebService() throws Exception
+    {
+        var service = new S4_Service(new URL("http://localhost:8080/ErVerifyTool/esor13/exec?wsdl"));
+        var port = service.getS4();
+        var request = XmlHelper.FACTORY_DSS.createVerifyRequest();
+        request.setRequestID(UUID.randomUUID().toString());
+        addReturnVR(request, null);
+        request.setInputDocuments(XmlHelper.FACTORY_DSS.createInputDocuments());
+        var document = XmlHelper.FACTORY_DSS.createDocumentType();
+        request.getInputDocuments().getDocumentOrTransformedDataOrDocumentHash().add(document);
+        var data = XmlHelper.FACTORY_DSS.createBase64Data();
+        document.setBase64Data(data);
+        data.setValue(TestUtils.decodeTestResource("/bin/example.tif.b64"));
+        data.setMimeType("image/tiff");
+        var sig = XmlHelper.FACTORY_DSS.createSignatureObject();
+        request.setSignatureObject(sig);
+        var sigValue = XmlHelper.FACTORY_DSS.createBase64Signature();
+        sig.setBase64Signature(sigValue);
+        sigValue.setValue(TestUtils.decodeTestResource("/bin/example.ers.b64"));
 
-    var resp = port.verify(request);
+        var resp = port.verify(request);
 
-    @SuppressWarnings("unchecked")
-    var jaxb = (JAXBElement<VerificationReportType>)resp.getOptionalOutputs().getAny().get(0);
-    var report = jaxb.getValue();
-    var overallResult = report.getIndividualReport().get(0).getResult();
-    assertThat(overallResult.getResultMajor(), is(OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri()));
-    assertThat(overallResult.getResultMessage().getValue(),
-               containsString("atss/0/0/tsp: no online validation of time stamp done"));
-    assertThat(overallResult.getResultMessage().getValue(), not(containsString("common#parameterError")));
-  }
+        @SuppressWarnings("unchecked")
+        var jaxb = (JAXBElement<VerificationReportType>)resp.getOptionalOutputs().getAny().get(0);
+        var report = jaxb.getValue();
+        var overallResult = report.getIndividualReport().get(0).getResult();
+        assertThat(overallResult.getResultMajor(), is(OasisDssResultMajor.INSUFFICIENT_INFORMATION.getUri()));
+        assertThat(overallResult.getResultMessage().getValue(), containsString("atss/0/0/tsp: no online validation of time stamp done"));
+        assertThat(overallResult.getResultMessage().getValue(), not(containsString("common#parameterError")));
+    }
 
-  private void addReturnVR(VerifyRequest request, String profile) throws JAXBException
-  {
-    request.setOptionalInputs(XmlHelper.FACTORY_DSS.createAnyType());
-    request.setProfile(profile);
-    var returnvr = FACTORY_OASIS_VR.createReturnVerificationReport();
-    returnvr.setReportDetailLevel("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:allDetails");
-    var optIn = XmlHelper.toElement(returnvr, FACTORY_OASIS_VR.getClass().getPackage().getName(), null);
-    request.getOptionalInputs().getAny().add(optIn);
-  }
+    private void addReturnVR(VerifyRequest request, String profile) throws JAXBException
+    {
+        request.setOptionalInputs(XmlHelper.FACTORY_DSS.createAnyType());
+        request.setProfile(profile);
+        var returnvr = FACTORY_OASIS_VR.createReturnVerificationReport();
+        returnvr.setReportDetailLevel("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:allDetails");
+        var optIn = XmlHelper.toElement(returnvr, FACTORY_OASIS_VR.getClass().getPackage().getName(), null);
+        request.getOptionalInputs().getAny().add(optIn);
+    }
 }

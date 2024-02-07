@@ -38,106 +38,105 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
  *
  * @author KK, TT
  */
-public class EvidenceRecordValidator
-  extends BaseValidator<EvidenceRecord, ErValidationContext, EvidenceRecordReport>
+public class EvidenceRecordValidator extends BaseValidator<EvidenceRecord, ErValidationContext, EvidenceRecordReport>
 {
 
-  private Reference reference;
+    private Reference reference;
 
-  @Override
-  public EvidenceRecordReport validateInternal(Reference ref, EvidenceRecord er)
-  {
-    if (!ctx.getReference().equals(ref))
+    @Override
+    public EvidenceRecordReport validateInternal(Reference ref, EvidenceRecord er)
     {
-      throw new IllegalArgumentException("Reference does not match the context");
+        if (!ctx.getReference().equals(ref))
+        {
+            throw new IllegalArgumentException("Reference does not match the context");
+        }
+        reference = ctx.getReference();
+
+        var detailReport = new EvidenceRecordReport(ref);
+
+        for (var message : ctx.getAdditionalMessages())
+        {
+            detailReport.addMessageOnly(message, reference);
+        }
+
+        if (er == null)
+        {
+            ctx.getFormatOk().setNoParsedObject("Evidence record");
+        }
+        else
+        {
+            checkVersion(er.getVersion(), detailReport);
+            checkCryptoInfo(er.getCryptoInfo(), detailReport);
+            checkEncryptionInfo(er.getEncryptionInfo(), detailReport);
+            ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
+            checkTimeStampSequence(er.getAtss(), detailReport);
+            checkDigestAlgorithmValidity(er, detailReport);
+        }
+        detailReport.setFormatOk(ctx.getFormatOk());
+        return detailReport;
     }
-    reference = ctx.getReference();
 
-    var detailReport = new EvidenceRecordReport(ref);
-
-    for ( var message : ctx.getAdditionalMessages() )
+    /**
+     * Checks version of evidence record.
+     *
+     * @param version
+     * @param detailReport
+     */
+    protected void checkVersion(int version, EvidenceRecordReport detailReport)
     {
-      detailReport.addMessageOnly(message, reference);
+        if (version != 1)
+        {
+            ctx.getFormatOk().invalidate("unexpected version number", reference.newChild("version"));
+        }
     }
 
-    if (er == null)
+    /**
+     * Checks crypto info of evidence record.
+     *
+     * @param cryptoInfo
+     * @param detailReport
+     */
+    protected void checkCryptoInfo(CryptoInfo cryptoInfo, EvidenceRecordReport detailReport)
     {
-      ctx.getFormatOk().setNoParsedObject("Evidence record");
+        // nothing to check for RFC4998
     }
-    else
+
+    /**
+     * Checks encryption info of evidence record.
+     *
+     * @param encryptionInfo
+     * @param detailReport
+     */
+    protected void checkEncryptionInfo(EncryptionInfo encryptionInfo, EvidenceRecordReport detailReport)
     {
-      checkVersion(er.getVersion(), detailReport);
-      checkCryptoInfo(er.getCryptoInfo(), detailReport);
-      checkEncryptionInfo(er.getEncryptionInfo(), detailReport);
-      ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
-      checkTimeStampSequence(er.getAtss(), detailReport);
-      checkDigestAlgorithmValidity(er, detailReport);
+        // nothing to check for RFC4998
     }
-    detailReport.setFormatOk(ctx.getFormatOk());
-    return detailReport;
-  }
 
-  /**
-   * Checks version of evidence record.
-   *
-   * @param version
-   * @param detailReport
-   */
-  protected void checkVersion(int version, EvidenceRecordReport detailReport)
-  {
-    if (version != 1)
+    private void checkTimeStampSequence(ArchiveTimeStampSequence atss, EvidenceRecordReport detailReport)
     {
-      ctx.getFormatOk().invalidate("unexpected version number", reference.newChild("version"));
+        var ref = reference.newChild("atss");
+        detailReport.addChild(callValidator(atss, ref, ATSSequenceReport.class));
     }
-  }
 
-  /**
-   * Checks crypto info of evidence record.
-   *
-   * @param cryptoInfo
-   * @param detailReport
-   */
-  protected void checkCryptoInfo(CryptoInfo cryptoInfo, EvidenceRecordReport detailReport)
-  {
-    // nothing to check for RFC4998
-  }
-
-  /**
-   * Checks encryption info of evidence record.
-   *
-   * @param encryptionInfo
-   * @param detailReport
-   */
-  protected void checkEncryptionInfo(EncryptionInfo encryptionInfo, EvidenceRecordReport detailReport)
-  {
-    // nothing to check for RFC4998
-  }
-
-  private void checkTimeStampSequence(ArchiveTimeStampSequence atss, EvidenceRecordReport detailReport)
-  {
-    var ref = reference.newChild("atss");
-    detailReport.addChild(callValidator(atss, ref, ATSSequenceReport.class));
-  }
-
-  private void checkDigestAlgorithmValidity(EvidenceRecord er, EvidenceRecordReport detailReport)
-  {
-    for ( var oid : er.getDigestAlgorithms() )
+    private void checkDigestAlgorithmValidity(EvidenceRecord er, EvidenceRecordReport detailReport)
     {
-      var usage = AlgorithmUsage.createHashed(oid, ctx.getLatestPossibleUsage(oid));
+        for (var oid : er.getDigestAlgorithms())
+        {
+            var usage = AlgorithmUsage.createHashed(oid, ctx.getLatestPossibleUsage(oid));
 
-      var ref = reference.newChild("digestAlgorithms:" + oid);
-      detailReport.addChild(callValidator(usage,
-                                          ref,
-                                          null,
-                                          () -> new AlgorithmValidityReport(ref, oid),
-                                          AlgorithmValidityReport.class));
+            var ref = reference.newChild("digestAlgorithms:" + oid);
+            detailReport.addChild(callValidator(usage,
+                ref,
+                null,
+                () -> new AlgorithmValidityReport(ref, oid),
+                AlgorithmValidityReport.class));
+        }
     }
-  }
 
-  @Override
-  protected Class<ErValidationContext> getRequiredContextClass()
-  {
-    return ErValidationContext.class;
-  }
+    @Override
+    protected Class<ErValidationContext> getRequiredContextClass()
+    {
+        return ErValidationContext.class;
+    }
 
 }

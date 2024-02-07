@@ -39,47 +39,47 @@ import org.bouncycastle.asn1.DERSequence;
 public class ArchiveTimeStampChain extends ArrayList<ArchiveTimeStamp> implements ASN1Encodable
 {
 
-  private static final long serialVersionUID = -3432163732812450811L;
+    private static final long serialVersionUID = -3432163732812450811L;
 
-  /**
-   * Constructs a new ArchiveTimeStampChain representation from its ASN&#46;1 notation.
-   *
-   * @param element ATS chain as parsed ASN.1
-   * @throws IOException
-   */
-  public ArchiveTimeStampChain(ASN1Encodable element) throws IOException
-  {
-    super();
-
-    if (element instanceof ASN1Sequence)
+    /**
+     * Constructs a new ArchiveTimeStampChain representation from its ASN&#46;1 notation.
+     *
+     * @param element ATS chain as parsed ASN.1
+     * @throws IOException
+     */
+    public ArchiveTimeStampChain(ASN1Encodable element) throws IOException
     {
-      var chain = (ASN1Sequence)element;
-      for ( var ats : chain )
-      {
-        add(new ArchiveTimeStamp(ats));
-      }
+        super();
+
+        if (element instanceof ASN1Sequence)
+        {
+            var chain = (ASN1Sequence)element;
+            for (var ats : chain)
+            {
+                add(new ArchiveTimeStamp(ats));
+            }
+        }
+        else
+        {
+            throw new IllegalArgumentException("Element is not an ASN1Sequence");
+        }
     }
-    else
+
+    /**
+     * Returns the ASN&#46;1 encoded representation of this ATS chain.
+     *
+     * @throws IOException
+     */
+    public byte[] getEncoded() throws IOException
     {
-      throw new IllegalArgumentException("Element is not an ASN1Sequence");
+        return toASN1Primitive().getEncoded();
     }
-  }
 
-  /**
-   * Returns the ASN&#46;1 encoded representation of this ATS chain.
-   *
-   * @throws IOException
-   */
-  public byte[] getEncoded() throws IOException
-  {
-    return toASN1Primitive().getEncoded();
-  }
-
-  @Override
-  public ASN1Primitive toASN1Primitive()
-  {
-    var atsc = new ASN1EncodableVector();
-    forEach(atsc::add);
-    return new DERSequence(atsc);
-  }
+    @Override
+    public ASN1Primitive toASN1Primitive()
+    {
+        var atsc = new ASN1EncodableVector();
+        forEach(atsc::add);
+        return new DERSequence(atsc);
+    }
 }

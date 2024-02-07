@@ -6,17 +6,17 @@ package de.bund.bsi.tr_esor.checktool.data;
 public final class UnsupportedData
 {
 
-  private final String message;
+    private final String message;
 
-  /** create marker for unsupported data with message */
-  public UnsupportedData(String message)
-  {
-    this.message = message;
-  }
+    /** create marker for unsupported data with message */
+    public UnsupportedData(String message)
+    {
+        this.message = message;
+    }
 
-  /** get the message */
-  public String getMessage()
-  {
-    return message;
-  }
+    /** get the message */
+    public String getMessage()
+    {
+        return message;
+    }
 }

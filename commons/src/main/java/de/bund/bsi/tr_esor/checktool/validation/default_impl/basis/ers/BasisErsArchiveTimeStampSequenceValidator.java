@@ -35,14 +35,13 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class BasisErsArchiveTimeStampSequenceValidator extends ArchiveTimeStampSequenceValidator
 {
 
-  @Override
-  protected ATSSequenceReport validateInternal(Reference ref, ArchiveTimeStampSequence toCheck)
-  {
-    if (toCheck.isEmpty())
+    @Override
+    protected ATSSequenceReport validateInternal(Reference ref, ArchiveTimeStampSequence toCheck)
     {
-      ctx.getFormatOk()
-         .invalidate("must contain at least one ArchiveTimeStampChain", ref.newChild("number chains"));
+        if (toCheck.isEmpty())
+        {
+            ctx.getFormatOk().invalidate("must contain at least one ArchiveTimeStampChain", ref.newChild("number chains"));
+        }
+        return super.validateInternal(ref, toCheck);
     }
-    return super.validateInternal(ref, toCheck);
-  }
 }

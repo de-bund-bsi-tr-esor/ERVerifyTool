@@ -36,56 +36,56 @@ import org.bouncycastle.asn1.DERSequence;
 
 
 /**
- * Represents a single node within a reduced hash tree which is a set of digest values. By definition this
- * must be called tree, but it has no tree structure. Note that the contained hashes are not ordered.
+ * Represents a single node within a reduced hash tree which is a set of digest values. By definition this must be called tree, but it has
+ * no tree structure. Note that the contained hashes are not ordered.
  *
  * @author TT
  */
 public class PartialHashtree extends ArrayList<byte[]> implements ASN1Encodable
 {
 
-  private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
 
-  /**
-   * constructor (generated from input parameter)
-   *
-   * @param obj ASN.1 object
-   * @throws IOException
-   */
-  public PartialHashtree(ASN1Object obj) throws IOException
-  {
-    super();
-
-    if (!(obj instanceof ASN1Sequence))
+    /**
+     * constructor (generated from input parameter)
+     *
+     * @param obj ASN.1 object
+     * @throws IOException
+     */
+    public PartialHashtree(ASN1Object obj) throws IOException
     {
-      throw new IOException("not valid (PH-1)");
+        super();
+
+        if (!(obj instanceof ASN1Sequence))
+        {
+            throw new IOException("not valid (PH-1)");
+        }
+        var s = (ASN1Sequence)obj;
+        for (var i = 0; i < s.size(); i++)
+        {
+            var e = s.getObjectAt(i);
+            if (!(e instanceof ASN1OctetString))
+            {
+                throw new IOException("not valid (PH-2)");
+            }
+            var o = (ASN1OctetString)e;
+            add(o.getOctets());
+        }
     }
-    var s = (ASN1Sequence)obj;
-    for ( var i = 0 ; i < s.size() ; i++ )
+
+    /**
+     * Same as super&#46;contains but uses Arrays&#46;equals.
+     */
+    public boolean contains(byte[] digestValue)
     {
-      var e = s.getObjectAt(i);
-      if (!(e instanceof ASN1OctetString))
-      {
-        throw new IOException("not valid (PH-2)");
-      }
-      var o = (ASN1OctetString)e;
-      add(o.getOctets());
+        return stream().anyMatch(value -> Arrays.equals(value, digestValue));
     }
-  }
 
-  /**
-   * Same as super&#46;contains but uses Arrays&#46;equals.
-   */
-  public boolean contains(byte[] digestValue)
-  {
-    return stream().anyMatch(value -> Arrays.equals(value, digestValue));
-  }
-
-  @Override
-  public ASN1Primitive toASN1Primitive()
-  {
-    var pht = new ASN1EncodableVector();
-    stream().map(DEROctetString::new).forEach(pht::add);
-    return new DERSequence(pht);
-  }
+    @Override
+    public ASN1Primitive toASN1Primitive()
+    {
+        var pht = new ASN1EncodableVector();
+        stream().map(DEROctetString::new).forEach(pht::add);
+        return new DERSequence(pht);
+    }
 }

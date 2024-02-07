@@ -29,77 +29,75 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 /**
  * Context data for validation of one root object.
  *
- * @author TT
  * @param <T>
+ * @author TT
  */
 public abstract class ValidationContext<T>
 {
 
-  private final Reference reference;
+    private final Reference reference;
 
-  private final T objectToValidate;
+    private final T objectToValidate;
 
-  private final String profileName;
+    private final String profileName;
 
-  private final ReturnVerificationReport returnVerificationReport;
+    private final ReturnVerificationReport returnVerificationReport;
 
-  /**
-   * Creates instance to collect data during validation of one object and its children.
-   *
-   * @param reference unique during the verify request
-   * @param objectToValidate object to validate
-   */
-  protected ValidationContext(Reference reference,
-                              T objectToValidate,
-                              String profileName,
-                              ReturnVerificationReport returnVerificationReport)
-  {
-    this.reference = reference;
-    this.objectToValidate = objectToValidate;
-    this.profileName = profileName;
-    this.returnVerificationReport = returnVerificationReport;
-  }
+    /**
+     * Creates instance to collect data during validation of one object and its children.
+     *
+     * @param reference unique during the verify request
+     * @param objectToValidate object to validate
+     */
+    protected ValidationContext(Reference reference, T objectToValidate, String profileName,
+        ReturnVerificationReport returnVerificationReport)
+    {
+        this.reference = reference;
+        this.objectToValidate = objectToValidate;
+        this.profileName = profileName;
+        this.returnVerificationReport = returnVerificationReport;
+    }
 
-  /**
-   * Returns a class object for the type of object to validate.
-   */
-  public abstract Class<T> getTargetClass();
+    /**
+     * Returns a class object for the type of object to validate.
+     */
+    public abstract Class<T> getTargetClass();
 
-  /**
-   * Returns a unique human readable description defining which object is validated here.
-   */
-  public Reference getReference()
-  {
-    return reference;
-  }
+    /**
+     * Returns a unique human readable description defining which object is validated here.
+     */
+    public Reference getReference()
+    {
+        return reference;
+    }
 
-  /**
-   * Returns the root object which is validated.
-   */
-  public T getObjectToValidate()
-  {
-    return objectToValidate;
-  }
+    /**
+     * Returns the root object which is validated.
+     */
+    public T getObjectToValidate()
+    {
+        return objectToValidate;
+    }
 
-  /**
-   * Returns the profile name. That name is used for choosing validators.
-   */
-  public String getProfileName()
-  {
-    return profileName;
-  }
+    /**
+     * Returns the profile name. That name is used for choosing validators.
+     */
+    public String getProfileName()
+    {
+        return profileName;
+    }
 
-  /**
-   * Returns <code>true</code> if validation is restricted in certain cases.
-   */
-  public abstract boolean isRestrictedValidation();
+    /**
+     * Returns <code>true</code> if validation is restricted in certain cases.
+     */
+    public abstract boolean isRestrictedValidation();
 
-  /**
-   * Returns the ReturnVerificationReport.
-   */
-  public ReturnVerificationReport getReturnVerificationReport()
-  {
-    return returnVerificationReport;
-  }
+    /**
+     * Returns the ReturnVerificationReport.
+     */
+    public ReturnVerificationReport getReturnVerificationReport()
+    {
+        return returnVerificationReport;
+    }
 
 }

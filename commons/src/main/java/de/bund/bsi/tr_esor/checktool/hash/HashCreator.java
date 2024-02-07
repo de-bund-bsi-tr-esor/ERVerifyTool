@@ -32,12 +32,12 @@ import java.security.NoSuchAlgorithmException;
 public interface HashCreator
 {
 
-  /**
-   * Calculates the hash for the given data using the algorithm specified by the OID.
-   *
-   * @param data
-   * @param oid
-   * @throws NoSuchAlgorithmException Thrown if the given OID is not known to the implementation.
-   */
-  byte[] calculateHash(byte[] data, String oid) throws NoSuchAlgorithmException;
+    /**
+     * Calculates the hash for the given data using the algorithm specified by the OID.
+     *
+     * @param data
+     * @param oid
+     * @throws NoSuchAlgorithmException Thrown if the given OID is not known to the implementation.
+     */
+    byte[] calculateHash(byte[] data, String oid) throws NoSuchAlgorithmException;
 }

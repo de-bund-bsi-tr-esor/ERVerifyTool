@@ -14,20 +14,20 @@ import de.bund.bsi.tr_esor.xaip.DataObjectType;
 public class InlineSignedDataObject extends InlineSignedData
 {
 
-  private final DataObjectType data;
+    private final DataObjectType data;
 
-  /**
-   * Create a wrapper object for an inline signature on a DataObject
-   */
-  public InlineSignedDataObject(Reference ref, LXaipReader lXaipReader, DataObjectType data)
-  {
-    super(ref, lXaipReader);
-    this.data = data;
-  }
+    /**
+     * Create a wrapper object for an inline signature on a DataObject
+     */
+    public InlineSignedDataObject(Reference ref, LXaipReader lXaipReader, DataObjectType data)
+    {
+        super(ref, lXaipReader);
+        this.data = data;
+    }
 
-  @Override
-  public byte[] readBinaryData() throws IOException
-  {
-    return Toolbox.readBinaryData(lXaipReader, data);
-  }
+    @Override
+    public byte[] readBinaryData() throws IOException
+    {
+        return Toolbox.readBinaryData(lXaipReader, data);
+    }
 }

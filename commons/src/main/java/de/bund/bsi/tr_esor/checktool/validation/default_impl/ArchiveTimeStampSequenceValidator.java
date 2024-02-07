@@ -36,88 +36,84 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
  *
  * @author TT, MO
  */
-public class ArchiveTimeStampSequenceValidator
-  extends BaseValidator<ArchiveTimeStampSequence, ErValidationContext, ATSSequenceReport>
+public class ArchiveTimeStampSequenceValidator extends BaseValidator<ArchiveTimeStampSequence, ErValidationContext, ATSSequenceReport>
 {
 
-  @Override
-  protected ATSSequenceReport validateInternal(Reference ref, ArchiveTimeStampSequence toCheck)
-  {
-    var report = new ATSSequenceReport(ref);
-    if (toCheck.isEmpty())
+    @Override
+    protected ATSSequenceReport validateInternal(Reference ref, ArchiveTimeStampSequence toCheck)
     {
-      return report;
-    }
-    setupSecuredTimes(toCheck);
-    for ( var i = 0 ; i < toCheck.size() ; i++ )
-    {
-      var chain = toCheck.get(i);
-      var chainRef = ref.newChild(Integer.toString(i));
-      var ph = computeHashOfSequenceSoFar(toCheck, i, chainRef, report);
-
-      report.addChild(callValidator(chain,
-                                    chainRef,
-                                    val -> ((ArchiveTimeStampChainValidator)val).setPrevChainHash(ph),
-                                    ATSChainReport.class));
-    }
-    return report;
-  }
-
-  /**
-   * For each ATS in the sequence, write into the context the time at which that ATS surely existed (because
-   * there is another time stamp proving that).
-   *
-   * @param toCheck
-   */
-  private void setupSecuredTimes(ArchiveTimeStampSequence toCheck)
-  {
-    ArchiveTimeStamp lastAts = null;
-    for ( var chain : toCheck )
-    {
-      for ( var ats : chain )
-      {
-        var secure = ats.getSignDateFromTimeStamp();
-        if (lastAts != null)
+        var report = new ATSSequenceReport(ref);
+        if (toCheck.isEmpty())
         {
-          ctx.setSecureData(lastAts, secure);
+            return report;
         }
-        lastAts = ats;
-      }
-    }
-    ctx.setSecureData(lastAts, new Date());
-  }
+        setupSecuredTimes(toCheck);
+        for (var i = 0; i < toCheck.size(); i++)
+        {
+            var chain = toCheck.get(i);
+            var chainRef = ref.newChild(Integer.toString(i));
+            var ph = computeHashOfSequenceSoFar(toCheck, i, chainRef, report);
 
-  /**
-   * Returns the hash value of the ATS sequence up the before current position (null if there is none) using
-   * digest algorithm of current ATS.
-   *
-   * @param toCheck
-   * @param pos
-   * @param ref for addressing a possible the problem in the report
-   * @param report to write error message to
-   */
-  private byte[] computeHashOfSequenceSoFar(ArchiveTimeStampSequence toCheck,
-                                            int pos,
-                                            Reference ref,
-                                            ATSSequenceReport report)
-  {
-    if (pos == 0)
-    {
-      return null;
+            report.addChild(callValidator(chain,
+                chainRef,
+                val -> ((ArchiveTimeStampChainValidator)val).setPrevChainHash(ph),
+                ATSChainReport.class));
+        }
+        return report;
     }
-    var hashOID = toCheck.get(pos).get(0).getOidFromTimeStamp();
-    var seq = new ArchiveTimeStampSequence();
-    for ( var i = 0 ; i < pos ; i++ )
-    {
-      seq.add(toCheck.get(i));
-    }
-    return computeHash(seq::getEncoded, hashOID, ref, report);
-  }
 
-  @Override
-  protected Class<ErValidationContext> getRequiredContextClass()
-  {
-    return ErValidationContext.class;
-  }
+    /**
+     * For each ATS in the sequence, write into the context the time at which that ATS surely existed (because there is another time stamp
+     * proving that).
+     *
+     * @param toCheck
+     */
+    private void setupSecuredTimes(ArchiveTimeStampSequence toCheck)
+    {
+        ArchiveTimeStamp lastAts = null;
+        for (var chain : toCheck)
+        {
+            for (var ats : chain)
+            {
+                var secure = ats.getSignDateFromTimeStamp();
+                if (lastAts != null)
+                {
+                    ctx.setSecureData(lastAts, secure);
+                }
+                lastAts = ats;
+            }
+        }
+        ctx.setSecureData(lastAts, new Date());
+    }
+
+    /**
+     * Returns the hash value of the ATS sequence up the before current position (null if there is none) using digest algorithm of current
+     * ATS.
+     *
+     * @param toCheck
+     * @param pos
+     * @param ref for addressing a possible the problem in the report
+     * @param report to write error message to
+     */
+    private byte[] computeHashOfSequenceSoFar(ArchiveTimeStampSequence toCheck, int pos, Reference ref, ATSSequenceReport report)
+    {
+        if (pos == 0)
+        {
+            return null;
+        }
+        var hashOID = toCheck.get(pos).get(0).getOidFromTimeStamp();
+        var seq = new ArchiveTimeStampSequence();
+        for (var i = 0; i < pos; i++)
+        {
+            seq.add(toCheck.get(i));
+        }
+        return computeHash(seq::getEncoded, hashOID, ref, report);
+    }
+
+    @Override
+    protected Class<ErValidationContext> getRequiredContextClass()
+    {
+        return ErValidationContext.class;
+    }
 
 }

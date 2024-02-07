@@ -51,131 +51,128 @@ import org.slf4j.LoggerFactory;
 public final class AlgorithmCatalog
 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(AlgorithmCatalog.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AlgorithmCatalog.class);
 
-  private static final AlgorithmCatalog INSTANCE = new AlgorithmCatalog();
+    private static final AlgorithmCatalog INSTANCE = new AlgorithmCatalog();
 
-  private final Map<String, SupportedHashAlgorithm> supportedAlgorithms = new HashMap<>();
+    private static final String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
 
-  private static final String ISO_8601_24H_FULL_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSXXX";
-
-  /**
-   * Parses the algorithms.json from the resources folder and initializes the AlgorithmCatalog instance.
-   *
-   * @throws IOException
-   * @throws ScriptException
-   * @throws ParseException
-   */
-  @SuppressWarnings("unchecked")
-  private AlgorithmCatalog()
-  {
-    var dateParser = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT, Locale.GERMANY);
-    dateParser.setTimeZone(TimeZone.getDefault());
-    try
-    {
-      for ( var catalogEntry : jsonToMap().entrySet() )
-      {
-        var values = (Map<String, Object>)catalogEntry.getValue();
-        Map<String, String> parameters = null;
-        var validity = dateParser.parse(values.get("validity").toString());
-        if (values.containsKey("parameter"))
-        {
-          parameters = (Map<String, String>)values.get("parameter");
-        }
-        var oids = (List<Map<String, String>>)values.get("oids");
-        var usedOids = oids.stream().map(om -> om.get("oid")).collect(Collectors.toList());
-        supportedAlgorithms.put(catalogEntry.getKey(),
-                                new SupportedHashAlgorithm(validity, parameters, usedOids));
-      }
-    }
-    catch (ScriptException | IOException | ParseException e)
-    {
-      LOG.error("algorithms.json is not parseable", e);
-    }
-
-  }
-
-  /**
-   * Returns the current instance of the AlgorithmCatalog.
-   */
-  public static AlgorithmCatalog getInstance()
-  {
-    return INSTANCE;
-  }
-
-  @SuppressWarnings("unchecked")
-  private Map<String, Object> jsonToMap() throws ScriptException, IOException
-  {
-    try (var reader = new BufferedReader(new InputStreamReader(
-                                                               this.getClass()
-                                                                   .getResourceAsStream("/algorithms.json"),
-                                                               StandardCharsets.UTF_8)))
-    {
-      var fileContent = reader.lines().collect(Collectors.joining("\n"));
-      var jsonObject = new JSONObject(fileContent);
-      return jsonObject.toMap();
-    }
-  }
-
-
-  /**
-   * Returns supported algorithms.
-   */
-  public Map<String, SupportedHashAlgorithm> getSupportedAlgorithms()
-  {
-    return supportedAlgorithms;
-  }
-
-  /**
-   * Representation of a hash algorithm.
-   */
-  public static class SupportedHashAlgorithm
-  {
-
-    private final Date validity;
-
-    private final Map<String, String> parameter;
-
-    private final List<String> oids;
+    private final Map<String, SupportedHashAlgorithm> supportedAlgorithms = new HashMap<>();
 
     /**
-     * Constructs the Hash Algorithm Representation.
+     * Parses the algorithms.json from the resources folder and initializes the AlgorithmCatalog instance.
      *
-     * @param validity Date until algorithm is valid.
-     * @param parameter creation parameter
-     * @param oids list of OIDs
+     * @throws IOException
+     * @throws ScriptException
+     * @throws ParseException
      */
-    SupportedHashAlgorithm(Date validity, Map<String, String> parameter, List<String> oids)
+    @SuppressWarnings("unchecked")
+    private AlgorithmCatalog()
     {
-      this.validity = validity;
-      this.parameter = parameter;
-      this.oids = oids;
+        var dateParser = new SimpleDateFormat(ISO_8601_24H_FULL_FORMAT, Locale.GERMANY);
+        dateParser.setTimeZone(TimeZone.getDefault());
+        try
+        {
+            for (var catalogEntry : jsonToMap().entrySet())
+            {
+                var values = (Map<String, Object>)catalogEntry.getValue();
+                Map<String, String> parameters = null;
+                var validity = dateParser.parse(values.get("validity").toString());
+                if (values.containsKey("parameter"))
+                {
+                    parameters = (Map<String, String>)values.get("parameter");
+                }
+                var oids = (List<Map<String, String>>)values.get("oids");
+                var usedOids = oids.stream().map(om -> om.get("oid")).collect(Collectors.toList());
+                supportedAlgorithms.put(catalogEntry.getKey(), new SupportedHashAlgorithm(validity, parameters, usedOids));
+            }
+        }
+        catch (ScriptException | IOException | ParseException e)
+        {
+            LOG.error("algorithms.json is not parseable", e);
+        }
+
     }
 
     /**
-     * Returns the validity date.
+     * Returns the current instance of the AlgorithmCatalog.
      */
-    public Date getValidity()
+    public static AlgorithmCatalog getInstance()
     {
-      return (Date)validity.clone();
+        return INSTANCE;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> jsonToMap() throws ScriptException, IOException
+    {
+        try (var reader = new BufferedReader(new InputStreamReader(this.getClass().getResourceAsStream("/algorithms.json"),
+            StandardCharsets.UTF_8)))
+        {
+            var fileContent = reader.lines().collect(Collectors.joining("\n"));
+            var jsonObject = new JSONObject(fileContent);
+            return jsonObject.toMap();
+        }
+    }
+
+
+    /**
+     * Returns supported algorithms.
+     */
+    public Map<String, SupportedHashAlgorithm> getSupportedAlgorithms()
+    {
+        return supportedAlgorithms;
     }
 
     /**
-     * Returns the creation parameter.
+     * Representation of a hash algorithm.
      */
-    public Map<String, String> getParameter()
+    public static class SupportedHashAlgorithm
     {
-      return parameter == null ? Collections.emptyMap() : parameter;
-    }
 
-    /**
-     * Returns the list of oids.
-     */
-    public List<String> getOids()
-    {
-      return oids;
-    }
+        private final Date validity;
 
-  }
+        private final Map<String, String> parameter;
+
+        private final List<String> oids;
+
+        /**
+         * Constructs the Hash Algorithm Representation.
+         *
+         * @param validity Date until algorithm is valid.
+         * @param parameter creation parameter
+         * @param oids list of OIDs
+         */
+        SupportedHashAlgorithm(Date validity, Map<String, String> parameter, List<String> oids)
+        {
+            this.validity = validity;
+            this.parameter = parameter;
+            this.oids = oids;
+        }
+
+        /**
+         * Returns the validity date.
+         */
+        public Date getValidity()
+        {
+            return (Date)validity.clone();
+        }
+
+        /**
+         * Returns the creation parameter.
+         */
+        public Map<String, String> getParameter()
+        {
+            return parameter == null ? Collections.emptyMap() : parameter;
+        }
+
+        /**
+         * Returns the list of oids.
+         */
+        public List<String> getOids()
+        {
+            return oids;
+        }
+
+    }
 
 }

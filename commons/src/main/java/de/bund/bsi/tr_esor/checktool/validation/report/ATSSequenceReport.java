@@ -35,42 +35,42 @@ import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequenc
 public class ATSSequenceReport extends ReportPart implements OutputCreator<ArchiveTimeStampSequence>
 {
 
-  /**
-   * Default validation results.
-   */
-  private final ArchiveTimeStampSequence xmlReport;
+    /**
+     * Default validation results.
+     */
+    private final ArchiveTimeStampSequence xmlReport;
 
-  /**
-   * Creates instance.
-   *
-   * @param ref
-   */
-  public ATSSequenceReport(Reference ref)
-  {
-    super(ref);
-    xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityTypeArchiveTimeStampSequence();
-  }
+    /**
+     * Creates instance.
+     *
+     * @param ref
+     */
+    public ATSSequenceReport(Reference ref)
+    {
+        super(ref);
+        xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityTypeArchiveTimeStampSequence();
+    }
 
-  /**
-   * Adds results to this report.
-   *
-   * @param report
-   */
-  public void addChild(ATSChainReport report)
-  {
-    updateCodes(report);
-    xmlReport.getArchiveTimeStampChain().add(VRCreator.translate(report, ArchiveTimeStampChain.class));
-  }
+    /**
+     * Adds results to this report.
+     *
+     * @param report
+     */
+    public void addChild(ATSChainReport report)
+    {
+        updateCodes(report);
+        xmlReport.getArchiveTimeStampChain().add(VRCreator.translate(report, ArchiveTimeStampChain.class));
+    }
 
-  @Override
-  public ArchiveTimeStampSequence getFormatted()
-  {
-    return xmlReport;
-  }
+    @Override
+    public ArchiveTimeStampSequence getFormatted()
+    {
+        return xmlReport;
+    }
 
-  @Override
-  public Class<ArchiveTimeStampSequence> getTargetClass()
-  {
-    return ArchiveTimeStampSequence.class;
-  }
+    @Override
+    public Class<ArchiveTimeStampSequence> getTargetClass()
+    {
+        return ArchiveTimeStampSequence.class;
+    }
 }

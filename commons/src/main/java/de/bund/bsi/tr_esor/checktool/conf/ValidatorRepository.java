@@ -31,166 +31,157 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 
 
 /**
- * Selects Validators respective to its target class according to the best matching class (as a Java VM
- * selects an overwritten method).
+ * Selects Validators respective to its target class according to the best matching class (as a Java VM selects an overwritten method).
  *
  * @author HMA, TT
  */
 public class ValidatorRepository
 {
 
-  private final ProfileRepo general = new ProfileRepo();
+    private final ProfileRepo general = new ProfileRepo();
 
-  private final Map<String, ProfileRepo> byProfile = new HashMap<>();
+    private final Map<String, ProfileRepo> byProfile = new HashMap<>();
 
-  /**
-   * Returns the object specified by target class and profile. If the profile does not contain any such value,
-   * chooses it from general set.
-   *
-   * @param target
-   * @param profileName
-   */
-  public Supplier<Object> get(Class<?> target,
-                              // Java cannot handle ? extends ValidationContext<?> properly.
-                              @SuppressWarnings("rawtypes") Class<? extends ValidationContext> contextClass,
-                              Class<? extends ReportPart> reportClass,
-                              String profileName)
-  {
-    return Optional.ofNullable(byProfile.get(profileName))
-                   .map(m -> m.get(target, contextClass, reportClass))
-                   .orElse(general.get(target, contextClass, reportClass));
-  }
-
-  /**
-   * Adds a value suitable for all supported profiles.
-   *
-   * @param supplier
-   * @param target
-   * @param contextClass
-   * @param reportClass
-   */
-  public void addGeneral(Supplier<Object> supplier,
-                         Class<?> target,
-                         @SuppressWarnings("rawtypes") Class<? extends ValidationContext> contextClass,
-                         Class<? extends ReportPart> reportClass)
-  {
-    general.add(supplier, target, contextClass, reportClass);
-  }
-
-  /**
-   * Adds a profile name.
-   *
-   * @param profile
-   */
-  public void addProfile(String profile)
-  {
-    if (!containsProfile(profile))
+    /**
+     * Returns the object specified by target class and profile. If the profile does not contain any such value, chooses it from general
+     * set.
+     *
+     * @param target
+     * @param profileName
+     */
+    public Supplier<Object> get(Class<?> target,
+        // Java cannot handle ? extends ValidationContext<?> properly.
+        @SuppressWarnings("rawtypes") Class<? extends ValidationContext> contextClass, Class<? extends ReportPart> reportClass,
+        String profileName)
     {
-      byProfile.put(profile, new ProfileRepo());
-    }
-  }
-
-  /**
-   * Adds a value for a special profile.
-   *
-   * @param supplier
-   * @param target
-   * @param contextClass
-   * @param reportClass
-   * @param profile
-   */
-  public void addToProfile(Supplier<Object> supplier,
-                           Class<?> target,
-                           @SuppressWarnings("rawtypes") Class<? extends ValidationContext> contextClass,
-                           Class<? extends ReportPart> reportClass,
-                           String profile)
-  {
-    if (profile == null)
-    {
-      general.add(supplier, target, contextClass, reportClass);
-    }
-    else
-    {
-      addProfile(profile);
-      byProfile.get(profile).add(supplier, target, contextClass, reportClass);
-    }
-  }
-
-  /**
-   * Returns <code>true</code> if specified profile is supported.
-   *
-   * @param profile
-   */
-  public boolean containsProfile(String profile)
-  {
-    return byProfile.containsKey(profile);
-  }
-
-
-  private static class ProfileRepo
-  {
-
-    private final Map<Class<?>, ValidatorSource> byTarget = new HashMap<>();
-
-
-    ProfileRepo()
-    {
-      // just for visibility
+        return Optional.ofNullable(byProfile.get(profileName))
+            .map(m -> m.get(target, contextClass, reportClass))
+            .orElse(general.get(target, contextClass, reportClass));
     }
 
-    @SuppressWarnings("rawtypes")
-    // ValidationContext
-    Supplier<Object> get(Class<?> target,
-                         Class<? extends ValidationContext> contextClass,
-                         Class<? extends ReportPart> reportClass)
+    /**
+     * Adds a value suitable for all supported profiles.
+     *
+     * @param supplier
+     * @param target
+     * @param contextClass
+     * @param reportClass
+     */
+    public void addGeneral(Supplier<Object> supplier, Class<?> target,
+        @SuppressWarnings("rawtypes") Class<? extends ValidationContext> contextClass, Class<? extends ReportPart> reportClass)
     {
-      return byTarget.entrySet()
-                     .stream()
-                     .filter(e -> e.getKey().isAssignableFrom(target))
-                     .filter(e -> e.getValue().contextClass.isAssignableFrom(contextClass))
-                     .filter(e -> reportClass.isAssignableFrom(e.getValue().reportClass))
-                     .sorted((a, b) -> countInheritanceSteps(b.getKey(), target)
-                                       - countInheritanceSteps(a.getKey(), target))
-                     .map(e -> e.getValue().supplier)
-                     .findFirst()
-                     .orElse(null);
+        general.add(supplier, target, contextClass, reportClass);
     }
 
-    void add(Supplier<Object> supplier, Class<?> target, Class<?> contextClass, Class<?> reportClass)
+    /**
+     * Adds a profile name.
+     *
+     * @param profile
+     */
+    public void addProfile(String profile)
     {
-      byTarget.put(target, new ValidatorSource(supplier, contextClass, reportClass));
+        if (!containsProfile(profile))
+        {
+            byProfile.put(profile, new ProfileRepo());
+        }
     }
 
-    private int countInheritanceSteps(Class<?> a, Class<?> b)
+    /**
+     * Adds a value for a special profile.
+     *
+     * @param supplier
+     * @param target
+     * @param contextClass
+     * @param reportClass
+     * @param profile
+     */
+    public void addToProfile(Supplier<Object> supplier, Class<?> target,
+        @SuppressWarnings("rawtypes") Class<? extends ValidationContext> contextClass, Class<? extends ReportPart> reportClass,
+        String profile)
     {
-      var result = 0;
-      var intermed = a;
-      while (intermed != null && intermed.isAssignableFrom(b))
-      {
-        result++;
-        intermed = intermed.getSuperclass();
-      }
-      return result - 1;
+        if (profile == null)
+        {
+            general.add(supplier, target, contextClass, reportClass);
+        }
+        else
+        {
+            addProfile(profile);
+            byProfile.get(profile).add(supplier, target, contextClass, reportClass);
+        }
+    }
+
+    /**
+     * Returns <code>true</code> if specified profile is supported.
+     *
+     * @param profile
+     */
+    public boolean containsProfile(String profile)
+    {
+        return byProfile.containsKey(profile);
     }
 
 
-    private static class ValidatorSource
+    private static class ProfileRepo
     {
 
-      Supplier<Object> supplier;
+        private final Map<Class<?>, ValidatorSource> byTarget = new HashMap<>();
 
-      Class<?> contextClass;
 
-      Class<?> reportClass;
+        ProfileRepo()
+        {
+            // just for visibility
+        }
 
-      ValidatorSource(Supplier<Object> supplier, Class<?> contextClass, Class<?> reportClass)
-      {
-        this.supplier = supplier;
-        this.contextClass = contextClass;
-        this.reportClass = reportClass;
-      }
+        @SuppressWarnings("rawtypes")
+            // ValidationContext
+        Supplier<Object> get(Class<?> target, Class<? extends ValidationContext> contextClass, Class<? extends ReportPart> reportClass)
+        {
+            return byTarget.entrySet()
+                .stream()
+                .filter(e -> e.getKey().isAssignableFrom(target))
+                .filter(e -> e.getValue().contextClass.isAssignableFrom(contextClass))
+                .filter(e -> reportClass.isAssignableFrom(e.getValue().reportClass))
+                .sorted((a, b) -> countInheritanceSteps(b.getKey(), target) - countInheritanceSteps(a.getKey(), target))
+                .map(e -> e.getValue().supplier)
+                .findFirst()
+                .orElse(null);
+        }
+
+        void add(Supplier<Object> supplier, Class<?> target, Class<?> contextClass, Class<?> reportClass)
+        {
+            byTarget.put(target, new ValidatorSource(supplier, contextClass, reportClass));
+        }
+
+        private int countInheritanceSteps(Class<?> a, Class<?> b)
+        {
+            var result = 0;
+            var intermed = a;
+            while (intermed != null && intermed.isAssignableFrom(b))
+            {
+                result++;
+                intermed = intermed.getSuperclass();
+            }
+            return result - 1;
+        }
+
+
+        private static class ValidatorSource
+        {
+
+            Supplier<Object> supplier;
+
+            Class<?> contextClass;
+
+            Class<?> reportClass;
+
+            ValidatorSource(Supplier<Object> supplier, Class<?> contextClass, Class<?> reportClass)
+            {
+                this.supplier = supplier;
+                this.contextClass = contextClass;
+                this.reportClass = reportClass;
+            }
+        }
     }
-  }
 
 
 }

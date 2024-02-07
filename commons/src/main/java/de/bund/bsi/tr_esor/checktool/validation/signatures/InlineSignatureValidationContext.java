@@ -21,11 +21,11 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.signatures;
 
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ObjectFactory;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
-
 import de.bund.bsi.tr_esor.checktool.data.InlineSignedData;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationContext;
+
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ObjectFactory;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
 
 
 /**
@@ -36,37 +36,37 @@ import de.bund.bsi.tr_esor.checktool.validation.ValidationContext;
 public class InlineSignatureValidationContext extends ValidationContext<InlineSignedData>
 {
 
-  /**
-   * Default constructor.
-   *
-   * @param objectToValidate DataObject containing an inline signature
-   */
-  public InlineSignatureValidationContext(InlineSignedData objectToValidate, String profileName)
-  {
-    super(objectToValidate.getReference(), objectToValidate, profileName, getAllDetailsRVR());
-  }
+    /**
+     * Default constructor.
+     *
+     * @param objectToValidate DataObject containing an inline signature
+     */
+    public InlineSignatureValidationContext(InlineSignedData objectToValidate, String profileName)
+    {
+        super(objectToValidate.getReference(), objectToValidate, profileName, getAllDetailsRVR());
+    }
 
-  private static ReturnVerificationReport getAllDetailsRVR()
-  {
-    ReturnVerificationReport rvr = new ObjectFactory().createReturnVerificationReport();
-    rvr.setIncludeVerifier(Boolean.TRUE);
-    rvr.setIncludeCertificateValues(Boolean.TRUE);
-    rvr.setIncludeRevocationValues(Boolean.TRUE);
-    rvr.setExpandBinaryValues(Boolean.TRUE);
-    rvr.setReportDetailLevel("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:allDetails");
-    return rvr;
-  }
+    private static ReturnVerificationReport getAllDetailsRVR()
+    {
+        ReturnVerificationReport rvr = new ObjectFactory().createReturnVerificationReport();
+        rvr.setIncludeVerifier(Boolean.TRUE);
+        rvr.setIncludeCertificateValues(Boolean.TRUE);
+        rvr.setIncludeRevocationValues(Boolean.TRUE);
+        rvr.setExpandBinaryValues(Boolean.TRUE);
+        rvr.setReportDetailLevel("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:reportdetail:allDetails");
+        return rvr;
+    }
 
-  @Override
-  public Class<InlineSignedData> getTargetClass()
-  {
-    return InlineSignedData.class;
-  }
+    @Override
+    public Class<InlineSignedData> getTargetClass()
+    {
+        return InlineSignedData.class;
+    }
 
-  @Override
-  public boolean isRestrictedValidation()
-  {
-    return false;
-  }
+    @Override
+    public boolean isRestrictedValidation()
+    {
+        return false;
+    }
 
 }

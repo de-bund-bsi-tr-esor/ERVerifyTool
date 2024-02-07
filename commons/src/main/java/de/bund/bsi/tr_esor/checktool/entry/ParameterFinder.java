@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
-
 import org.bouncycastle.cms.CMSSignedData;
 
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
@@ -37,181 +35,181 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
 
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+
 
 /**
- * Finds evidence records and documents to check. This class supports one XAIP or CMS signed data, possibly
- * with embedded ERs, an arbitrary number of binary documents, one detached evidence record (request allows
- * only one signed object).
+ * Finds evidence records and documents to check. This class supports one XAIP or CMS signed data, possibly with embedded ERs, an arbitrary
+ * number of binary documents, one detached evidence record (request allows only one signed object).
  *
  * @author TT
  */
 public abstract class ParameterFinder
 {
 
-  /**
-   * binary documents given as input (CMS and XAIP not listed here).
-   */
-  protected final Map<Reference, byte[]> binaryDocuments = new HashMap<>();
+    /**
+     * binary documents given as input (CMS and XAIP not listed here).
+     */
+    protected final Map<Reference, byte[]> binaryDocuments = new HashMap<>();
 
-  /** CMS signed data (possibly with ERs contained) specified in input */
-  protected CMSSignedData cmsDocument;
+    /** CMS signed data (possibly with ERs contained) specified in input */
+    protected CMSSignedData cmsDocument;
 
-  /** XAIP (possibly with ERs contained) specified in input */
-  protected XAIPType xaip;
+    /** XAIP (possibly with ERs contained) specified in input */
+    protected XAIPType xaip;
 
-  /** serializer for XAIP elements */
-  protected XaipSerializer serializer;
+    /** serializer for XAIP elements */
+    protected XaipSerializer serializer;
 
-  /** evidence record given separately as input */
-  protected EvidenceRecord er;
+    /** evidence record given separately as input */
+    protected EvidenceRecord er;
 
-  /** version of XAIP addressed by evidence record given separately within an XML structure. */
-  protected String xaipVersionAddressdByEr;
+    /** version of XAIP addressed by evidence record given separately within an XML structure. */
+    protected String xaipVersionAddressdByEr;
 
-  /** AOID of XAIP addressed by evidence record given separately within an XML structure. */
-  protected String xaipAoidAddressdByEr;
+    /** AOID of XAIP addressed by evidence record given separately within an XML structure. */
+    protected String xaipAoidAddressdByEr;
 
-  /** where that element came from */
-  protected Reference erRef;
+    /** where that element came from */
+    protected Reference erRef;
 
-  /** where that element came from */
-  protected Reference xaipRef;
+    /** where that element came from */
+    protected Reference xaipRef;
 
-  /** where that element came from */
-  protected Reference cmsRef;
+    /** where that element came from */
+    protected Reference cmsRef;
 
-  /** reference of some input which cannot be parsed to any supported type. */
-  protected Reference unsupportedRef;
+    /** reference of some input which cannot be parsed to any supported type. */
+    protected Reference unsupportedRef;
 
-  /** Information on the input in the unsupported ref. */
-  protected UnsupportedData unsupportedData;
+    /** Information on the input in the unsupported ref. */
+    protected UnsupportedData unsupportedData;
 
-  private String profileName;
+    /** returnVerificationReport specified in the optionalinputs. **/
+    protected ReturnVerificationReport returnVerificationReport;
 
-  /** returnVerificationReport specified in the optionalinputs. **/
-  protected ReturnVerificationReport returnVerificationReport;
+    private String profileName;
 
-  /**
-   * Returns the ReturnVerificationReport.
-   */
-  public ReturnVerificationReport getReturnVerificationReport()
-  {
-    return returnVerificationReport;
-  }
+    /**
+     * Returns the ReturnVerificationReport.
+     */
+    public ReturnVerificationReport getReturnVerificationReport()
+    {
+        return returnVerificationReport;
+    }
 
-  /**
-   * Returns the binary documents addressed by some unique id.
-   */
-  public Map<Reference, byte[]> getBinaryDocuments()
-  {
-    return binaryDocuments;
-  }
+    /**
+     * Returns the binary documents addressed by some unique id.
+     */
+    public Map<Reference, byte[]> getBinaryDocuments()
+    {
+        return binaryDocuments;
+    }
 
-  /**
-   * Returns the given CMS signed data.
-   */
-  public CMSSignedData getCmsDocument()
-  {
-    return cmsDocument;
-  }
+    /**
+     * Returns the given CMS signed data.
+     */
+    public CMSSignedData getCmsDocument()
+    {
+        return cmsDocument;
+    }
 
-  /**
-   * Returns the detached evidence record to verify.
-   */
-  public EvidenceRecord getEr()
-  {
-    return er;
-  }
+    /**
+     * Returns the detached evidence record to verify.
+     */
+    public EvidenceRecord getEr()
+    {
+        return er;
+    }
 
-  /**
-   * Returns the XAIP specified as input.
-   */
-  public XAIPType getXaip()
-  {
-    return xaip;
-  }
+    /**
+     * Returns the XAIP specified as input.
+     */
+    public XAIPType getXaip()
+    {
+        return xaip;
+    }
 
-  /**
-   * Returns the Serializer for the Xaip
-   */
-  public XaipSerializer getSerializer()
-  {
-    return serializer;
-  }
+    /**
+     * Returns the Serializer for the Xaip
+     */
+    public XaipSerializer getSerializer()
+    {
+        return serializer;
+    }
 
-  /**
-   * Returns profile name from request or configured default one if none was specified.
-   */
-  public String getProfileName()
-  {
-    return profileName;
-  }
+    /**
+     * Returns profile name from request or configured default one if none was specified.
+     */
+    public String getProfileName()
+    {
+        return profileName;
+    }
 
-  /**
-   * Returns the reference the XAIP came from.
-   */
-  public Reference getXaipRef()
-  {
-    return xaipRef;
-  }
+    /**
+     * Returns the reference the XAIP came from.
+     */
+    public Reference getXaipRef()
+    {
+        return xaipRef;
+    }
 
-  /**
-   * Returns the reference the CMS signature came from.
-   */
-  public Reference getCmsRef()
-  {
-    return cmsRef;
-  }
+    /**
+     * Returns the reference the CMS signature came from.
+     */
+    public Reference getCmsRef()
+    {
+        return cmsRef;
+    }
 
-  /**
-   * Returns a XAIP version specified in XML with separately given ER.
-   */
-  public String getXaipVersionAddressedByEr()
-  {
-    return xaipVersionAddressdByEr;
-  }
+    /**
+     * Returns a XAIP version specified in XML with separately given ER.
+     */
+    public String getXaipVersionAddressedByEr()
+    {
+        return xaipVersionAddressdByEr;
+    }
 
-  /**
-   * Returns a XAIP AOID specified in XML with separately given ER.
-   */
-  public String getXaipAoidAddressedByEr()
-  {
-    return xaipAoidAddressdByEr;
-  }
+    /**
+     * Returns a XAIP AOID specified in XML with separately given ER.
+     */
+    public String getXaipAoidAddressedByEr()
+    {
+        return xaipAoidAddressdByEr;
+    }
 
-  /**
-   * Returns reference where the detaches ER came from.
-   */
-  public Reference getErRef()
-  {
-    return erRef;
-  }
+    /**
+     * Returns reference where the detaches ER came from.
+     */
+    public Reference getErRef()
+    {
+        return erRef;
+    }
 
-  /**
-   * Returns a reference of an input element which cannot be parsed into any supported format.
-   */
-  public Reference getUnsupportedRef()
-  {
-    return unsupportedRef;
-  }
+    /**
+     * Returns a reference of an input element which cannot be parsed into any supported format.
+     */
+    public Reference getUnsupportedRef()
+    {
+        return unsupportedRef;
+    }
 
-  /**
-   * Returns information on the unsupported element referenced through the unsupportedRef
-   */
-  public UnsupportedData getUnsupportedData()
-  {
-    return unsupportedData;
-  }
+    /**
+     * Returns information on the unsupported element referenced through the unsupportedRef
+     */
+    public UnsupportedData getUnsupportedData()
+    {
+        return unsupportedData;
+    }
 
-  /**
-   * Sets the profile name attribute to given or configured default value.
-   *
-   * @param byRequest
-   */
-  protected void handleProfileName(String byRequest)
-  {
-    profileName = Optional.ofNullable(Optional.ofNullable(byRequest)
-                                              .orElse(Configurator.getInstance().getDefaultProfileName()))
-                          .orElse(ProfileNames.RFC4998);
-  }
+    /**
+     * Sets the profile name attribute to given or configured default value.
+     *
+     * @param byRequest
+     */
+    protected void handleProfileName(String byRequest)
+    {
+        profileName = Optional.ofNullable(Optional.ofNullable(byRequest).orElse(Configurator.getInstance().getDefaultProfileName()))
+            .orElse(ProfileNames.RFC4998);
+    }
 }

@@ -24,9 +24,9 @@ package de.bund.bsi.tr_esor.checktool.validation.report;
 import java.util.ArrayList;
 import java.util.List;
 
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType;
-
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType;
 
 
 /**
@@ -37,73 +37,73 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class ArchiveTimeStampReport extends ReportPart implements OutputCreator<ArchiveTimeStampValidityType>
 {
 
-  private final ArchiveTimeStampValidityType xmlReport;
+    private final ArchiveTimeStampValidityType xmlReport;
 
-  private final List<Reference> idsOfMissingHashValues = new ArrayList<>();
+    private final List<Reference> idsOfMissingHashValues = new ArrayList<>();
 
-  /**
-   * Creates new instance.
-   *
-   * @param ref
-   */
-  public ArchiveTimeStampReport(Reference ref)
-  {
-    super(ref);
-    xmlReport = XmlHelper.FACTORY_OASIS_VR.createArchiveTimeStampValidityType();
-  }
+    /**
+     * Creates new instance.
+     *
+     * @param ref
+     */
+    public ArchiveTimeStampReport(Reference ref)
+    {
+        super(ref);
+        xmlReport = XmlHelper.FACTORY_OASIS_VR.createArchiveTimeStampValidityType();
+    }
 
-  @Override
-  public ArchiveTimeStampValidityType getFormatted()
-  {
-    return xmlReport;
-  }
+    @Override
+    public ArchiveTimeStampValidityType getFormatted()
+    {
+        return xmlReport;
+    }
 
-  @Override
-  public Class<ArchiveTimeStampValidityType> getTargetClass()
-  {
-    return ArchiveTimeStampValidityType.class;
-  }
+    @Override
+    public Class<ArchiveTimeStampValidityType> getTargetClass()
+    {
+        return ArchiveTimeStampValidityType.class;
+    }
 
-  /**
-   * Sets the algorithm validity report.
-   *
-   * @param reportPart
-   */
-  public void addChild(AlgorithmValidityReport reportPart)
-  {
-    updateCodes(reportPart);
-    xmlReport.setDigestAlgorithm(reportPart.getFormatted());
-  }
+    /**
+     * Sets the algorithm validity report.
+     *
+     * @param reportPart
+     */
+    public void addChild(AlgorithmValidityReport reportPart)
+    {
+        updateCodes(reportPart);
+        xmlReport.setDigestAlgorithm(reportPart.getFormatted());
+    }
 
-  /**
-   * Sets the time stamp report.
-   *
-   * @param reportPart
-   */
-  public void addChild(TimeStampReport reportPart)
-  {
-    updateCodes(reportPart);
-    xmlReport.setTimeStamp(reportPart.getFormatted());
-  }
+    /**
+     * Sets the time stamp report.
+     *
+     * @param reportPart
+     */
+    public void addChild(TimeStampReport reportPart)
+    {
+        updateCodes(reportPart);
+        xmlReport.setTimeStamp(reportPart.getFormatted());
+    }
 
-  /**
-   * For debugging purposes: Records the identifier of an object whose hash was missing.
-   *
-   * @param ref
-   */
-  public void addIdOfMissingHash(Reference ref)
-  {
-    idsOfMissingHashValues.add(ref);
-  }
+    /**
+     * For debugging purposes: Records the identifier of an object whose hash was missing.
+     *
+     * @param ref
+     */
+    public void addIdOfMissingHash(Reference ref)
+    {
+        idsOfMissingHashValues.add(ref);
+    }
 
-  /**
-   * Sets the value of the formatOk report part.
-   *
-   * @param formatOk
-   */
-  public void setFormatOk(FormatOkReport formatOk)
-  {
-    updateCodes(formatOk);
-    xmlReport.setFormatOK(formatOk.getOverallResultVerbose());
-  }
+    /**
+     * Sets the value of the formatOk report part.
+     *
+     * @param formatOk
+     */
+    public void setFormatOk(FormatOkReport formatOk)
+    {
+        updateCodes(formatOk);
+        xmlReport.setFormatOK(formatOk.getOverallResultVerbose());
+    }
 }

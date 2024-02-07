@@ -22,7 +22,6 @@
 package de.bund.bsi.tr_esor.checktool.validation;
 
 
-
 /**
  * 3 kinds of validation verdict: valid, invalid, inconclusive.
  *
@@ -31,74 +30,74 @@ package de.bund.bsi.tr_esor.checktool.validation;
 public enum ValidationResultMajor
 {
 
-  /**
-   * The result of the validation is valid.
-   */
-  VALID("valid"),
+    /**
+     * The result of the validation is valid.
+     */
+    VALID("valid"),
 
-  /**
-   * The result of the validation is inconclusive.
-   */
-  INDETERMINED("indetermined"),
+    /**
+     * The result of the validation is inconclusive.
+     */
+    INDETERMINED("indetermined"),
 
-  /**
-   * The result of the validation is invalid.
-   */
-  INVALID("invalid");
+    /**
+     * The result of the validation is invalid.
+     */
+    INVALID("invalid");
 
-  private String value;
+    private String value;
 
-  ValidationResultMajor(String value)
-  {
-    this.value = "urn:oasis:names:tc:dss:1.0:detail:" + value;
-  }
-
-  @Override
-  public String toString()
-  {
-    return value;
-  }
-
-  /**
-   * Returns the "less valid" value.
-   */
-  public ValidationResultMajor worse(ValidationResultMajor other)
-  {
-    var effectiveOther = other == null ? INDETERMINED : other;
-    return compareTo(effectiveOther) > 0 ? this : effectiveOther;
-  }
-
-  /**
-   * Returns matching instance (prefix ignored).
-   *
-   * @param value
-   */
-  public static ValidationResultMajor forValue(String value)
-  {
-    for ( var m : values() )
+    ValidationResultMajor(String value)
     {
-      if (m.value.equals(value))
-      {
-        return m;
-      }
+        this.value = "urn:oasis:names:tc:dss:1.0:detail:" + value;
     }
-    return null;
-  }
 
-  /**
-   * Returns matching instance, takes an DSS result as specified in the "OASIS DSS core specification v1.0".
-   */
-  public static ValidationResultMajor forDssResult(String major, String minor)
-  {
-    if ("urn:oasis:names:tc:dss:1.0:resultmajor:Success".equals(major)
-        && "urn:oasis:names:tc:dss:1.0:resultminor:valid:signature:OnAllDocuments".equals(minor))
+    @Override
+    public String toString()
     {
-      return VALID;
+        return value;
     }
-    if (minor != null && minor.contains("invalid"))
+
+    /**
+     * Returns the "less valid" value.
+     */
+    public ValidationResultMajor worse(ValidationResultMajor other)
     {
-      return INVALID;
+        var effectiveOther = other == null ? INDETERMINED : other;
+        return compareTo(effectiveOther) > 0 ? this : effectiveOther;
     }
-    return INDETERMINED;
-  }
+
+    /**
+     * Returns matching instance (prefix ignored).
+     *
+     * @param value
+     */
+    public static ValidationResultMajor forValue(String value)
+    {
+        for (var m : values())
+        {
+            if (m.value.equals(value))
+            {
+                return m;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns matching instance, takes an DSS result as specified in the "OASIS DSS core specification v1.0".
+     */
+    public static ValidationResultMajor forDssResult(String major, String minor)
+    {
+        if ("urn:oasis:names:tc:dss:1.0:resultmajor:Success".equals(major)
+            && "urn:oasis:names:tc:dss:1.0:resultminor:valid:signature:OnAllDocuments".equals(minor))
+        {
+            return VALID;
+        }
+        if (minor != null && minor.contains("invalid"))
+        {
+            return INVALID;
+        }
+        return INDETERMINED;
+    }
 }

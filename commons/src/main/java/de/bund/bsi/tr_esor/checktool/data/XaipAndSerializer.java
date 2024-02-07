@@ -31,33 +31,33 @@ import de.bund.bsi.tr_esor.xaip.XAIPType;
 public class XaipAndSerializer
 {
 
-  private final XAIPType xaip;
+    private final XAIPType xaip;
 
-  private final ComprehensiveXaipSerializer serializer;
+    private final ComprehensiveXaipSerializer serializer;
 
 
-  /**
-   * Create a wrapper for a XAIP and the serializer used to serialize its contents
-   */
-  public XaipAndSerializer(XAIPType xaip, ComprehensiveXaipSerializer serializer)
-  {
-    this.xaip = xaip;
-    this.serializer = serializer;
-  }
+    /**
+     * Create a wrapper for a XAIP and the serializer used to serialize its contents
+     */
+    public XaipAndSerializer(XAIPType xaip, ComprehensiveXaipSerializer serializer)
+    {
+        this.xaip = xaip;
+        this.serializer = serializer;
+    }
 
-  /**
-   * Returns the wrapped XAIP.
-   */
-  public XAIPType getXaip()
-  {
-    return xaip;
-  }
+    /**
+     * Returns the wrapped XAIP.
+     */
+    public XAIPType getXaip()
+    {
+        return xaip;
+    }
 
-  /**
-   * Returns the serializer which is suitable for the elements in the wrapped XAIP.
-   */
-  public ComprehensiveXaipSerializer getSerializer()
-  {
-    return serializer;
-  }
+    /**
+     * Returns the serializer which is suitable for the elements in the wrapped XAIP.
+     */
+    public ComprehensiveXaipSerializer getSerializer()
+    {
+        return serializer;
+    }
 }

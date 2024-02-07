@@ -38,112 +38,111 @@ import de.bund.bsi.tr_esor.xaip.VersionManifestType;
 public final class Toolbox
 {
 
-  private Toolbox()
-  {
-    // no instance required
-  }
-
-  /**
-   * Determine file extension for data object.
-   *
-   * @param data data object
-   * @return extension with dot
-   */
-  public static String getPreferredExtension(DataObjectType data)
-  {
-    var binData = data.getBinaryData();
-    if (binData == null)
+    private Toolbox()
     {
-      if (LXaipReader.isValidLXaipElement(data, data.getDataObjectID()))
-      {
+        // no instance required
+    }
+
+    /**
+     * Determine file extension for data object.
+     *
+     * @param data data object
+     * @return extension with dot
+     */
+    public static String getPreferredExtension(DataObjectType data)
+    {
+        var binData = data.getBinaryData();
+        if (binData == null)
+        {
+            if (LXaipReader.isValidLXaipElement(data, data.getDataObjectID()))
+            {
+                return ".bin";
+            }
+            return ".xml";
+        }
+
+        if ("application/pdf".equals(binData.getMimeType()))
+        {
+            return ".pdf";
+        }
+
         return ".bin";
-      }
-      return ".xml";
     }
 
-    if ("application/pdf".equals(binData.getMimeType()))
+    /**
+     * Determine Id from xaip object.
+     *
+     * @param value xaip object
+     * @return Id as string
+     */
+    // TODO Might be duplicate from XaipReader
+    public static String getId(Object value)
     {
-      return ".pdf";
+        if (value instanceof DataObjectType)
+        {
+            return ((DataObjectType)value).getDataObjectID();
+        }
+        if (value instanceof MetaDataObjectType)
+        {
+            return ((MetaDataObjectType)value).getMetaDataID();
+        }
+        if (value instanceof CredentialType)
+        {
+            return ((CredentialType)value).getCredentialID();
+        }
+        if (value instanceof VersionManifestType)
+        {
+            return ((VersionManifestType)value).getVersionID();
+        }
+        throw new IllegalArgumentException("Unsupported type " + value.getClass().getName());
     }
 
-    return ".bin";
-  }
+    /**
+     * Removes all parts of the string which may cause problems with file system and replaces it with an underscore for files.
+     */
+    public static String sanitizeFileName(String str)
+    {
+        if (str == null)
+        {
+            return null;
+        }
 
-  /**
-   * Determine Id from xaip object.
-   *
-   * @param value xaip object
-   * @return Id as string
-   */
-  // TODO Might be duplicate from XaipReader
-  public static String getId(Object value)
-  {
-    if (value instanceof DataObjectType)
-    {
-      return ((DataObjectType)value).getDataObjectID();
-    }
-    if (value instanceof MetaDataObjectType)
-    {
-      return ((MetaDataObjectType)value).getMetaDataID();
-    }
-    if (value instanceof CredentialType)
-    {
-      return ((CredentialType)value).getCredentialID();
-    }
-    if (value instanceof VersionManifestType)
-    {
-      return ((VersionManifestType)value).getVersionID();
-    }
-    throw new IllegalArgumentException("Unsupported type " + value.getClass().getName());
-  }
-
-  /**
-   * Removes all parts of the string which may cause problems with file system and replaces it with an
-   * underscore for files.
-   */
-  public static String sanitizeFileName(String str)
-  {
-    if (str == null)
-    {
-      return null;
+        return str.replaceAll("[^a-zA-Z0-9\\.]", "_");
     }
 
-    return str.replaceAll("[^a-zA-Z0-9\\.]", "_");
-  }
+    /**
+     * Helper Method to extract the binary data of a DataObjectType from a LXaip or Xaip
+     */
+    public static byte[] readBinaryData(LXaipReader lXaipReader, DataObjectType data) throws IOException
+    {
+        byte[] binaryData = null;
+        if (lXaipReader.isValidLXaipElement(data, data.getDataObjectID()))
+        {
+            binaryData = lXaipReader.readBinaryData(data, data.getDataObjectID());
+        }
+        else if (data.getBinaryData() != null)
+        {
+            binaryData = data.getBinaryData().getValue().getInputStream().readAllBytes();
+            data.getBinaryData().getValue().getInputStream().reset();
+        }
+        return binaryData;
+    }
 
-  /**
-   * Helper Method to extract the binary data of a DataObjectType from a LXaip or Xaip
-   */
-  public static byte[] readBinaryData(LXaipReader lXaipReader, DataObjectType data) throws IOException
-  {
-    byte[] binaryData = null;
-    if (lXaipReader.isValidLXaipElement(data, data.getDataObjectID()))
+    /**
+     * Helper Method to extract the binary data of a MetaDataObjectType from a LXaip or Xaip
+     */
+    public static byte[] readBinaryData(LXaipReader lXaipReader, MetaDataObjectType meta) throws IOException
     {
-      binaryData = lXaipReader.readBinaryData(data, data.getDataObjectID());
+        byte[] binaryData = null;
+        if (lXaipReader.isValidLXaipElement(meta, meta.getMetaDataID()))
+        {
+            binaryData = lXaipReader.readBinaryData(meta, meta.getMetaDataID());
+        }
+        else if (meta.getBinaryMetaData() != null)
+        {
+            binaryData = meta.getBinaryMetaData().getValue().getInputStream().readAllBytes();
+            meta.getBinaryMetaData().getValue().getInputStream().reset();
+        }
+        return binaryData;
     }
-    else if (data.getBinaryData() != null)
-    {
-      binaryData = data.getBinaryData().getValue().getInputStream().readAllBytes();
-      data.getBinaryData().getValue().getInputStream().reset();
-    }
-    return binaryData;
-  }
-
-  /**
-   * Helper Method to extract the binary data of a MetaDataObjectType from a LXaip or Xaip
-   */
-  public static byte[] readBinaryData(LXaipReader lXaipReader, MetaDataObjectType meta) throws IOException
-  {
-    byte[] binaryData = null;
-    if (lXaipReader.isValidLXaipElement(meta, meta.getMetaDataID()))
-    {
-      binaryData = lXaipReader.readBinaryData(meta, meta.getMetaDataID());
-    }
-    else if (meta.getBinaryMetaData() != null)
-    {
-      binaryData = meta.getBinaryMetaData().getValue().getInputStream().readAllBytes();
-      meta.getBinaryMetaData().getValue().getInputStream().reset();
-    }
-    return binaryData;
-  }
 }

@@ -52,70 +52,68 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestBasisErsArchiveTimeStampSequenceValidator
 {
 
-  private FormatOkReport ersFormatOk;
+    private FormatOkReport ersFormatOk;
 
-  /**
-   * Loads test configuration.
-   *
-   * @throws Exception
-   */
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
+    /**
+     * Loads test configuration.
+     *
+     * @throws Exception
+     */
+    @BeforeClass
+    public static void setUpClass() throws Exception
+    {
+        TestUtils.loadDefaultConfig();
+    }
 
-  /**
-   * Asserts that {@link BasisErsArchiveTimeStampSequenceValidator} invalidates formatOk if
-   * {@link ArchiveTimeStampSequence} has no {@link ArchiveTimeStampChain}.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void noArchiveTimeStampChains() throws Exception
-  {
-    validate(er -> new ArchiveTimeStampSequence());
-    assertThat("major", ersFormatOk.getOverallResult().getResultMajor(), endsWith(":invalid"));
-    assertThat("summarized message",
-               ersFormatOk.getSummarizedMessage(),
-               containsString("must contain at least one ArchiveTimeStampChain"));
-  }
+    /**
+     * Asserts that {@link BasisErsArchiveTimeStampSequenceValidator} invalidates formatOk if {@link ArchiveTimeStampSequence} has no
+     * {@link ArchiveTimeStampChain}.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void noArchiveTimeStampChains() throws Exception
+    {
+        validate(er -> new ArchiveTimeStampSequence());
+        assertThat("major", ersFormatOk.getOverallResult().getResultMajor(), endsWith(":invalid"));
+        assertThat("summarized message",
+            ersFormatOk.getSummarizedMessage(),
+            containsString("must contain at least one ArchiveTimeStampChain"));
+    }
 
-  /**
-   * Asserts that {@link BasisErsArchiveTimeStampSequenceValidator} keeps formatOk in context valid if
-   * {@link ArchiveTimeStampSequence} has some {@link ArchiveTimeStampChain}. The checked
-   * ArchiveTimeStampSequence is indetermined, because no online time stamp check was done.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void someArchiveTimeStamps() throws Exception
-  {
-    var report = validate(er -> er.getAtss());
-    assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
-    assertThat("summarized message",
-               report.getSummarizedMessage(),
-               is("0: no protected data to check\n0/0/tsp: no online validation of time stamp done"));
-    report.getFormatted()
-          .getArchiveTimeStampChain()
-          .stream()
-          .flatMap(atsc -> atsc.getArchiveTimeStamp().stream())
-          .forEach(ats -> assertThat(ats.getFormatOK().getResultMajor(), endsWith(":valid")));
-  }
+    /**
+     * Asserts that {@link BasisErsArchiveTimeStampSequenceValidator} keeps formatOk in context valid if {@link ArchiveTimeStampSequence}
+     * has some {@link ArchiveTimeStampChain}. The checked ArchiveTimeStampSequence is indetermined, because no online time stamp check was
+     * done.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void someArchiveTimeStamps() throws Exception
+    {
+        var report = validate(er -> er.getAtss());
+        assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
+        assertThat("summarized message",
+            report.getSummarizedMessage(),
+            is("0: no protected data to check\n0/0/tsp: no online validation of time stamp done"));
+        report.getFormatted()
+            .getArchiveTimeStampChain()
+            .stream()
+            .flatMap(atsc -> atsc.getArchiveTimeStamp().stream())
+            .forEach(ats -> assertThat(ats.getFormatOK().getResultMajor(), endsWith(":valid")));
+    }
 
-  private ATSSequenceReport validate(Function<EvidenceRecord, ArchiveTimeStampSequence> getSequenceFor)
-    throws Exception
-  {
-    var er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
-    var validator = new BasisErsArchiveTimeStampSequenceValidator();
-    var ref = new Reference("er");
-    var ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS,
-                                      TestUtils.createReturnVerificationReport(), false);
-    ctx.setDeclaredDigestOIDs(Collections.singletonList("2.16.840.1.101.3.4.2.1"));
-    validator.setContext(ctx);
-    var report = validator.validate(ref.newChild("test"), getSequenceFor.apply(er));
-    ersFormatOk = ctx.getFormatOk();
-    return report;
-  }
+    private ATSSequenceReport validate(Function<EvidenceRecord, ArchiveTimeStampSequence> getSequenceFor) throws Exception
+    {
+        var er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
+        var validator = new BasisErsArchiveTimeStampSequenceValidator();
+        var ref = new Reference("er");
+        var ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS, TestUtils.createReturnVerificationReport(), false);
+        ctx.setDeclaredDigestOIDs(Collections.singletonList("2.16.840.1.101.3.4.2.1"));
+        validator.setContext(ctx);
+        var report = validator.validate(ref.newChild("test"), getSequenceFor.apply(er));
+        ersFormatOk = ctx.getFormatOk();
+        return report;
+    }
 
 }

@@ -9,15 +9,15 @@ import de.bund.bsi.tr_esor.checktool.data.UnsupportedData;
 public class UnsupportedXaipParser extends RegexBasedParser
 {
 
-  /** create a parser that checks for unsupported XAIPs */
-  public UnsupportedXaipParser()
-  {
-    super(regexForMainTag("XAIP", "http://(www.)?bsi.bund.de/tr-esor/xaip/1.[2|1]"));
-  }
+    /** create a parser that checks for unsupported XAIPs */
+    public UnsupportedXaipParser()
+    {
+        super(regexForMainTag("XAIP", "http://(www.)?bsi.bund.de/tr-esor/xaip/1.[2|1]"));
+    }
 
-  @Override
-  public Object parse() throws IOException
-  {
-    return new UnsupportedData("An unsupported XAIP format (TR-ESOR 1.1 or 1.2) was found.");
-  }
+    @Override
+    public Object parse() throws IOException
+    {
+        return new UnsupportedData("An unsupported XAIP format (TR-ESOR 1.1 or 1.2) was found.");
+    }
 }

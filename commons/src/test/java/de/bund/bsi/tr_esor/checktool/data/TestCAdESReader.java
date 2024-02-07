@@ -42,36 +42,36 @@ import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 public class TestCAdESReader
 {
 
-  /**
-   * Asserts CMS with embedded evidence record can be read.
-   */
-  @Test
-  public void encapsulatedWithEr() throws Exception
-  {
-    var bytes = TestUtils.decodeTestResource("/cms/encapsulated_with_er.p7s.b64");
-    var signature = new CMSSignedData(bytes);
-    var reader = new CAdESReader(signature);
-    assertFalse(reader.hasCertificateValues());
-    assertFalse(reader.hasRevocationValues());
-    assertTrue(reader.hasUnsignedAttributes());
-    var erBytes = reader.getEmbeddedEvidenceRecord();
-    assertThat(erBytes, notNullValue());
-    assertThat(new ASN1EvidenceRecordParser().parse(erBytes), notNullValue());
-  }
+    /**
+     * Asserts CMS with embedded evidence record can be read.
+     */
+    @Test
+    public void encapsulatedWithEr() throws Exception
+    {
+        var bytes = TestUtils.decodeTestResource("/cms/encapsulated_with_er.p7s.b64");
+        var signature = new CMSSignedData(bytes);
+        var reader = new CAdESReader(signature);
+        assertFalse(reader.hasCertificateValues());
+        assertFalse(reader.hasRevocationValues());
+        assertTrue(reader.hasUnsignedAttributes());
+        var erBytes = reader.getEmbeddedEvidenceRecord();
+        assertThat(erBytes, notNullValue());
+        assertThat(new ASN1EvidenceRecordParser().parse(erBytes), notNullValue());
+    }
 
-  /**
-   * Asserts CMS without embedded evidence record can be read.
-   */
-  @Test
-  public void detached() throws Exception
-  {
-    var bytes = TestUtils.decodeTestResource("/cms/TestDataLogo.png_er.p7s.b64");
-    var signature = new CMSSignedData(bytes);
-    var reader = new CAdESReader(signature);
-    assertFalse(reader.hasCertificateValues());
-    assertFalse(reader.hasRevocationValues());
-    assertTrue(reader.hasUnsignedAttributes());
-    assertThat(reader.getEmbeddedEvidenceRecord(), nullValue());
-  }
+    /**
+     * Asserts CMS without embedded evidence record can be read.
+     */
+    @Test
+    public void detached() throws Exception
+    {
+        var bytes = TestUtils.decodeTestResource("/cms/TestDataLogo.png_er.p7s.b64");
+        var signature = new CMSSignedData(bytes);
+        var reader = new CAdESReader(signature);
+        assertFalse(reader.hasCertificateValues());
+        assertFalse(reader.hasRevocationValues());
+        assertTrue(reader.hasUnsignedAttributes());
+        assertThat(reader.getEmbeddedEvidenceRecord(), nullValue());
+    }
 
 }

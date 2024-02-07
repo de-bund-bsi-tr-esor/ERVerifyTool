@@ -10,19 +10,19 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
 public final class ECardResultMajor
 {
 
-  /**
-   * Successful operation
-   */
-  public static final String OK = "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok";
+    /**
+     * Successful operation
+     */
+    public static final String OK = "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#ok";
 
-  /**
-   * Operation concluded with problems (e.g. missing content or OCSP unavailable)
-   */
-  public static final String WARNING = "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#warning";
+    /**
+     * Operation concluded with problems (e.g. missing content or OCSP unavailable)
+     */
+    public static final String WARNING = "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#warning";
 
-  /**
-   * Operation failed or data was checked as invalid.
-   */
-  public static final String ERROR = "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error";
+    /**
+     * Operation failed or data was checked as invalid.
+     */
+    public static final String ERROR = "http://www.bsi.bund.de/ecard/api/1.1/resultmajor#error";
 
 }

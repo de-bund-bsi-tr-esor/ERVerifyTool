@@ -40,35 +40,34 @@ import org.bouncycastle.util.encoders.Hex;
 public final class ASN1Utils
 {
 
-  private ASN1Utils()
-  {
-    // no instances
-  }
+    private ASN1Utils()
+    {
+        // no instances
+    }
 
-  /**
-   * Returns an algorithm identifier which is represented by a sequence containing the AOID and parameters.
-   * However, because implicit DER encoding is allowed, be aware that the sequence tag(s) may be missing.
-   *
-   * @param data
-   * @throws IOException
-   */
-  public static AlgorithmIdentifier parseAlgorithmIdentifier(ASN1Encodable data) throws IOException
-  {
-    return data instanceof ASN1ObjectIdentifier ? new AlgorithmIdentifier((ASN1ObjectIdentifier)data)
-      : AlgorithmIdentifier.getInstance(Checked.cast(data).to(ASN1Sequence.class));
-  }
+    /**
+     * Returns an algorithm identifier which is represented by a sequence containing the AOID and parameters. However, because implicit DER
+     * encoding is allowed, be aware that the sequence tag(s) may be missing.
+     *
+     * @param data
+     * @throws IOException
+     */
+    public static AlgorithmIdentifier parseAlgorithmIdentifier(ASN1Encodable data) throws IOException
+    {
+        return data instanceof ASN1ObjectIdentifier
+            ? new AlgorithmIdentifier((ASN1ObjectIdentifier)data)
+            : AlgorithmIdentifier.getInstance(Checked.cast(data).to(ASN1Sequence.class));
+    }
 
-  /**
-   * Returns a human-readable string representing a signer ID.
-   *
-   * @param sid
-   */
-  public static String sidToString(SignerId sid)
-  {
-    return Optional.ofNullable(sid.getIssuer())
-                   .map(i -> i + "#" + sid.getSerialNumber())
-                   .orElse(Optional.ofNullable(sid.getSubjectKeyIdentifier())
-                                   .map(Hex::toHexString)
-                                   .orElse(sid.toString()));
-  }
+    /**
+     * Returns a human-readable string representing a signer ID.
+     *
+     * @param sid
+     */
+    public static String sidToString(SignerId sid)
+    {
+        return Optional.ofNullable(sid.getIssuer())
+            .map(i -> i + "#" + sid.getSerialNumber())
+            .orElse(Optional.ofNullable(sid.getSubjectKeyIdentifier()).map(Hex::toHexString).orElse(sid.toString()));
+    }
 }

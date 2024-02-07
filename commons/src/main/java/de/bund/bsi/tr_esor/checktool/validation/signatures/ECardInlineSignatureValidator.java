@@ -22,69 +22,65 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
 
 import java.io.IOException;
 
+import de.bund.bsi.ecard.api._1.VerifyRequest;
+import de.bund.bsi.tr_esor.checktool.data.InlineSignedData;
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+
+import jakarta.xml.bind.JAXBException;
 import oasis.names.tc.dss._1_0.core.schema.DocumentType;
 import oasis.names.tc.dss._1_0.core.schema.InputDocuments;
 import oasis.names.tc.dss._1_0.core.schema.SignaturePtr;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
-import jakarta.xml.bind.JAXBException;
-
-import de.bund.bsi.ecard.api._1.VerifyRequest;
-import de.bund.bsi.tr_esor.checktool.data.InlineSignedData;
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
-
 
 /**
- * Validator for data objects. It issues an eCard VerifyRequest to the configured eCard-compliant web service
- * and adds the returned VerificationReport to the context.
+ * Validator for data objects. It issues an eCard VerifyRequest to the configured eCard-compliant web service and adds the returned
+ * VerificationReport to the context.
  *
  * @author PRE
  */
-public class ECardInlineSignatureValidator
-  extends BaseECardSignatureValidator<InlineSignedData, InlineSignatureValidationContext>
+public class ECardInlineSignatureValidator extends BaseECardSignatureValidator<InlineSignedData, InlineSignatureValidationContext>
 {
 
-  /**
-   * Creates a signature verification request based on a detached signature. With encapsulated signatures, the
-   * format of the request may differ.
-   */
-  @Override
-  protected VerifyRequest createVerifyRequest(InlineSignedData data) throws JAXBException, IOException
-  {
-    VerifyRequest request = XmlHelper.FACTORY_ECARD.createVerifyRequest();
-    request.setRequestID("id#" + System.currentTimeMillis());
-    request.setOptionalInputs(createReturnVerificationReportOI());
+    /**
+     * Creates a signature verification request based on a detached signature. With encapsulated signatures, the format of the request may
+     * differ.
+     */
+    @Override
+    protected VerifyRequest createVerifyRequest(InlineSignedData data) throws JAXBException, IOException
+    {
+        VerifyRequest request = XmlHelper.FACTORY_ECARD.createVerifyRequest();
+        request.setRequestID("id#" + System.currentTimeMillis());
+        request.setOptionalInputs(createReturnVerificationReportOI());
 
-    InputDocuments inp = XmlHelper.FACTORY_DSS.createInputDocuments();
-    request.setInputDocuments(inp);
-    DocumentType doc = createBase64Document(ctx.getReference().toString(),
-                                            ctx.getObjectToValidate().readBinaryData());
-    inp.getDocumentOrTransformedDataOrDocumentHash().add(doc);
+        InputDocuments inp = XmlHelper.FACTORY_DSS.createInputDocuments();
+        request.setInputDocuments(inp);
+        DocumentType doc = createBase64Document(ctx.getReference().toString(), ctx.getObjectToValidate().readBinaryData());
+        inp.getDocumentOrTransformedDataOrDocumentHash().add(doc);
 
-    SignaturePtr sigPtr = XmlHelper.FACTORY_DSS.createSignaturePtr();
-    sigPtr.setWhichDocument(doc);
-    de.bund.bsi.ecard.api._1.SignatureObject target = XmlHelper.FACTORY_ECARD.createSignatureObject();
-    target.setSignaturePtr(sigPtr);
-    request.getSignatureObject().add(target);
-    return request;
-  }
+        SignaturePtr sigPtr = XmlHelper.FACTORY_DSS.createSignaturePtr();
+        sigPtr.setWhichDocument(doc);
+        de.bund.bsi.ecard.api._1.SignatureObject target = XmlHelper.FACTORY_ECARD.createSignatureObject();
+        target.setSignaturePtr(sigPtr);
+        request.getSignatureObject().add(target);
+        return request;
+    }
 
-  @Override
-  protected boolean isRestrictedValidation(VerificationReportType verificationReport,
-                                           InlineSignedData toCheck)
-  {
-    return false;
-  }
+    @Override
+    protected boolean isRestrictedValidation(VerificationReportType verificationReport, InlineSignedData toCheck)
+    {
+        return false;
+    }
 
-  @Override
-  protected String noSignatureFoundMessage()
-  {
-    return "No inline signature found in data object. Detached signatures might be present.";
-  }
+    @Override
+    protected String noSignatureFoundMessage()
+    {
+        return "No inline signature found in data object. Detached signatures might be present.";
+    }
 
-  @Override
-  protected Class<InlineSignatureValidationContext> getRequiredContextClass()
-  {
-    return InlineSignatureValidationContext.class;
-  }
+    @Override
+    protected Class<InlineSignatureValidationContext> getRequiredContextClass()
+    {
+        return InlineSignatureValidationContext.class;
+    }
 }

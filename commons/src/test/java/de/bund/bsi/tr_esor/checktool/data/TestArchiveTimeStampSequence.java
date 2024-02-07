@@ -37,38 +37,38 @@ import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 public class TestArchiveTimeStampSequence
 {
 
-  /**
-   * Asserts that a ASN&#46;1 ATSS from an EvidenceRecord can be parsed, encoded again and the encoded bytes
-   * are found in the EvidenceRecord (encoded data must be identical to original data).
-   */
-  @Test
-  public void parseAndEncode() throws Exception
-  {
-    var erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
-    var er = new ASN1EvidenceRecordParser().parse(erBytes);
-    var atss = er.getAtss().getEncoded();
-    assertTrue("Encoded ATSS is found in EvidenceRecord", findInArray(erBytes, atss));
-  }
+    /**
+     * Asserts that a ASN&#46;1 ATSS from an EvidenceRecord can be parsed, encoded again and the encoded bytes are found in the
+     * EvidenceRecord (encoded data must be identical to original data).
+     */
+    @Test
+    public void parseAndEncode() throws Exception
+    {
+        var erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
+        var er = new ASN1EvidenceRecordParser().parse(erBytes);
+        var atss = er.getAtss().getEncoded();
+        assertTrue("Encoded ATSS is found in EvidenceRecord", findInArray(erBytes, atss));
+    }
 
-  @SuppressWarnings("PMD.AssignmentInOperand")
-  private boolean findInArray(byte[] haystack, byte[] needle)
-  {
-    if (needle.length == 0)
+    @SuppressWarnings("PMD.AssignmentInOperand")
+    private boolean findInArray(byte[] haystack, byte[] needle)
     {
-      return true;
+        if (needle.length == 0)
+        {
+            return true;
+        }
+        var pos = 0;
+        for (var i = 0; i < haystack.length; i++)
+        {
+            if (haystack[i] != needle[pos++])
+            {
+                pos = 0;
+            }
+            if (pos == needle.length)
+            {
+                return true;
+            }
+        }
+        return false;
     }
-    var pos = 0;
-    for ( var i = 0 ; i < haystack.length ; i++ )
-    {
-      if (haystack[i] != needle[pos++])
-      {
-        pos = 0;
-      }
-      if (pos == needle.length)
-      {
-        return true;
-      }
-    }
-    return false;
-  }
 }

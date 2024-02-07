@@ -56,83 +56,76 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestBasisErsArchiveTimeStampChainValidator
 {
 
-  private FormatOkReport ersFormatOk;
+    private FormatOkReport ersFormatOk;
 
-  /**
-   * Loads test configuration.
-   */
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
-
-  /**
-   * Asserts that {@link BasisErsArchiveTimeStampChainValidator} invalidates formatOk if
-   * {@link ArchiveTimeStampChain} has no {@link ArchiveTimeStamp}.
-   */
-  @Test
-  public void noArchiveTimeStamps() throws Exception
-  {
-    validate(er -> emptyChain());
-    assertThat("major", ersFormatOk.getOverallResult().getResultMajor(), endsWith(":invalid"));
-    assertThat("summarized Message",
-               ersFormatOk.getSummarizedMessage(),
-               containsString("must contain at least one ArchiveTimeStamp"));
-  }
-
-  /**
-   * Asserts that {@link BasisErsArchiveTimeStampChainValidator} keeps formatOk in context valid if
-   * {@link ArchiveTimeStampChain} has some {@link ArchiveTimeStamp}. The checked ArchiveTimeStampChain is
-   * indetermined, because no online time stamp check was done.
-   */
-  @Test
-  public void someArchiveTimeStamps() throws Exception
-  {
-    var report = validate(er -> er.getAtss().get(0));
-
-    assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
-    assertThat("summarized Message",
-               report.getSummarizedMessage(),
-               is("no protected data to check\n0/tsp: no online validation of time stamp done"));
-    report.getFormatted()
-          .getArchiveTimeStamp()
-          .forEach(ats -> assertThat(ats.getFormatOK().getResultMajor(), endsWith(":valid")));
-  }
-
-  private ATSChainReport validate(Function<EvidenceRecord, ArchiveTimeStampChain> getChainFor)
-    throws Exception
-  {
-    var er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
-    var chain = getChainFor.apply(er);
-    var validator = new BasisErsArchiveTimeStampChainValidator();
-    var ref = new Reference("er");
-    var ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS,
-                                      TestUtils.createReturnVerificationReport(), false);
-    if (!chain.isEmpty())
+    /**
+     * Loads test configuration.
+     */
+    @BeforeClass
+    public static void setUpClass() throws Exception
     {
-      var dateFromTimeStamp = new Date(chain.get(0).getSignDateFromTimeStamp().getTime());
-      dateFromTimeStamp.setTime(dateFromTimeStamp.getTime() + 1);
-      ctx.setSecureData(chain.get(0), dateFromTimeStamp);
+        TestUtils.loadDefaultConfig();
     }
-    ctx.setDeclaredDigestOIDs(Collections.singletonList("2.16.840.1.101.3.4.2.1"));
-    validator.setContext(ctx);
-    var report = validator.validate(ref.newChild("test"), chain);
-    ersFormatOk = ctx.getFormatOk();
-    return report;
-  }
 
-  private ArchiveTimeStampChain emptyChain()
-  {
-    try
+    /**
+     * Asserts that {@link BasisErsArchiveTimeStampChainValidator} invalidates formatOk if {@link ArchiveTimeStampChain} has no
+     * {@link ArchiveTimeStamp}.
+     */
+    @Test
+    public void noArchiveTimeStamps() throws Exception
     {
-      return new ArchiveTimeStampChain(new DERSequence());
+        validate(er -> emptyChain());
+        assertThat("major", ersFormatOk.getOverallResult().getResultMajor(), endsWith(":invalid"));
+        assertThat("summarized Message", ersFormatOk.getSummarizedMessage(), containsString("must contain at least one ArchiveTimeStamp"));
     }
-    catch (IOException e)
+
+    /**
+     * Asserts that {@link BasisErsArchiveTimeStampChainValidator} keeps formatOk in context valid if {@link ArchiveTimeStampChain} has some
+     * {@link ArchiveTimeStamp}. The checked ArchiveTimeStampChain is indetermined, because no online time stamp check was done.
+     */
+    @Test
+    public void someArchiveTimeStamps() throws Exception
     {
-      fail("need empty ATS chain for this test" + e.getMessage());
-      return null;
+        var report = validate(er -> er.getAtss().get(0));
+
+        assertThat("major", report.getOverallResult().getResultMajor(), endsWith(":indetermined"));
+        assertThat("summarized Message",
+            report.getSummarizedMessage(),
+            is("no protected data to check\n0/tsp: no online validation of time stamp done"));
+        report.getFormatted().getArchiveTimeStamp().forEach(ats -> assertThat(ats.getFormatOK().getResultMajor(), endsWith(":valid")));
     }
-  }
+
+    private ATSChainReport validate(Function<EvidenceRecord, ArchiveTimeStampChain> getChainFor) throws Exception
+    {
+        var er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource("/bin/basis_ers.b64"));
+        var chain = getChainFor.apply(er);
+        var validator = new BasisErsArchiveTimeStampChainValidator();
+        var ref = new Reference("er");
+        var ctx = new ErValidationContext(ref, er, ProfileNames.BASIS_ERS, TestUtils.createReturnVerificationReport(), false);
+        if (!chain.isEmpty())
+        {
+            var dateFromTimeStamp = new Date(chain.get(0).getSignDateFromTimeStamp().getTime());
+            dateFromTimeStamp.setTime(dateFromTimeStamp.getTime() + 1);
+            ctx.setSecureData(chain.get(0), dateFromTimeStamp);
+        }
+        ctx.setDeclaredDigestOIDs(Collections.singletonList("2.16.840.1.101.3.4.2.1"));
+        validator.setContext(ctx);
+        var report = validator.validate(ref.newChild("test"), chain);
+        ersFormatOk = ctx.getFormatOk();
+        return report;
+    }
+
+    private ArchiveTimeStampChain emptyChain()
+    {
+        try
+        {
+            return new ArchiveTimeStampChain(new DERSequence());
+        }
+        catch (IOException e)
+        {
+            fail("need empty ATS chain for this test" + e.getMessage());
+            return null;
+        }
+    }
 
 }

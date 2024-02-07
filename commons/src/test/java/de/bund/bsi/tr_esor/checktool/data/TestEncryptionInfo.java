@@ -46,50 +46,49 @@ import org.junit.Test;
 public class TestEncryptionInfo
 {
 
-  /**
-   * Asserts that the {@link EncryptionInfo} can be constructed and converted to an ASN1Primitive.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testCryptoInfo() throws Exception
-  {
-    var encryptionInfo = new EncryptionInfo("1.2.3.4.5", new DERSet().toASN1Primitive().getEncoded());
-    var primitive = encryptionInfo.toASN1Primitive();
-    assertThat(primitive, instanceOf(DERSequence.class));
-    var iterator = ((DERSequence)primitive).iterator();
-    assertThat(iterator.next(), is(new ASN1ObjectIdentifier("1.2.3.4.5")));
-    assertThat(iterator.next(), is(new DEROctetString(new DERSet())));
-    assertFalse(iterator.hasNext());
-  }
-
-  /**
-   * Asserts that the {@link EncryptionInfo} cannot be constructed for invalid parameters but throws a
-   * sensible exception.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void invalidConstruction() throws Exception
-  {
-    assertNoCreation(null);
-    assertNoCreation(ASN1Boolean.getInstance(true));
-    assertNoCreation(new DERSequence());
-    assertNoCreation(new DERSequence(new DERSet()));
-  }
-
-  @SuppressWarnings("unused")
-  private void assertNoCreation(ASN1Object param)
-  {
-    try
+    /**
+     * Asserts that the {@link EncryptionInfo} can be constructed and converted to an ASN1Primitive.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCryptoInfo() throws Exception
     {
-      new EncryptionInfo(param);
-      fail("expected IOException");
+        var encryptionInfo = new EncryptionInfo("1.2.3.4.5", new DERSet().toASN1Primitive().getEncoded());
+        var primitive = encryptionInfo.toASN1Primitive();
+        assertThat(primitive, instanceOf(DERSequence.class));
+        var iterator = ((DERSequence)primitive).iterator();
+        assertThat(iterator.next(), is(new ASN1ObjectIdentifier("1.2.3.4.5")));
+        assertThat(iterator.next(), is(new DEROctetString(new DERSet())));
+        assertFalse(iterator.hasNext());
     }
-    catch (IOException e)
+
+    /**
+     * Asserts that the {@link EncryptionInfo} cannot be constructed for invalid parameters but throws a sensible exception.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void invalidConstruction() throws Exception
     {
-      assertThat(e.getMessage(), is("not valid (EI-1)"));
+        assertNoCreation(null);
+        assertNoCreation(ASN1Boolean.getInstance(true));
+        assertNoCreation(new DERSequence());
+        assertNoCreation(new DERSequence(new DERSet()));
     }
-  }
+
+    @SuppressWarnings("unused")
+    private void assertNoCreation(ASN1Object param)
+    {
+        try
+        {
+            new EncryptionInfo(param);
+            fail("expected IOException");
+        }
+        catch (IOException e)
+        {
+            assertThat(e.getMessage(), is("not valid (EI-1)"));
+        }
+    }
 
 }

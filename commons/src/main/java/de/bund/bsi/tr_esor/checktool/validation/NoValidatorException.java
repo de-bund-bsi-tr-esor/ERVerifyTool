@@ -29,29 +29,28 @@ package de.bund.bsi.tr_esor.checktool.validation;
 public class NoValidatorException extends RuntimeException
 {
 
-  private static final long serialVersionUID = 1534755707417005771L;
+    private static final long serialVersionUID = 1534755707417005771L;
 
-  /**
-   * Creates new instance for problem with configured class.
-   *
-   * @param className of validator
-   * @param cause
-   */
-  public NoValidatorException(String className, ReflectiveOperationException cause)
-  {
-    super("cannot instantiate " + className + " because of " + cause.getMessage(), cause);
-  }
+    /**
+     * Creates new instance for problem with configured class.
+     *
+     * @param className of validator
+     * @param cause
+     */
+    public NoValidatorException(String className, ReflectiveOperationException cause)
+    {
+        super("cannot instantiate " + className + " because of " + cause.getMessage(), cause);
+    }
 
-  /**
-   * Creates new instance for unsupported arguments.
-   *
-   * @param targetClass class name of target class of validator
-   * @param ctx context of validator
-   * @param reportClass class name of report part of validator
-   */
-  public NoValidatorException(String targetClass, ValidationContext<?> ctx, String reportClass)
-  {
-    super("no validator found for " + targetClass + ", context is " + ctx.getClass()
-          + ", required report type " + reportClass);
-  }
+    /**
+     * Creates new instance for unsupported arguments.
+     *
+     * @param targetClass class name of target class of validator
+     * @param ctx context of validator
+     * @param reportClass class name of report part of validator
+     */
+    public NoValidatorException(String targetClass, ValidationContext<?> ctx, String reportClass)
+    {
+        super("no validator found for " + targetClass + ", context is " + ctx.getClass() + ", required report type " + reportClass);
+    }
 }

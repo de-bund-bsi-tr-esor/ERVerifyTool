@@ -49,121 +49,120 @@ import org.junit.Before;
 public class FileOutputChecker
 {
 
-  /**
-   * Output folder, will be provided
-   */
-  protected Path destination;
+    /**
+     * Output folder, will be provided
+     */
+    protected Path destination;
 
-  /**
-   * Creates output directory.
-   */
-  @Before
-  public void setUp() throws Exception
-  {
-    destination = Paths.get(System.getProperty("java.io.tmpdir"), getClass().getSimpleName());
-    cleanUp();
-    assertThat("create destination dir '" + destination + "'", destination.toFile().mkdirs(), equalTo(true));
-  }
-
-  @After
-  public void tearDown() throws Exception
-  {
-    cleanUp();
-  }
-
-  /**
-   * Asserts that a file exists.
-   */
-  protected void assertFileExists(String relativeFilePath)
-  {
-    assertThat(file(relativeFilePath).toFile(), anExistingFile());
-  }
-
-  /**
-   * Asserts that a file not exists.
-   */
-  protected void assertFileNotExists(String relativeFilePath)
-  {
-    assertThat(file(relativeFilePath).toFile(), not(anExistingFile()));
-  }
-
-  /**
-   * Asserts that a folder exists.
-   */
-  protected void assertFolderExists(String relativeFolderPath)
-  {
-    assertThat(file(relativeFolderPath).toFile(), anExistingDirectory());
-  }
-
-  /**
-   * Asserts that the content of a specified file contains given substring.
-   */
-  protected void assertFileContains(String relativeFilePath, String expectedSubstring) throws Exception
-  {
-    assertThat(content(relativeFilePath), containsString(expectedSubstring));
-  }
-
-  /**
-   * Asserts that the content of a specified file contains given bytes.
-   */
-  protected void assertFileContainsBytes(String relativeFilePath, byte[] bytes) throws Exception
-  {
-    Assertions.assertThat(contentBinary(relativeFilePath)).contains(bytes);
-  }
-
-  /**
-   * Asserts that the content of a specified file matches given pattern.
-   */
-  protected void assertFileContainsPattern(String relativeFilePath, String expectedPattern) throws Exception
-  {
-    assertThat(content(relativeFilePath), matchesPattern(expectedPattern));
-  }
-
-  /**
-   * Asserts that the content of a specified file does not contain the given substring.
-   */
-  protected void assertFileNotContains(String relativeFilePath, String unexpectedSubstring) throws Exception
-  {
-    assertThat(content(relativeFilePath), not(containsString(unexpectedSubstring)));
-  }
-
-  /**
-   * Asserts that the content of a specified file does not contain the given pattern.
-   */
-  protected void assertFileNotContainsPattern(String relativeFilePath, String unexpectedPattern)
-    throws Exception
-  {
-    assertThat(content(relativeFilePath), not(matchesPattern(unexpectedPattern)));
-  }
-
-  /**
-   * content of file as String
-   */
-  protected String content(String relativeFilePath) throws Exception
-  {
-    assertFileExists(relativeFilePath);
-    return Files.readAllLines(file(relativeFilePath)).toString();
-  }
-
-  /**
-   * content of file as String
-   */
-  protected byte[] contentBinary(String relativeFilePath) throws Exception
-  {
-    assertFileExists(relativeFilePath);
-    return Files.readAllBytes(file(relativeFilePath));
-  }
-
-  private Path file(String relativeFilePath)
-  {
-    return destination.resolve(relativeFilePath);
-  }
-
-  private void cleanUp() throws IOException
-  {
-    if (destination.toFile().exists())
+    /**
+     * Creates output directory.
+     */
+    @Before
+    public void setUp() throws Exception
     {
-      Files.walk(destination).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        destination = Paths.get(System.getProperty("java.io.tmpdir"), getClass().getSimpleName());
+        cleanUp();
+        assertThat("create destination dir '" + destination + "'", destination.toFile().mkdirs(), equalTo(true));
     }
-  }
+
+    @After
+    public void tearDown() throws Exception
+    {
+        cleanUp();
+    }
+
+    /**
+     * Asserts that a file exists.
+     */
+    protected void assertFileExists(String relativeFilePath)
+    {
+        assertThat(file(relativeFilePath).toFile(), anExistingFile());
+    }
+
+    /**
+     * Asserts that a file not exists.
+     */
+    protected void assertFileNotExists(String relativeFilePath)
+    {
+        assertThat(file(relativeFilePath).toFile(), not(anExistingFile()));
+    }
+
+    /**
+     * Asserts that a folder exists.
+     */
+    protected void assertFolderExists(String relativeFolderPath)
+    {
+        assertThat(file(relativeFolderPath).toFile(), anExistingDirectory());
+    }
+
+    /**
+     * Asserts that the content of a specified file contains given substring.
+     */
+    protected void assertFileContains(String relativeFilePath, String expectedSubstring) throws Exception
+    {
+        assertThat(content(relativeFilePath), containsString(expectedSubstring));
+    }
+
+    /**
+     * Asserts that the content of a specified file contains given bytes.
+     */
+    protected void assertFileContainsBytes(String relativeFilePath, byte[] bytes) throws Exception
+    {
+        Assertions.assertThat(contentBinary(relativeFilePath)).contains(bytes);
+    }
+
+    /**
+     * Asserts that the content of a specified file matches given pattern.
+     */
+    protected void assertFileContainsPattern(String relativeFilePath, String expectedPattern) throws Exception
+    {
+        assertThat(content(relativeFilePath), matchesPattern(expectedPattern));
+    }
+
+    /**
+     * Asserts that the content of a specified file does not contain the given substring.
+     */
+    protected void assertFileNotContains(String relativeFilePath, String unexpectedSubstring) throws Exception
+    {
+        assertThat(content(relativeFilePath), not(containsString(unexpectedSubstring)));
+    }
+
+    /**
+     * Asserts that the content of a specified file does not contain the given pattern.
+     */
+    protected void assertFileNotContainsPattern(String relativeFilePath, String unexpectedPattern) throws Exception
+    {
+        assertThat(content(relativeFilePath), not(matchesPattern(unexpectedPattern)));
+    }
+
+    /**
+     * content of file as String
+     */
+    protected String content(String relativeFilePath) throws Exception
+    {
+        assertFileExists(relativeFilePath);
+        return Files.readAllLines(file(relativeFilePath)).toString();
+    }
+
+    /**
+     * content of file as String
+     */
+    protected byte[] contentBinary(String relativeFilePath) throws Exception
+    {
+        assertFileExists(relativeFilePath);
+        return Files.readAllBytes(file(relativeFilePath));
+    }
+
+    private Path file(String relativeFilePath)
+    {
+        return destination.resolve(relativeFilePath);
+    }
+
+    private void cleanUp() throws IOException
+    {
+        if (destination.toFile().exists())
+        {
+            Files.walk(destination).sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+        }
+    }
 }

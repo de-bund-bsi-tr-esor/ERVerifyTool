@@ -36,86 +36,84 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public final class VerificationResultCreator
 {
 
-  private VerificationResultCreator()
-  {
-    // static only
-  }
-
-  /**
-   * Returns an OK result.
-   */
-  public static VerificationResultType createOK()
-  {
-    return create(ValidationResultMajor.VALID, null, null);
-  }
-
-  /**
-   * Returns a result with specified codes and message.
-   *
-   * @param major
-   * @param minor
-   * @param message
-   */
-  public static VerificationResultType create(ValidationResultMajor major, String minor, String message)
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    return getVerificationResultType(major, minor, message, result);
-  }
-
-  private static VerificationResultType getVerificationResultType(ValidationResultMajor major,
-                                                                  String minor,
-                                                                  String message,
-                                                                  VerificationResultType result)
-  {
-    result.setResultMajor(major.toString());
-    result.setResultMinor(minor);
-    if (message != null)
+    private VerificationResultCreator()
     {
-      var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
-      is.setLang("en");
-      is.setValue(message);
-      result.setResultMessage(is);
+        // static only
     }
-    return result;
-  }
 
-  /**
-   * Returns a result with specified codes and message.
-   *
-   * @param major
-   * @param minor
-   * @param message
-   */
-  public static Result createDssResult(OasisDssResultMajor major, String minor, String message)
-  {
-    var result = XmlHelper.FACTORY_DSS.createResult();
-    result.setResultMajor(major.toString());
-    result.setResultMinor(minor);
-    if (message != null)
+    /**
+     * Returns an OK result.
+     */
+    public static VerificationResultType createOK()
     {
-      var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
-      is.setLang("en");
-      is.setValue(message);
-      result.setResultMessage(is);
+        return create(ValidationResultMajor.VALID, null, null);
     }
-    return result;
-  }
 
-  /**
-   * Returns a result with specified codes and message.
-   */
-  public static Result createECardResult(String major, String minor, String message)
-  {
-    var result = XmlHelper.FACTORY_DSS.createResult();
-    result.setResultMajor(major);
-    result.setResultMinor(minor);
-    if (message != null)
+    /**
+     * Returns a result with specified codes and message.
+     *
+     * @param major
+     * @param minor
+     * @param message
+     */
+    public static VerificationResultType create(ValidationResultMajor major, String minor, String message)
     {
-      var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
-      is.setLang("en");
-      is.setValue(message);
-      result.setResultMessage(is);
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        return getVerificationResultType(major, minor, message, result);
     }
-    return result;
-  }
+
+    private static VerificationResultType getVerificationResultType(ValidationResultMajor major, String minor, String message,
+        VerificationResultType result)
+    {
+        result.setResultMajor(major.toString());
+        result.setResultMinor(minor);
+        if (message != null)
+        {
+            var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
+            is.setLang("en");
+            is.setValue(message);
+            result.setResultMessage(is);
+        }
+        return result;
+    }
+
+    /**
+     * Returns a result with specified codes and message.
+     *
+     * @param major
+     * @param minor
+     * @param message
+     */
+    public static Result createDssResult(OasisDssResultMajor major, String minor, String message)
+    {
+        var result = XmlHelper.FACTORY_DSS.createResult();
+        result.setResultMajor(major.toString());
+        result.setResultMinor(minor);
+        if (message != null)
+        {
+            var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
+            is.setLang("en");
+            is.setValue(message);
+            result.setResultMessage(is);
+        }
+        return result;
+    }
+
+    /**
+     * Returns a result with specified codes and message.
+     */
+    public static Result createECardResult(String major, String minor, String message)
+    {
+        var result = XmlHelper.FACTORY_DSS.createResult();
+        result.setResultMajor(major);
+        result.setResultMinor(minor);
+        if (message != null)
+        {
+            var is = XmlHelper.FACTORY_DSS.createInternationalStringType();
+            is.setLang("en");
+            is.setValue(message);
+            result.setResultMessage(is);
+        }
+        return result;
+    }
 }

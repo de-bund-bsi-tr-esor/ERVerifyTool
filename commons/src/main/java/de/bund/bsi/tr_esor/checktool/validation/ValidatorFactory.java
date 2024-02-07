@@ -79,179 +79,159 @@ import de.bund.bsi.tr_esor.checktool.validation.signatures.InlineSignatureValida
 public final class ValidatorFactory
 {
 
-  private static final ValidatorRepository BUILT_IN = new ValidatorRepository();
+    private static final ValidatorRepository BUILT_IN = new ValidatorRepository();
 
-  static
-  {
-    BUILT_IN.addGeneral(AlgorithmUsageValidator::new,
-                        AlgorithmUsage.class,
-                        ValidationContext.class,
-                        AlgorithmValidityReport.class);
-    BUILT_IN.addGeneral(EvidenceRecordValidator::new,
-                        EvidenceRecord.class,
-                        ErValidationContext.class,
-                        EvidenceRecordReport.class);
-    BUILT_IN.addGeneral(ArchiveTimeStampSequenceValidator::new,
-                        ArchiveTimeStampSequence.class,
-                        ErValidationContext.class,
-                        ATSSequenceReport.class);
-    BUILT_IN.addGeneral(ArchiveTimeStampChainValidator::new,
-                        ArchiveTimeStampChain.class,
-                        ErValidationContext.class,
-                        ATSChainReport.class);
-    BUILT_IN.addGeneral(ArchiveTimeStampValidator::new,
-                        ArchiveTimeStamp.class,
-                        ErValidationContext.class,
-                        ArchiveTimeStampReport.class);
-    BUILT_IN.addGeneral(DummyTimeStampValidator::new,
-                        TimeStampToken.class,
-                        ValidationContext.class,
-                        TimeStampReport.class);
-    // check for alternatives to ECard
-    BUILT_IN.addGeneral(ECardInlineSignatureValidator::new,
-                        InlineSignedData.class,
-                        InlineSignatureValidationContext.class,
-                        SignatureReportPart.class);
-    BUILT_IN.addGeneral(ECardDetachedSignatureValidator::new,
-                        SignatureObject.class,
-                        DetachedSignatureValidationContext.class,
-                        SignatureReportPart.class);
-    BUILT_IN.addGeneral(NoVerificationValidator::new,
-                        Object.class,
-                        NoVerificationContext.class,
-                        ReportPart.class);
+    private static final ValidatorFactory INSTANCE = new ValidatorFactory();
 
-    /* The RFC4998 profile contains the default validators, so no others are configured here */
-    BUILT_IN.addProfile(ProfileNames.RFC4998);
-
-    /* The TR-ESOR profile requires an online check for timestamps to be done. */
-    BUILT_IN.addProfile(ProfileNames.TR_ESOR);
-    BUILT_IN.addToProfile(ECardTimeStampValidator::new,
-                          TimeStampToken.class,
-                          ValidationContext.class,
-                          TimeStampReport.class,
-                          ProfileNames.TR_ESOR);
-
-    BUILT_IN.addToProfile(BasisErsAlgorithmUsageValidator::new,
-                          AlgorithmUsage.class,
-                          ValidationContext.class,
-                          AlgorithmValidityReport.class,
-                          ProfileNames.BASIS_ERS);
-    BUILT_IN.addToProfile(BasisErsArchiveTimeStampValidator::new,
-                          ArchiveTimeStamp.class,
-                          ErValidationContext.class,
-                          ArchiveTimeStampReport.class,
-                          ProfileNames.BASIS_ERS);
-    BUILT_IN.addToProfile(BasisErsArchiveTimeStampSequenceValidator::new,
-                          ArchiveTimeStampSequence.class,
-                          ErValidationContext.class,
-                          ATSSequenceReport.class,
-                          ProfileNames.BASIS_ERS);
-    BUILT_IN.addToProfile(BasisErsArchiveTimeStampChainValidator::new,
-                          ArchiveTimeStampChain.class,
-                          ErValidationContext.class,
-                          ATSChainReport.class,
-                          ProfileNames.BASIS_ERS);
-    BUILT_IN.addToProfile(BasisErsEvidenceRecordValidator::new,
-                          EvidenceRecord.class,
-                          ErValidationContext.class,
-                          EvidenceRecordReport.class,
-                          ProfileNames.BASIS_ERS);
-    BUILT_IN.addToProfile(BasisErsDummyTimeStampValidator::new,
-                          TimeStampToken.class,
-                          ValidationContext.class,
-                          TimeStampReport.class,
-                          ProfileNames.BASIS_ERS);
-  }
-
-  private static final ValidatorFactory INSTANCE = new ValidatorFactory();
-
-  private ValidatorFactory()
-  {
-    // nobody else
-  }
-
-  /**
-   * Singleton getter.
-   */
-  public static ValidatorFactory getInstance()
-  {
-    return INSTANCE;
-  }
-
-  /**
-   * Returns a validator to check an object of given type and returning the required report type. If a
-   * validator is configured, it must be returned. Otherwise, a default instance will be returned. The
-   * eventually chosen validator may support more general parameter classes but the caller gets what he or she
-   * asked for.
-   *
-   * @param targetClass
-   * @param reportClass
-   * @param context
-   */
-  @SuppressWarnings({"rawtypes", "unchecked"})
-  public <T, C extends ValidationContext, R extends ReportPart> Validator<T, C, R> getValidator(Class<T> targetClass,
-                                                                                                Class<R> reportClass,
-                                                                                                C context)
-  {
-
-    var profileName = context.getProfileName();
-    var sup = Optional.ofNullable(Configurator.getInstance().getValidators())
-                      .map(r -> r.get(targetClass, context.getClass(), reportClass, profileName))
-                      .orElse(BUILT_IN.get(targetClass, context.getClass(), reportClass, profileName));
-    var result = (Validator<T, C, R>)Optional.ofNullable(sup)
-                                             .map(Supplier::get)
-                                             .orElseThrow(() -> new NoValidatorException(targetClass.getName(),
-                                                                                         context,
-                                                                                         reportClass.getName()));
-    result.setContext(context);
-    return result;
-  }
-
-  /**
-   * Returns the configured instance of {@link HashCreator}.
-   *
-   * @throws ReflectiveOperationException
-   */
-  public HashCreator getHashCreator() throws ReflectiveOperationException
-  {
-    var config = Configurator.getInstance();
-    var cnf = config.getHashCreator();
-    if (cnf == null)
+    static
     {
-      return new LocalHashCreator();
-    }
-    return (HashCreator)createInstance(cnf, Class.forName(cnf.getClassName()));
-  }
+        BUILT_IN.addGeneral(AlgorithmUsageValidator::new, AlgorithmUsage.class, ValidationContext.class, AlgorithmValidityReport.class);
+        BUILT_IN.addGeneral(EvidenceRecordValidator::new, EvidenceRecord.class, ErValidationContext.class, EvidenceRecordReport.class);
+        BUILT_IN.addGeneral(ArchiveTimeStampSequenceValidator::new,
+            ArchiveTimeStampSequence.class,
+            ErValidationContext.class,
+            ATSSequenceReport.class);
+        BUILT_IN.addGeneral(ArchiveTimeStampChainValidator::new,
+            ArchiveTimeStampChain.class,
+            ErValidationContext.class,
+            ATSChainReport.class);
+        BUILT_IN.addGeneral(ArchiveTimeStampValidator::new,
+            ArchiveTimeStamp.class,
+            ErValidationContext.class,
+            ArchiveTimeStampReport.class);
+        BUILT_IN.addGeneral(DummyTimeStampValidator::new, TimeStampToken.class, ValidationContext.class, TimeStampReport.class);
+        // check for alternatives to ECard
+        BUILT_IN.addGeneral(ECardInlineSignatureValidator::new,
+            InlineSignedData.class,
+            InlineSignatureValidationContext.class,
+            SignatureReportPart.class);
+        BUILT_IN.addGeneral(ECardDetachedSignatureValidator::new,
+            SignatureObject.class,
+            DetachedSignatureValidationContext.class,
+            SignatureReportPart.class);
+        BUILT_IN.addGeneral(NoVerificationValidator::new, Object.class, NoVerificationContext.class, ReportPart.class);
 
-  /**
-   * Returns <code>true</code> if a built-in or configured profile with given name is supported.
-   *
-   * @param profileName
-   */
-  public boolean isProfileSupported(String profileName)
-  {
-    return BUILT_IN.containsProfile(profileName)
-           || Configurator.getInstance().isProfileSupported(profileName);
-  }
+        /* The RFC4998 profile contains the default validators, so no others are configured here */
+        BUILT_IN.addProfile(ProfileNames.RFC4998);
 
-  private static <T> T createInstance(ConfigurableObjectType cnf, Class<T> clazz)
-    throws ReflectiveOperationException
-  {
-    var params = cnf.getParameter()
-                    .stream()
-                    .collect(Collectors.toMap(ParameterType::getName, ParameterType::getValue));
-    try
-    {
-      return clazz.getConstructor(Map.class).newInstance(params);
+        /* The TR-ESOR profile requires an online check for timestamps to be done. */
+        BUILT_IN.addProfile(ProfileNames.TR_ESOR);
+        BUILT_IN.addToProfile(ECardTimeStampValidator::new,
+            TimeStampToken.class,
+            ValidationContext.class,
+            TimeStampReport.class,
+            ProfileNames.TR_ESOR);
+
+        BUILT_IN.addToProfile(BasisErsAlgorithmUsageValidator::new,
+            AlgorithmUsage.class,
+            ValidationContext.class,
+            AlgorithmValidityReport.class,
+            ProfileNames.BASIS_ERS);
+        BUILT_IN.addToProfile(BasisErsArchiveTimeStampValidator::new,
+            ArchiveTimeStamp.class,
+            ErValidationContext.class,
+            ArchiveTimeStampReport.class,
+            ProfileNames.BASIS_ERS);
+        BUILT_IN.addToProfile(BasisErsArchiveTimeStampSequenceValidator::new,
+            ArchiveTimeStampSequence.class,
+            ErValidationContext.class,
+            ATSSequenceReport.class,
+            ProfileNames.BASIS_ERS);
+        BUILT_IN.addToProfile(BasisErsArchiveTimeStampChainValidator::new,
+            ArchiveTimeStampChain.class,
+            ErValidationContext.class,
+            ATSChainReport.class,
+            ProfileNames.BASIS_ERS);
+        BUILT_IN.addToProfile(BasisErsEvidenceRecordValidator::new,
+            EvidenceRecord.class,
+            ErValidationContext.class,
+            EvidenceRecordReport.class,
+            ProfileNames.BASIS_ERS);
+        BUILT_IN.addToProfile(BasisErsDummyTimeStampValidator::new,
+            TimeStampToken.class,
+            ValidationContext.class,
+            TimeStampReport.class,
+            ProfileNames.BASIS_ERS);
     }
-    catch (NoSuchMethodException e)
+
+    private ValidatorFactory()
     {
-      if (!params.isEmpty())
-      {
-        throw e;
-      }
-      return clazz.getDeclaredConstructor().newInstance();
+        // nobody else
     }
-  }
+
+    /**
+     * Singleton getter.
+     */
+    public static ValidatorFactory getInstance()
+    {
+        return INSTANCE;
+    }
+
+    /**
+     * Returns a validator to check an object of given type and returning the required report type. If a validator is configured, it must be
+     * returned. Otherwise, a default instance will be returned. The eventually chosen validator may support more general parameter classes
+     * but the caller gets what he or she asked for.
+     *
+     * @param targetClass
+     * @param reportClass
+     * @param context
+     */
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public <T, C extends ValidationContext, R extends ReportPart> Validator<T, C, R> getValidator(Class<T> targetClass,
+        Class<R> reportClass, C context)
+    {
+
+        var profileName = context.getProfileName();
+        var sup = Optional.ofNullable(Configurator.getInstance().getValidators())
+            .map(r -> r.get(targetClass, context.getClass(), reportClass, profileName))
+            .orElse(BUILT_IN.get(targetClass, context.getClass(), reportClass, profileName));
+        var result = (Validator<T, C, R>)Optional.ofNullable(sup)
+            .map(Supplier::get)
+            .orElseThrow(() -> new NoValidatorException(targetClass.getName(), context, reportClass.getName()));
+        result.setContext(context);
+        return result;
+    }
+
+    /**
+     * Returns the configured instance of {@link HashCreator}.
+     *
+     * @throws ReflectiveOperationException
+     */
+    public HashCreator getHashCreator() throws ReflectiveOperationException
+    {
+        var config = Configurator.getInstance();
+        var cnf = config.getHashCreator();
+        if (cnf == null)
+        {
+            return new LocalHashCreator();
+        }
+        return (HashCreator)createInstance(cnf, Class.forName(cnf.getClassName()));
+    }
+
+    /**
+     * Returns <code>true</code> if a built-in or configured profile with given name is supported.
+     *
+     * @param profileName
+     */
+    public boolean isProfileSupported(String profileName)
+    {
+        return BUILT_IN.containsProfile(profileName) || Configurator.getInstance().isProfileSupported(profileName);
+    }
+
+    private static <T> T createInstance(ConfigurableObjectType cnf, Class<T> clazz) throws ReflectiveOperationException
+    {
+        var params = cnf.getParameter().stream().collect(Collectors.toMap(ParameterType::getName, ParameterType::getValue));
+        try
+        {
+            return clazz.getConstructor(Map.class).newInstance(params);
+        }
+        catch (NoSuchMethodException e)
+        {
+            if (!params.isEmpty())
+            {
+                throw e;
+            }
+            return clazz.getDeclaredConstructor().newInstance();
+        }
+    }
 }

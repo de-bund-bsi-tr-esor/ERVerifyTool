@@ -26,150 +26,149 @@ import java.util.Objects;
 
 
 /**
- * Describes which object within an object tree is validated. Contains at least a human readable "field name".
- * May contain further information which is more suitable for instance in an XML verification report.
+ * Describes which object within an object tree is validated. Contains at least a human readable "field name". May contain further
+ * information which is more suitable for instance in an XML verification report.
  *
  * @author HMA, TT
  */
 public class Reference
 {
 
-  private final Reference parent;
+    private final Reference parent;
 
-  private final String name;
+    private final String name;
 
-  private byte[] signatureValue;
+    private byte[] signatureValue;
 
-  private String xPath;
+    private String xPath;
 
-  private Reference(Reference parent, String name)
-  {
-    this.parent = parent;
-    this.name = name;
-  }
-
-  /**
-   * Creates a new top-level reference.
-   *
-   * @param name
-   */
-  public Reference(String name)
-  {
-    this(null, name);
-  }
-
-  /**
-   * Creates new sub-reference.
-   *
-   * @param childName describes position within the parent
-   */
-  public Reference newChild(String childName)
-  {
-    return new Reference(this, childName);
-  }
-
-  /**
-   * Returns a signature value identifying the referenced object (if known).
-   */
-  public byte[] getSignatureValue()
-  {
-    return signatureValue == null ? null : Arrays.copyOf(signatureValue, signatureValue.length);
-  }
-
-  /**
-   * Specifies a signature value of the addressed object (in case it is some kind of signature).
-   */
-  public void setSignatureValue(byte[] signatureValue)
-  {
-    this.signatureValue = Arrays.copyOf(signatureValue, signatureValue.length);
-  }
-
-  /**
-   * Returns the xPath of the referenced object (optional).
-   */
-  public String getxPath()
-  {
-    return xPath;
-  }
-
-  /**
-   * @see #getxPath()
-   */
-  public void setxPath(String xPath)
-  {
-    this.xPath = xPath;
-  }
-
-  /**
-   * Returns <code>true</code> if the given reference belongs to the sub tree starting at this reference.
-   *
-   * @param other
-   */
-  public boolean isAncestorOf(Reference other)
-  {
-    var intermediate = other;
-    while (true)
+    private Reference(Reference parent, String name)
     {
-      if (intermediate == null)
-      {
-        return false;
-      }
-      if (intermediate.equals(this))
-      {
-        return true;
-      }
-      intermediate = intermediate.parent;
+        this.parent = parent;
+        this.name = name;
     }
-  }
 
-  /**
-   * Returns a string describing where the other object is relative to this reference.
-   *
-   * @param anchestor
-   */
-  public String relativize(Reference anchestor)
-  {
-    var result = toString();
-    if (anchestor.isAncestorOf(this))
+    /**
+     * Creates a new top-level reference.
+     *
+     * @param name
+     */
+    public Reference(String name)
     {
-      var other = anchestor.toString();
-      return other.equals(result) ? "" : result.substring(other.length() + 1);
+        this(null, name);
     }
-    return result;
-  }
 
-  /**
-   * Returns the full name starting at top-level.
-   */
-  @Override
-  public String toString()
-  {
-    return parent == null ? name : parent + "/" + name;
-  }
-
-  @Override
-  public int hashCode()
-  {
-    return ((name == null) ? 0 : name.hashCode()) + 31 * ((parent == null) ? 0 : parent.hashCode());
-  }
-
-  /**
-   * We consider the reference as uniquely defined by its name and parent and do not consider additional
-   * optional attributes here.
-   */
-  @Override
-  public boolean equals(Object obj)
-  {
-    if (this == obj)
+    /**
+     * Creates new sub-reference.
+     *
+     * @param childName describes position within the parent
+     */
+    public Reference newChild(String childName)
     {
-      return true;
+        return new Reference(this, childName);
     }
-    if (obj == null || getClass() != obj.getClass())
+
+    /**
+     * Returns a signature value identifying the referenced object (if known).
+     */
+    public byte[] getSignatureValue()
     {
-      return false;
+        return signatureValue == null ? null : Arrays.copyOf(signatureValue, signatureValue.length);
     }
-    var other = (Reference)obj;
-    return Objects.equals(name, other.name) && Objects.equals(parent, other.parent);
-  }
+
+    /**
+     * Specifies a signature value of the addressed object (in case it is some kind of signature).
+     */
+    public void setSignatureValue(byte[] signatureValue)
+    {
+        this.signatureValue = Arrays.copyOf(signatureValue, signatureValue.length);
+    }
+
+    /**
+     * Returns the xPath of the referenced object (optional).
+     */
+    public String getxPath()
+    {
+        return xPath;
+    }
+
+    /**
+     * @see #getxPath()
+     */
+    public void setxPath(String xPath)
+    {
+        this.xPath = xPath;
+    }
+
+    /**
+     * Returns <code>true</code> if the given reference belongs to the sub tree starting at this reference.
+     *
+     * @param other
+     */
+    public boolean isAncestorOf(Reference other)
+    {
+        var intermediate = other;
+        while (true)
+        {
+            if (intermediate == null)
+            {
+                return false;
+            }
+            if (intermediate.equals(this))
+            {
+                return true;
+            }
+            intermediate = intermediate.parent;
+        }
+    }
+
+    /**
+     * Returns a string describing where the other object is relative to this reference.
+     *
+     * @param anchestor
+     */
+    public String relativize(Reference anchestor)
+    {
+        var result = toString();
+        if (anchestor.isAncestorOf(this))
+        {
+            var other = anchestor.toString();
+            return other.equals(result) ? "" : result.substring(other.length() + 1);
+        }
+        return result;
+    }
+
+    /**
+     * Returns the full name starting at top-level.
+     */
+    @Override
+    public String toString()
+    {
+        return parent == null ? name : parent + "/" + name;
+    }
+
+    @Override
+    public int hashCode()
+    {
+        return ((name == null) ? 0 : name.hashCode()) + 31 * ((parent == null) ? 0 : parent.hashCode());
+    }
+
+    /**
+     * We consider the reference as uniquely defined by its name and parent and do not consider additional optional attributes here.
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (this == obj)
+        {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass())
+        {
+            return false;
+        }
+        var other = (Reference)obj;
+        return Objects.equals(name, other.name) && Objects.equals(parent, other.parent);
+    }
 
 }

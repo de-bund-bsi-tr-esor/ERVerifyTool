@@ -30,37 +30,37 @@ import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
 
 
 /**
- * Basis-ERS-Profil requirements for the time stamp inside an ArchiveTimeStamp. This performs an online
- * validation, see {@link ECardTimeStampValidator} for further details.
+ * Basis-ERS-Profil requirements for the time stamp inside an ArchiveTimeStamp. This performs an online validation, see
+ * {@link ECardTimeStampValidator} for further details.
  *
  * @author MO
  */
 public class BasisErsECardTimeStampValidator extends ECardTimeStampValidator
 {
 
-  /**
-   * @see ECardTimeStampValidator#ECardTimeStampValidator()
-   */
-  public BasisErsECardTimeStampValidator()
-  {
-    super();
-  }
+    /**
+     * @see ECardTimeStampValidator#ECardTimeStampValidator()
+     */
+    public BasisErsECardTimeStampValidator()
+    {
+        super();
+    }
 
-  /**
-   * @see ECardTimeStampValidator#ECardTimeStampValidator(ECard_Service)
-   */
-  public BasisErsECardTimeStampValidator(ECard_Service eCardWebService)
-  {
-    super(eCardWebService);
-  }
+    /**
+     * @see ECardTimeStampValidator#ECardTimeStampValidator(ECard_Service)
+     */
+    public BasisErsECardTimeStampValidator(ECard_Service eCardWebService)
+    {
+        super(eCardWebService);
+    }
 
 
-  @Override
-  protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
-  {
-    super.checkUnsignedAttributes(ts, formatOk);
-    var contentInfoChecker = new ContentInfoChecker(formatOk);
-    contentInfoChecker.checkContentInfo(formatOk.getReference(), ts.toCMSSignedData().toASN1Structure());
+    @Override
+    protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
+    {
+        super.checkUnsignedAttributes(ts, formatOk);
+        var contentInfoChecker = new ContentInfoChecker(formatOk);
+        contentInfoChecker.checkContentInfo(formatOk.getReference(), ts.toCMSSignedData().toASN1Structure());
 
-  }
+    }
 }

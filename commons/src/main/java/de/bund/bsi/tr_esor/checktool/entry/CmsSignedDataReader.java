@@ -48,131 +48,128 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class CmsSignedDataReader
 {
 
-  /** for encapsulated */
-  private static final ASN1ObjectIdentifier OID_INTERNAL = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.2.49");
+    /** for detached */
+    public static final ASN1ObjectIdentifier OID_EXTERNAL = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.2.50");
 
-  /** for detached */
-  public static final ASN1ObjectIdentifier OID_EXTERNAL = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.2.50");
+    /** for encapsulated */
+    private static final ASN1ObjectIdentifier OID_INTERNAL = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.2.49");
 
-  private final CMSSignedData cms;
+    private final CMSSignedData cms;
 
-  private final Reference ref;
+    private final Reference ref;
 
-  private final ASN1ObjectIdentifier oid;
+    private final ASN1ObjectIdentifier oid;
 
-  private final Map<Reference, SignerId> signerIdByReference = new HashMap<>();
+    private final Map<Reference, SignerId> signerIdByReference = new HashMap<>();
 
-  private final Map<Reference, Integer> posByReference = new HashMap<>();
+    private final Map<Reference, Integer> posByReference = new HashMap<>();
 
-  /**
-   * Creates a new instance.
-   *
-   * @param data
-   * @param ref
-   */
-  public CmsSignedDataReader(CMSSignedData data, Reference ref)
-  {
-    this.cms = data;
-    this.ref = ref;
-    oid = isDetached() ? OID_EXTERNAL : OID_INTERNAL;
-  }
-
-  /**
-   * Returns all embedded evidence records.
-   *
-   * @throws IOException
-   */
-  public Map<Reference, EvidenceRecord> getEmbeddedErs() throws IOException
-  {
-    Map<Reference, EvidenceRecord> result = new HashMap<>();
-
-    for ( var signerInformation : cms.getSignerInfos() )
+    /**
+     * Creates a new instance.
+     *
+     * @param data
+     * @param ref
+     */
+    public CmsSignedDataReader(CMSSignedData data, Reference ref)
     {
-      var unsignedAttributes = signerInformation.getUnsignedAttributes();
-      if (unsignedAttributes == null)
-      {
-        continue;
-      }
-      var all = unsignedAttributes.getAll(oid);
-      for ( var i = 0 ; i < all.size() ; i++ )
-      {
-        var attribute = (Attribute)all.get(i);
-        var encodables = attribute.getAttributeValues();
-        var asn1Encodable = encodables[0];
-        var encodedER = asn1Encodable.toASN1Primitive().getEncoded();
-        var erRef = ref.newChild(ASN1Utils.sidToString(signerInformation.getSID()))
-                       .newChild(Integer.toString(i));
-
-        result.put(erRef, new ASN1EvidenceRecordParser().parse(encodedER));
-        signerIdByReference.put(erRef, signerInformation.getSID());
-        posByReference.put(erRef, Integer.valueOf(i));
-      }
+        this.cms = data;
+        this.ref = ref;
+        oid = isDetached() ? OID_EXTERNAL : OID_INTERNAL;
     }
-    return result;
-  }
 
-  /**
-   * Returns the content info minus the referenced evidence records and all subsequence evidence records for
-   * the same signer.
-   *
-   * @param erRef
-   * @throws IOException
-   */
-  public byte[] getContentInfoProtectedByEr(Reference erRef) throws IOException
-  {
-    var sid = signerIdByReference.get(erRef);
-    if (sid == null)
+    /**
+     * Returns all embedded evidence records.
+     *
+     * @throws IOException
+     */
+    public Map<Reference, EvidenceRecord> getEmbeddedErs() throws IOException
     {
-      return cms.getEncoded();
-    }
-    return cmsWithout(cms, sid, oid, posByReference.get(erRef).intValue());
-  }
+        Map<Reference, EvidenceRecord> result = new HashMap<>();
 
-  /**
-   * Returns <code>true</code> if signature is detached.
-   */
-  public final boolean isDetached()
-  {
-    return cms.isDetachedSignature();
-  }
-
-  /**
-   * Returns a CMS signed data which is equal to the given one except that the i-th and all further values of
-   * the specified unsigned attribute in the specified signer are removed.
-   *
-   * @param cms
-   * @param sid
-   * @param oid
-   * @param i
-   * @throws IOException
-   */
-  @SuppressWarnings("PMD.NullAssignment")
-  private static byte[] cmsWithout(CMSSignedData cms, SignerId sid, ASN1ObjectIdentifier oid, int i)
-    throws IOException
-  {
-    List<SignerInformation> si = new ArrayList<>();
-    for ( var signerInformation : cms.getSignerInfos() )
-    {
-      if (signerInformation.getSID().equals(sid))
-      {
-        var at = signerInformation.getUnsignedAttributes();
-        var all = at.getAll(oid);
-        at = at.remove(oid);
-        for ( var k = 0 ; k < i ; k++ )
+        for (var signerInformation : cms.getSignerInfos())
         {
-          at = at.add(oid, all.get(k));
+            var unsignedAttributes = signerInformation.getUnsignedAttributes();
+            if (unsignedAttributes == null)
+            {
+                continue;
+            }
+            var all = unsignedAttributes.getAll(oid);
+            for (var i = 0; i < all.size(); i++)
+            {
+                var attribute = (Attribute)all.get(i);
+                var encodables = attribute.getAttributeValues();
+                var asn1Encodable = encodables[0];
+                var encodedER = asn1Encodable.toASN1Primitive().getEncoded();
+                var erRef = ref.newChild(ASN1Utils.sidToString(signerInformation.getSID())).newChild(Integer.toString(i));
+
+                result.put(erRef, new ASN1EvidenceRecordParser().parse(encodedER));
+                signerIdByReference.put(erRef, signerInformation.getSID());
+                posByReference.put(erRef, Integer.valueOf(i));
+            }
         }
-        if (at.size() == 0) // cannot happen in a correct CAdES-E-ERS structure
-        {
-          at = null;
-        }
-        si.add(SignerInformation.replaceUnsignedAttributes(signerInformation, at));
-      }
-      else
-      {
-        si.add(signerInformation);
-      }
+        return result;
     }
-    return CMSSignedData.replaceSigners(cms, new SignerInformationStore(si)).getEncoded();
-  }
+
+    /**
+     * Returns the content info minus the referenced evidence records and all subsequence evidence records for the same signer.
+     *
+     * @param erRef
+     * @throws IOException
+     */
+    public byte[] getContentInfoProtectedByEr(Reference erRef) throws IOException
+    {
+        var sid = signerIdByReference.get(erRef);
+        if (sid == null)
+        {
+            return cms.getEncoded();
+        }
+        return cmsWithout(cms, sid, oid, posByReference.get(erRef).intValue());
+    }
+
+    /**
+     * Returns <code>true</code> if signature is detached.
+     */
+    public final boolean isDetached()
+    {
+        return cms.isDetachedSignature();
+    }
+
+    /**
+     * Returns a CMS signed data which is equal to the given one except that the i-th and all further values of the specified unsigned
+     * attribute in the specified signer are removed.
+     *
+     * @param cms
+     * @param sid
+     * @param oid
+     * @param i
+     * @throws IOException
+     */
+    @SuppressWarnings("PMD.NullAssignment")
+    private static byte[] cmsWithout(CMSSignedData cms, SignerId sid, ASN1ObjectIdentifier oid, int i) throws IOException
+    {
+        List<SignerInformation> si = new ArrayList<>();
+        for (var signerInformation : cms.getSignerInfos())
+        {
+            if (signerInformation.getSID().equals(sid))
+            {
+                var at = signerInformation.getUnsignedAttributes();
+                var all = at.getAll(oid);
+                at = at.remove(oid);
+                for (var k = 0; k < i; k++)
+                {
+                    at = at.add(oid, all.get(k));
+                }
+                if (at.size() == 0) // cannot happen in a correct CAdES-E-ERS structure
+                {
+                    at = null;
+                }
+                si.add(SignerInformation.replaceUnsignedAttributes(signerInformation, at));
+            }
+            else
+            {
+                si.add(signerInformation);
+            }
+        }
+        return CMSSignedData.replaceSigners(cms, new SignerInformationStore(si)).getEncoded();
+    }
 }

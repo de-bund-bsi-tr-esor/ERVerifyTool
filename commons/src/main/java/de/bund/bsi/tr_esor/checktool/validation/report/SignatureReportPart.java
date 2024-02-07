@@ -25,90 +25,87 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import jakarta.xml.bind.JAXBElement;
 import oasis.names.tc.dss._1_0.core.schema.AnyType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.DetailedSignatureReportType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
-import jakarta.xml.bind.JAXBElement;
-
 
 /**
- * Report wrapper to allow later integration into the ERVerifyTool. No functionality except trivial stuff
- * implemented yet.
+ * Report wrapper to allow later integration into the ERVerifyTool. No functionality except trivial stuff implemented yet.
  *
  * @author TT, WS
  */
 public class SignatureReportPart extends ReportPart
 {
 
-  private VerificationReportType vr;
+    private VerificationReportType vr;
 
-  /**
-   * Creates instance.
-   */
-  public SignatureReportPart(Reference reference)
-  {
-    super(reference);
-  }
-
-  /**
-   * Returns the wrapped report.
-   */
-  public VerificationReportType getVr()
-  {
-    return vr;
-  }
-
-  /**
-   * Sets the wrapped report.
-   */
-  public void setVr(VerificationReportType vr)
-  {
-    this.vr = vr;
-  }
-
-  /**
-   * Collects all {@link DetailedSignatureReportType} and {@link TimeStampValidityType} from all
-   * IndividualReports contained in provided VerificationReportType.
-   *
-   * @return Map with {@link DetailedSignatureReportType} and {@link TimeStampValidityType} indexed by
-   *         signature value
-   */
-  public Map<byte[], Object> findSignatureReportDetails()
-  {
-    var result = new LinkedHashMap<byte[], Object>();
-    for ( var individualReportType : vr.getIndividualReport() )
+    /**
+     * Creates instance.
+     */
+    public SignatureReportPart(Reference reference)
     {
-      var signatureValue = individualReportType.getSignedObjectIdentifier().getSignatureValue().getValue();
-      for ( var any : individualReportType.getDetails().getAny() )
-      {
-        if (any instanceof JAXBElement<?>)
-        {
-          var jaxbVal = ((JAXBElement<?>)any).getValue();
-          if (jaxbVal instanceof DetailedSignatureReportType || jaxbVal instanceof TimeStampValidityType)
-          {
-            result.put(signatureValue, jaxbVal);
-          }
-        }
-      }
+        super(reference);
     }
-    return result;
-  }
 
-  @Override
-  public boolean isDetailsPresent()
-  {
-    return Optional.ofNullable(vr)
-                   .map(VerificationReportType::getIndividualReport)
-                   .filter(l -> !l.isEmpty())
-                   .map(l -> l.get(0))
-                   .map(IndividualReportType::getDetails)
-                   .map(AnyType::getAny)
-                   .filter(l -> !l.isEmpty())
-                   .map(l -> l.get(0))
-                   .map(x -> ((JAXBElement<?>)x).getValue())
-                   .isPresent();
-  }
+    /**
+     * Returns the wrapped report.
+     */
+    public VerificationReportType getVr()
+    {
+        return vr;
+    }
+
+    /**
+     * Sets the wrapped report.
+     */
+    public void setVr(VerificationReportType vr)
+    {
+        this.vr = vr;
+    }
+
+    /**
+     * Collects all {@link DetailedSignatureReportType} and {@link TimeStampValidityType} from all IndividualReports contained in provided
+     * VerificationReportType.
+     *
+     * @return Map with {@link DetailedSignatureReportType} and {@link TimeStampValidityType} indexed by signature value
+     */
+    public Map<byte[], Object> findSignatureReportDetails()
+    {
+        var result = new LinkedHashMap<byte[], Object>();
+        for (var individualReportType : vr.getIndividualReport())
+        {
+            var signatureValue = individualReportType.getSignedObjectIdentifier().getSignatureValue().getValue();
+            for (var any : individualReportType.getDetails().getAny())
+            {
+                if (any instanceof JAXBElement<?>)
+                {
+                    var jaxbVal = ((JAXBElement<?>)any).getValue();
+                    if (jaxbVal instanceof DetailedSignatureReportType || jaxbVal instanceof TimeStampValidityType)
+                    {
+                        result.put(signatureValue, jaxbVal);
+                    }
+                }
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isDetailsPresent()
+    {
+        return Optional.ofNullable(vr)
+            .map(VerificationReportType::getIndividualReport)
+            .filter(l -> !l.isEmpty())
+            .map(l -> l.get(0))
+            .map(IndividualReportType::getDetails)
+            .map(AnyType::getAny)
+            .filter(l -> !l.isEmpty())
+            .map(l -> l.get(0))
+            .map(x -> ((JAXBElement<?>)x).getValue())
+            .isPresent();
+    }
 }

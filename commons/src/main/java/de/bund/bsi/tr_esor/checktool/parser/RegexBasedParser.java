@@ -30,61 +30,68 @@ import java.util.regex.Pattern;
 /**
  * Base class for parsers which use regular expressions to determine whether input is suitable.
  *
- * @author TT
  * @param <T> type of parsed object
+ * @author TT
  */
 public abstract class RegexBasedParser<T> implements Parser<T>
 {
 
-  /**
-   * Data to parse.
-   */
-  protected InputStream input;
+    private static final int BUF_SIZE = 2 * 1024;
 
-  private final Pattern pattern;
+    private final Pattern pattern;
 
-  private static final int BUF_SIZE = 2 * 1024;
+    /**
+     * Data to parse.
+     */
+    protected InputStream input;
 
-  /**
-   * Creates new instance.
-   *
-   * @param regex matches beginning of input if input is feasible
-   */
-  protected RegexBasedParser(String regex)
-  {
-    pattern = Pattern.compile(regex);
-  }
-
-  @Override
-  public void setInput(InputStream input)
-  {
-    this.input = input;
-    if (!input.markSupported())
+    /**
+     * Creates new instance.
+     *
+     * @param regex matches beginning of input if input is feasible
+     */
+    protected RegexBasedParser(String regex)
     {
-      throw new IllegalArgumentException("can only handle streams which support mark/reset");
+        pattern = Pattern.compile(regex);
     }
-  }
 
-  @Override
-  public boolean canParse() throws IOException
-  {
-    input.mark(BUF_SIZE);
-    var buf = new byte[BUF_SIZE];
-    var len = input.read(buf, 0, BUF_SIZE);
-    input.reset();
-    var beginning = new String(buf, 0, len, StandardCharsets.UTF_8);
-    return pattern.matcher(beginning).find();
-  }
+    @Override
+    public void setInput(InputStream input)
+    {
+        this.input = input;
+        if (!input.markSupported())
+        {
+            throw new IllegalArgumentException("can only handle streams which support mark/reset");
+        }
+    }
 
-  /**
-   * Returns a regular expression which matches XML files with specified root tag.
-   *
-   * @param localName
-   * @param namespaceURI required (root tags without namespace not supported here)
-   */
-  protected static String regexForMainTag(String localName, String namespaceURI)
-  {
-    return "\\A(<\\?xml [^>]*>[^<]*)?(<([a-zA-Z]\\w*):" + localName + "[\\s\\n][^>]*xmlns:\\3=\""
-           + namespaceURI + "\")|(<" + localName + " [^>]*xmlns=\"" + namespaceURI + "\")";
-  }
+    @Override
+    public boolean canParse() throws IOException
+    {
+        input.mark(BUF_SIZE);
+        var buf = new byte[BUF_SIZE];
+        var len = input.read(buf, 0, BUF_SIZE);
+        input.reset();
+        var beginning = new String(buf, 0, len, StandardCharsets.UTF_8);
+        return pattern.matcher(beginning).find();
+    }
+
+    /**
+     * Returns a regular expression which matches XML files with specified root tag.
+     *
+     * @param localName
+     * @param namespaceURI required (root tags without namespace not supported here)
+     */
+    protected static String regexForMainTag(String localName, String namespaceURI)
+    {
+        return "\\A(<\\?xml [^>]*>[^<]*)?(<([a-zA-Z]\\w*):"
+            + localName
+            + "[\\s\\n][^>]*xmlns:\\3=\""
+            + namespaceURI
+            + "\")|(<"
+            + localName
+            + " [^>]*xmlns=\""
+            + namespaceURI
+            + "\")";
+    }
 }

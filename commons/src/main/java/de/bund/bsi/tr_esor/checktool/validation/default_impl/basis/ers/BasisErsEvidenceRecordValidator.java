@@ -35,30 +35,30 @@ import de.bund.bsi.tr_esor.checktool.validation.report.EvidenceRecordReport;
 public class BasisErsEvidenceRecordValidator extends EvidenceRecordValidator
 {
 
-  @Override
-  protected void checkVersion(int version, EvidenceRecordReport detailReport)
-  {
-    if (version != 1)
+    @Override
+    protected void checkVersion(int version, EvidenceRecordReport detailReport)
     {
-      ctx.getFormatOk().invalidate("must be 1", detailReport.getReference().newChild("version"));
+        if (version != 1)
+        {
+            ctx.getFormatOk().invalidate("must be 1", detailReport.getReference().newChild("version"));
+        }
     }
-  }
 
-  @Override
-  protected void checkCryptoInfo(CryptoInfo cryptoInfo, EvidenceRecordReport detailReport)
-  {
-    if (cryptoInfo != null)
+    @Override
+    protected void checkCryptoInfo(CryptoInfo cryptoInfo, EvidenceRecordReport detailReport)
     {
-      ctx.getFormatOk().invalidate("must be omitted", detailReport.getReference().newChild("cryptoInfo"));
+        if (cryptoInfo != null)
+        {
+            ctx.getFormatOk().invalidate("must be omitted", detailReport.getReference().newChild("cryptoInfo"));
+        }
     }
-  }
 
-  @Override
-  protected void checkEncryptionInfo(EncryptionInfo encryptionInfo, EvidenceRecordReport detailReport)
-  {
-    if (encryptionInfo != null)
+    @Override
+    protected void checkEncryptionInfo(EncryptionInfo encryptionInfo, EvidenceRecordReport detailReport)
     {
-      ctx.getFormatOk().invalidate("must be omitted", detailReport.getReference().newChild("encryptionInfo"));
+        if (encryptionInfo != null)
+        {
+            ctx.getFormatOk().invalidate("must be omitted", detailReport.getReference().newChild("encryptionInfo"));
+        }
     }
-  }
 }
