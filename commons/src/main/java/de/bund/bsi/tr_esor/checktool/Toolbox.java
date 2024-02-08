@@ -23,6 +23,11 @@ package de.bund.bsi.tr_esor.checktool;
 
 import java.io.IOException;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1TaggedObject;
+import org.bouncycastle.asn1.cms.OtherRevocationInfoFormat;
+import org.bouncycastle.asn1.cms.SignedData;
+
 import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 import de.bund.bsi.tr_esor.xaip.CredentialType;
 import de.bund.bsi.tr_esor.xaip.DataObjectType;
@@ -144,5 +149,22 @@ public final class Toolbox
             meta.getBinaryMetaData().getValue().getInputStream().reset();
         }
         return binaryData;
+    }
+
+    /**
+     * Finds first {@link OtherRevocationInfoFormat} from ASN.1 structure in given {@link SignedData}. Returns <code>null</code> otherwise.
+     */
+    public static OtherRevocationInfoFormat findOtherRevocationInfoFormat(SignedData signedData)
+    {
+        for (var revocationValue : signedData.getCRLs())
+        {
+            var asn1Object = revocationValue instanceof ASN1TaggedObject ? ((ASN1TaggedObject)revocationValue).getObject() : null;
+            var otherRevocationInfoFormat = OtherRevocationInfoFormat.getInstance(asn1Object);
+            if (otherRevocationInfoFormat != null)
+            {
+                return otherRevocationInfoFormat;
+            }
+        }
+        return null;
     }
 }
