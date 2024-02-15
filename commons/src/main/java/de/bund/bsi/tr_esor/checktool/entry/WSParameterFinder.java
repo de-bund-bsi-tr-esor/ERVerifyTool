@@ -38,7 +38,6 @@ import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.dom.DOMSource;
 
 import org.bouncycastle.cms.CMSSignedData;
-import org.etsi.uri._02918.v1_2.DataObjectReferenceType;
 import org.w3._2000._09.xmldsig_.CanonicalizationMethodType;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
