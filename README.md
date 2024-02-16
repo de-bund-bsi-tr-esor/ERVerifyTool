@@ -99,3 +99,7 @@ cli/bin$ ./checktool -conf ../../config/config.xml -data some-xaip.xml -er some-
 This will print the XML *VerificationReport* to standard out.
 
 See the product documentation for more options and possible configurations.
+
+# Known Issues
+
+* [**KI-001**] - handling of the CAdES with embedded evidence record (CAdES-E-ERS) according to ETSI TS 119 122-3 in the special case, CAdES doesn't contain any unsigned attributes. While creating the corresponding evidence record, **(1)** the CAdES can be hashed as-is, meaning without the unsigned attributes structure, or **(2)** an empty unsigned attributes structure can be created before the hash value has been computed. The same strategy had to be applied in case of verification, but there is no standardised possibility to store the strategy information in the CAdES and ETSI TS 119 122-3 doesn't specify, which approach shall be chosen, which means, the both approaches have to be tried. The ERVT does support currently only the **(2)** strategy version. The strategy **(1)** will supported in the next version of ERVT.
