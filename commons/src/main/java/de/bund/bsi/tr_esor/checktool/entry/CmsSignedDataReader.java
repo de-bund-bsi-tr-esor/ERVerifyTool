@@ -21,12 +21,10 @@
  */
 package de.bund.bsi.tr_esor.checktool.entry;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import de.bund.bsi.tr_esor.checktool.data.ASN1Utils;
+import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
+import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
+import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.cms.Attribute;
 import org.bouncycastle.cms.CMSSignedData;
@@ -34,10 +32,11 @@ import org.bouncycastle.cms.SignerId;
 import org.bouncycastle.cms.SignerInformation;
 import org.bouncycastle.cms.SignerInformationStore;
 
-import de.bund.bsi.tr_esor.checktool.data.ASN1Utils;
-import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
-import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
-import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 
 /**

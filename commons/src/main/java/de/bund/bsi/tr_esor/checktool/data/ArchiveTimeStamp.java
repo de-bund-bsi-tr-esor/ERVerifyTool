@@ -95,7 +95,7 @@ public class ArchiveTimeStamp implements ASN1Encodable
         {
           case TAGNO_DIGESTALGO:
             indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, 1);
-            digestAlgo = ASN1Utils.parseAlgorithmIdentifier(tagged.getObject());
+            digestAlgo = ASN1Utils.parseAlgorithmIdentifier(tagged.getBaseObject());
             break;
           case TAGNO_ATTRIBUTES:
             indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, 2);
@@ -157,13 +157,14 @@ public class ArchiveTimeStamp implements ASN1Encodable
   {
     // This tag is implicit, if only one attribute is present, the data is recognized as ASN1Sequence
     // (outer element of an attribute).
-    if (t.getObject() instanceof ASN1Sequence)
+
+    if (t.getBaseObject() instanceof ASN1Sequence)
     {
-      attributes = Attributes.getInstance(new DLSet(t.getObject()));
+      attributes = Attributes.getInstance(new DLSet(t.getBaseObject()));
     }
-    else if (t.getObject() instanceof ASN1Set)
+    else if (t.getBaseObject() instanceof ASN1Set)
     {
-      attributes = Attributes.getInstance(t.getObject());
+      attributes = Attributes.getInstance(t.getBaseObject());
     }
     else
     {
