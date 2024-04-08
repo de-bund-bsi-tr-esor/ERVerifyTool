@@ -283,7 +283,7 @@ public class ContentInfoChecker
 
   private OtherRevocationInfoFormat extractOrif(Object obj)
   {
-    Object orif = obj instanceof ASN1TaggedObject ? ((ASN1TaggedObject)obj).getObject() : null;
+    Object orif = obj instanceof ASN1TaggedObject ? ((ASN1TaggedObject)obj).getBaseObject() : null;
     return OtherRevocationInfoFormat.getInstance(orif);
   }
 
