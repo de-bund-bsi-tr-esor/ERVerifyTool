@@ -306,7 +306,7 @@ public class TestContentInfoChecker
       : ContentInfoChecker.OID_BASIC_OSCP_RESPONSE));
     var mockOCSPResponse = mockOCSPResponse(valid);
     otherRevVector.add(wrongElement ? null : mockOCSPResponse);
-    when(tag.getObject()).thenReturn(new DLSequence(otherRevVector));
+    when(tag.getBaseObject()).thenReturn(new DLSequence(otherRevVector));
     return tag;
   }
 
