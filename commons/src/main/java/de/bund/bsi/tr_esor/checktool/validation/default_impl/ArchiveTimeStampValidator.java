@@ -497,7 +497,7 @@ public class ArchiveTimeStampValidator extends BaseValidator<ArchiveTimeStamp, E
         PARAMETER_ERROR("http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError"),
         SIGNATURE_FORMAT_NOT_SUPPORTED("http://www.bsi.bund.de/ecard/api/1.1/resultminor/il/signature#signatureFormatNotSupported"),
         SIGNATURE_ALGORITHM_NOT_SUPPORTED("http://www.bsi.bund.de/ecard/api/1.1/resultminor//il/algorithm#signatureAlgorithmNotSupported"),
-        UNKNOWN_ATTRIBUTE("http://www.bsi.bund.de/tr-esor/api/1.1/resultminor/unknownAttribute"),
+        UNKNOWN_ATTRIBUTE("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/unknownAttribute"),
         NOT_SUPPORTED("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/arl/notSupported");
 
         private final String value;

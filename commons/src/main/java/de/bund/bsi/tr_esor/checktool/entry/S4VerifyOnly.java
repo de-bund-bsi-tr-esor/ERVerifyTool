@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import de.bund.bsi.tr_esor.checktool.validation.report.BsiResultMajor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -218,21 +219,21 @@ public class S4VerifyOnly implements S4
 
         if (allOasisMajors.stream().allMatch(OasisDssResultMajor.SUCCESS::equals))
         {
-            resp.getResult().setResultMajor(ECardResultMajor.OK);
+            resp.getResult().setResultMajor(BsiResultMajor.OK.getUri());
         }
         else if (allOasisMajors.stream().anyMatch(OasisDssResultMajor.REQUESTER_ERROR::equals))
         {
-            resp.getResult().setResultMajor(ECardResultMajor.ERROR);
+            resp.getResult().setResultMajor(BsiResultMajor.ERROR.getUri());
             resp.getResult().setResultMinor(extractFirstResultMinorForMajor(report, OasisDssResultMajor.REQUESTER_ERROR));
         }
         else if (allOasisMajors.stream().anyMatch(OasisDssResultMajor.RESPONDER_ERROR::equals))
         {
-            resp.getResult().setResultMajor(ECardResultMajor.ERROR);
+            resp.getResult().setResultMajor(BsiResultMajor.ERROR.getUri());
             resp.getResult().setResultMinor(extractFirstResultMinorForMajor(report, OasisDssResultMajor.RESPONDER_ERROR));
         }
         else
         {
-            resp.getResult().setResultMajor(ECardResultMajor.WARNING);
+            resp.getResult().setResultMajor(BsiResultMajor.WARNING.getUri());
             resp.getResult().setResultMinor(extractFirstResultMinorForMajor(report, OasisDssResultMajor.INSUFFICIENT_INFORMATION));
         }
 

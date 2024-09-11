@@ -162,8 +162,7 @@ public class TestMainIT extends TestBase
         var individualReports =
             verify("xaip/XAIP_NOK_EXCEET.xml", "xaip/XAIP_NOK_EXCEET.ers", "TR-ESOR", "command line parameter er", "DO-01", "DO-02");
         var erReport = individualReports.get("command line parameter er");
-        assertThat(erReport.getResult().getResultMajor()).contains("InsufficientInformation");
-        assertThat(erReport.getResult().getResultMessage().getValue()).contains("revocation_value_trust_invalid_no_retention");
+        assertThat(erReport.getResult().getResultMajor()).contains("Success");
         var evidenceRecordValidityType = ((JAXBElement<EvidenceRecordValidityType>)erReport.getDetails().getAny().get(0)).getValue();
         var chainingOk = evidenceRecordValidityType.getArchiveTimeStampSequence()
             .getArchiveTimeStampChain()
@@ -315,18 +314,13 @@ public class TestMainIT extends TestBase
         SignatureValidationTestHelper.assertNoSignatureFound(individualReports.get("Hundename_V001"));
     }
 
-    /**
-     * FIXME Exchange test data for valid result
-     */
     @Test
     public void validateDoubleDetachedSignature() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_xades_det_double.xml", true, "DO-01", "CR-01", "CR-01 (2)");
 
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01 (2)"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01"));
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01 (2)"));
 
         assertFileExistsAndContains("xaip_ok_xades_det_double/DO_01/DO_01.bin");
         assertFileExistsAndContains("xaip_ok_xades_det_double/CR_01/DO_01.bin");
@@ -431,14 +425,13 @@ public class TestMainIT extends TestBase
 
     /**
      * Assert that a XAIP containing a plain XAdES signature embedded as XML and binary signed data (which is XML, but not canonicalized)
-     * can be validated successfully. FIXME exchange test data for valid result
+     * can be validated successfully.
      */
     @Test
     public void validateXaipOkXadesDetXmlSingle() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_xades_det_xml_single.xml", true, "DO-01", "CR-01");
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01"));
 
 
         assertFileExistsAndContains("xaip_ok_xades_det_xml_single/DO_01/DO_01.bin",
@@ -449,28 +442,22 @@ public class TestMainIT extends TestBase
     }
 
     /**
-     * Ensures XAdES enveloping are validated FIXME exchange test data for valid result
+     * Ensures XAdES enveloping are validated
      */
     @Test
     public void validatesEnvelopingXmlSig() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_xmlsig_enveloping.xml", false, "CR-01");
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01"));
     }
 
-    /**
-     * FIXME exchange test data for valid result
-     */
     @Test
     public void validatesTwoCadesSigs() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_pdf_two_sigs.xml", false, "DO-01", "CR-01", "CR-01 (2)");
 
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01 (2)"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01"));
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01 (2)"));
     }
 
     /**
@@ -549,17 +536,14 @@ public class TestMainIT extends TestBase
     }
 
     /**
-     * Reads an XAIP containing an XML signature as binary. Thus, there are no embedding problems and it should be checked as valid. FIXME
-     * exchange test data for valid result
+     * Reads an XAIP containing an XML signature as binary. Thus, there are no embedding problems and it should be checked as valid.
      */
     @Test
     public void validatePdfSig() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_pdfsig.xml", true, "DO-01", "DO-01 (2)");
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("DO-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("DO-01 (2)"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("DO-01"));
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("DO-01 (2)"));
 
         assertFileExistsAndContains("xaip_ok_pdfsig/DO_01/DO_01.bin");
     }

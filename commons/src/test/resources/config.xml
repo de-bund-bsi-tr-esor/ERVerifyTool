@@ -21,7 +21,7 @@
 
     <!-- The TR-ESOR profile requires an online validation service and qualified timestamps -->
     <Profile name="TR-ESOR" requireQualifiedTimestamps="true"
-             validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl"
+             validationService="https://cvs-test.governikus-asp.de/ECardService/eCard?wsdl"
              verifySignatures="true">
     </Profile>
 

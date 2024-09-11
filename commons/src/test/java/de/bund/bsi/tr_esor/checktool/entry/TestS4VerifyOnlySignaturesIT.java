@@ -97,18 +97,13 @@ public class TestS4VerifyOnlySignaturesIT
             OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
     }
 
-    /**
-     * FIXME exchange test data for valid result
-     */
     @Test
     public void validateDoubleDetachedSignature() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_xades_det_double.xml", "DO-01", "CR-01", "CR-01 (2)");
 
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01 (2)"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01"));
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01 (2)"));
     }
 
     @Test
@@ -220,18 +215,13 @@ public class TestS4VerifyOnlySignaturesIT
             S4_VERIFY_ONLY_BASE64_RESTRICTION);
     }
 
-    /**
-     * FIXME exchange test data for valid result
-     */
     @Test
     public void validatesTwoCadesSigs() throws Exception
     {
         var individualReports = verify("xaip/signature/xaip_ok_pdf_two_sigs.xml", "DO-01", "CR-01", "CR-01 (2)");
 
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("CR-01 (2)"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01"));
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("CR-01 (2)"));
     }
 
     /**
@@ -296,8 +286,7 @@ public class TestS4VerifyOnlySignaturesIT
     }
 
     /**
-     * Validates a CAdES signature that was generated over simple text metadata content (no tags). FIXME exchange test data for valid
-     * result
+     * Validates a CAdES signature that was generated over simple text metadata content (no tags).
      */
     @Test
     public void validateValidTextMetadata() throws Exception
@@ -317,10 +306,8 @@ public class TestS4VerifyOnlySignaturesIT
     {
         var individualReports = verify("xaip/signature/xaip_ok_pdfsig.xml", "DO-01", "DO-01 (2)");
 
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("DO-01"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
-        SignatureValidationTestHelper.assertInsufficientInformationInIndividualReport(individualReports.get("DO-01 (2)"),
-            OasisDssResultMinor.ERROR_RESPONSE_GENERAL_ERROR.getUri());
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("DO-01"));
+        SignatureValidationTestHelper.assertMajorSuccessInIndividualReport(individualReports.get("DO-01 (2)"));
     }
 
     /**
