@@ -36,6 +36,12 @@
     </Profile>
 
     <!-- You may specify own profiles with any number of new or replaced validators: -->
+    <Profile name="multiErNoVerifySignatures" validationService="https://cvs-test.governikus-asp.de:443/ECardService/eCard?wsdl" verifySignatures="false">
+        <Validator>
+            <className>de.bund.bsi.tr_esor.checktool.validation.default_impl.ECardTimeStampValidator</className>
+            <targetType>org.bouncycastle.tsp.TimeStampToken</targetType>
+        </Validator>
+    </Profile>
     <Profile name="custom" hashMode="unsorted" lxaipDataDirectory="../commons/src/test/resources/lxaip"
              validationService="https://aeonia-govsuite-latest.govkg.de/ECardService/eCard?wsdl"
              requireQualifiedTimestamps="false" verifySignatures="true">

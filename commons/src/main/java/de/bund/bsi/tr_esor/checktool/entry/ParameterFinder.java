@@ -21,15 +21,16 @@
  */
 package de.bund.bsi.tr_esor.checktool.entry;
 
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.Optional;
 
 import org.bouncycastle.cms.CMSSignedData;
 
 import de.bund.bsi.tr_esor.checktool.conf.Configurator;
 import de.bund.bsi.tr_esor.checktool.conf.ProfileNames;
-import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 import de.bund.bsi.tr_esor.checktool.data.UnsupportedData;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
@@ -61,20 +62,11 @@ public abstract class ParameterFinder
     /** serializer for XAIP elements */
     protected XaipSerializer serializer;
 
-    /** evidence record given separately as input */
-    protected EvidenceRecord er;
-
-    /** version of XAIP addressed by evidence record given separately within an XML structure. */
-    protected String xaipVersionAddressdByEr;
-
-    /** AOID of XAIP addressed by evidence record given separately within an XML structure. */
-    protected String xaipAoidAddressdByEr;
-
-    /** where that element came from */
-    protected Reference erRef;
-
     /** where that element came from */
     protected Reference xaipRef;
+
+    /** List of all provided er **/
+    protected List<ERParameter> providedERs = new ArrayList<>();
 
     /** where that element came from */
     protected Reference cmsRef;
@@ -115,14 +107,6 @@ public abstract class ParameterFinder
     }
 
     /**
-     * Returns the detached evidence record to verify.
-     */
-    public EvidenceRecord getEr()
-    {
-        return er;
-    }
-
-    /**
      * Returns the XAIP specified as input.
      */
     public XAIPType getXaip()
@@ -155,35 +139,19 @@ public abstract class ParameterFinder
     }
 
     /**
+     * Returns a list of all Evidence Records provided by the verify request.
+     */
+    public List<ERParameter> getProvidedERs()
+    {
+        return providedERs;
+    }
+
+    /**
      * Returns the reference the CMS signature came from.
      */
     public Reference getCmsRef()
     {
         return cmsRef;
-    }
-
-    /**
-     * Returns a XAIP version specified in XML with separately given ER.
-     */
-    public String getXaipVersionAddressedByEr()
-    {
-        return xaipVersionAddressdByEr;
-    }
-
-    /**
-     * Returns a XAIP AOID specified in XML with separately given ER.
-     */
-    public String getXaipAoidAddressedByEr()
-    {
-        return xaipAoidAddressdByEr;
-    }
-
-    /**
-     * Returns reference where the detaches ER came from.
-     */
-    public Reference getErRef()
-    {
-        return erRef;
     }
 
     /**

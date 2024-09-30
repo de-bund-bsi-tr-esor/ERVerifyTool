@@ -138,22 +138,23 @@ public class WSParameterFinder extends ParameterFinder
 
     private void handleOther(AnyType other)
     {
-        if (other != null && !other.getAny().isEmpty())
+        if (other != null)
         {
-            var erXml = getErXML(other.getAny().get(0));
-            try
-            {
-                er = new ASN1EvidenceRecordParser().parse(erXml.getAsn1EvidenceRecord());
-                erRef = new Reference(DETACHED_ER_ID);
-                erRef.setxPath("SignatureObject/Other/evidenceRecord/asn1EvidenceRecord");
-                xaipVersionAddressdByEr = erXml.getVersionID();
-                xaipAoidAddressdByEr = erXml.getAOID();
-                return;
+            for (var anyEr : other.getAny()) {
+                var erXml = getErXML(anyEr);
+                try {
+                    var erParameter = new ERParameter();
+                    erParameter.setEr(new ASN1EvidenceRecordParser().parse(erXml.getAsn1EvidenceRecord()));
+                    erParameter.setErRef(new Reference(DETACHED_ER_ID));
+                    erParameter.getErRef().setxPath("SignatureObject/Other/evidenceRecord/asn1EvidenceRecord");
+                    erParameter.setXaipVersionAddressedByEr(erXml.getVersionID());
+                    erParameter.setXaipAoidAddressedByEr(erXml.getAOID());
+                    providedERs.add(erParameter);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("invalid content in element xaip:evidenceRecord", e);
+                }
             }
-            catch (IOException e)
-            {
-                throw new IllegalArgumentException("invalid content in element xaip:evidenceRecord", e);
-            }
+            return;
         }
         throw new IllegalArgumentException("only Base64Signature or other/evidenceRecord/asn1EvidenceRecord are supported");
     }
@@ -205,16 +206,20 @@ public class WSParameterFinder extends ParameterFinder
             }
             else if (parsed instanceof EvidenceRecord)
             {
-                erRef = new Reference(DETACHED_ER_ID);
-                erRef.setxPath(xPath);
-                er = (EvidenceRecord)parsed;
+                var erParameter = new ERParameter();
+                erParameter.setErRef(new Reference(DETACHED_ER_ID));
+                erParameter.getErRef().setxPath(xPath);
+                erParameter.setEr((EvidenceRecord)parsed);
+                providedERs.add(erParameter);
             }
             else if (parsed instanceof EvidenceRecordType)
             {
-                erRef = new Reference(DETACHED_ER_ID);
-                erRef.setxPath("/evidenceRecord/asn1EvidenceRecord");
-                er = new ASN1EvidenceRecordParser().parse(((EvidenceRecordType)parsed).getAsn1EvidenceRecord());
-                xaipVersionAddressdByEr = ((EvidenceRecordType)parsed).getVersionID();
+                var erParameter = new ERParameter();
+                erParameter.setErRef(new Reference(DETACHED_ER_ID));
+                erParameter.getErRef().setxPath("/evidenceRecord/asn1EvidenceRecord");
+                erParameter.setEr(new ASN1EvidenceRecordParser().parse(((EvidenceRecordType)parsed).getAsn1EvidenceRecord()));
+                erParameter.setXaipVersionAddressedByEr(((EvidenceRecordType)parsed).getVersionID());
+                providedERs.add(erParameter);
             }
             else
             {

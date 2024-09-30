@@ -5,8 +5,8 @@ package de.bund.bsi.tr_esor.checktool.validation.report;
  */
 public enum BsiResultMajor {
 
-    OK ("http://www.bsi.bund.de/tr-esor/api/1.3/resultmajor#ok"),
-    WARNING ("http://www.bsi.bund.de/tr-esor/api/1.3/resultmajor#warning"),
+    OK("http://www.bsi.bund.de/tr-esor/api/1.3/resultmajor#ok"),
+    WARNING("http://www.bsi.bund.de/tr-esor/api/1.3/resultmajor#warning"),
     ERROR("http://www.bsi.bund.de/tr-esor/api/1.3/resultmajor#error");
 
     private final String uri;

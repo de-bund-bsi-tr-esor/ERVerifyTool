@@ -5,6 +5,7 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 
 import de.bund.bsi.tr_esor.checktool.TestUtils;
+import de.bund.bsi.tr_esor.checktool.entry.ERParameter;
 import de.bund.bsi.tr_esor.checktool.entry.ParameterFinder;
 import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 import de.bund.bsi.tr_esor.checktool.parser.XaipParser;
@@ -34,8 +35,10 @@ class TestParameterFinder extends ParameterFinder
 
     public void setEr(String path) throws IOException
     {
-        er = new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource(path));
-        erRef = new Reference("ER_TEST_VALUE");
+        var erParameter = new ERParameter();
+        erParameter.setEr(new ASN1EvidenceRecordParser().parse(TestUtils.decodeTestResource(path)));
+        erParameter.setErRef(new Reference("ER_TEST_VALUE"));
+        providedERs.add(erParameter);
     }
 
     public void setXaip(String path) throws Exception

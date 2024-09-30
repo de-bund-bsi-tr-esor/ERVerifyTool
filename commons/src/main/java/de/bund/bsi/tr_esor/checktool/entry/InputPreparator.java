@@ -70,15 +70,16 @@ public class InputPreparator
     /**
      * Sorts the input in case the XAIP has already been identified.
      */
-    public InputPreparator(ParameterFinder params) throws ReflectiveOperationException, IOException
-    {
+    public InputPreparator(ParameterFinder params) throws ReflectiveOperationException, IOException {
         this.params = params;
 
-        if (isAoidOrVersionBroken())
+        for (var erParameter : params.getProvidedERs())
         {
-            return;
+            if (isAoidOrVersionBroken(erParameter))
+            {
+                return;
+            }
         }
-
         var xaip = params.getXaip();
         if (xaip != null)
         {
@@ -99,7 +100,10 @@ public class InputPreparator
 
         if (xaip == null && cmsDocument == null)
         {
-            createContextForDetachedEr(this::addProtectedDataFromBinaryDocuments);
+            for (var er : params.getProvidedERs())
+            {
+                createContextForDetachedEr(this::addProtectedDataFromBinaryDocuments, er);
+            }
         }
 
         var unsupportedRef = params.getUnsupportedRef();
@@ -139,7 +143,9 @@ public class InputPreparator
     {
         var reader = new XaipReader(params.getXaip(), params.getXaipRef(), params.getProfileName());
         scanXaipForEmbeddedER(reader);
-        createContextForDetachedEr(ctx -> addProtectedElements(reader, params.getXaipVersionAddressedByEr(), ctx));
+        for (var er : params.getProvidedERs()) {
+            createContextForDetachedEr(ctx -> addProtectedElements(reader, er.getXaipVersionAddressedByEr(), ctx), er);
+        }
     }
 
     private void scanXaipForInlineSignatures()
@@ -268,10 +274,10 @@ public class InputPreparator
      * In case the evidence record has been specified inside an XML structure, asserts that a XAIP with specified AOID and version is
      * given.
      */
-    private boolean isAoidOrVersionBroken()
+    private boolean isAoidOrVersionBroken(ERParameter erParameter)
     {
-        var aoid = params.getXaipAoidAddressedByEr();
-        var version = params.getXaipVersionAddressedByEr();
+        var aoid = erParameter.getXaipAoidAddressedByEr();
+        var version = erParameter.getXaipVersionAddressedByEr();
         if (version == null && aoid == null)
         {
             return false; // No restrictions to check
@@ -382,21 +388,21 @@ public class InputPreparator
         }
     }
 
-    private void createContextForDetachedEr(Function<ErValidationContext, ValidationContext<?>> addProtectedData)
+    private void createContextForDetachedEr(Function<ErValidationContext, ValidationContext<?>> addProtectedData, ERParameter er)
         throws ReflectiveOperationException
     {
-        if (params.getErRef() == null)
+        if (er.getErRef() == null)
         {
             return;
         }
-        if (params.getEr() == null)
+        if (er.getEr() == null)
         {
-            validations.add(new ErValidationContext(params.getErRef(), "not an ASN.1 evidence record", params.getProfileName()));
+            validations.add(new ErValidationContext(er.getErRef(), "not an ASN.1 evidence record", params.getProfileName()));
         }
         else
         {
-            var ctx = new ErValidationContext(params.getErRef(),
-                params.getEr(),
+            var ctx = new ErValidationContext(er.getErRef(),
+                er.getEr(),
                 params.getProfileName(),
                 params.getReturnVerificationReport(),
                 needsToCheckAllHashes());

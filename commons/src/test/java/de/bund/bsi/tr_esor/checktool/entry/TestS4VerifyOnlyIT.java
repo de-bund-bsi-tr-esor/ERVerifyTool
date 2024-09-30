@@ -32,7 +32,7 @@ public class TestS4VerifyOnlyIT
 
     private static final String MAJOR_INVALID = "ResultMajor>urn:oasis:names:tc:dss:1.0:detail:invalid";
 
-    private static final String MAJOR_VALID = "ResultMajor>urn:oasis:names:tc:dss:1.0:detail:valid";
+    private static final String MAJOR_VALID = "ResultMajor>http://www.bsi.bund.de/tr-esor/api/1.3/resultmajor#ok";
 
     private static final String PARAMETER_ERROR = "http://www.bsi.bund.de/ecard/api/1.1/resultminor/al/common#parameterError";
 
@@ -60,6 +60,21 @@ public class TestS4VerifyOnlyIT
         assertThat(response.body(), containsString(MAJOR_INDETERMINED));
         assertThat(response.body(), containsString(VERIFICATION_REPORT_NAMESPACE));
         assertThat(response.body(), containsString(VERIFICATION_REPORT));
+        assertThat(response.body(), not(containsString(PARAMETER_ERROR)));
+    }
+
+    @Test
+    public void verifiesXaipWithMultipleER() throws Exception
+    {
+        var individualReportOccurrences = 3;
+        var response = response("src/test/resources/requests/verify_xaip_ok_multi_cred_ers.txt");
+
+        assertThat(response.statusCode(), is(STATUS_CODE_OK));
+        var responseBody = response.body();
+        int split = responseBody.split("<IndividualReport>", -1).length - 1;
+        assertThat(split, is(individualReportOccurrences));
+        assertThat(response.body(), containsString(MAJOR_VALID));
+        assertThat(response.body(), containsString(VERIFICATION_REPORT_NAMESPACE));
         assertThat(response.body(), not(containsString(PARAMETER_ERROR)));
     }
 

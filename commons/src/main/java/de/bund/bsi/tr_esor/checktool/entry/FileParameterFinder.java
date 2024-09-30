@@ -76,21 +76,22 @@ public class FileParameterFinder extends ParameterFinder
     private void setErAttributes(Object parsedEr) throws IOException
     {
         var baseErRef = new Reference("command line parameter er");
+        var erParameter = new ERParameter();
         if (parsedEr instanceof EvidenceRecord)
         {
-            er = (EvidenceRecord)parsedEr;
-            erRef = baseErRef;
+            erParameter.setEr((EvidenceRecord)parsedEr);
+            erParameter.setErRef(baseErRef);
         }
         else if (parsedEr instanceof EvidenceRecordType)
         {
             var r = (EvidenceRecordType)parsedEr;
-            xaipVersionAddressdByEr = r.getVersionID();
-            xaipAoidAddressdByEr = r.getAOID();
-            erRef = baseErRef.newChild("asn1EvidenceRecord");
-            erRef.setxPath("/evidenceRecord/asn1EvidenceRecord");
+            erParameter.setXaipVersionAddressedByEr(r.getVersionID());
+            erParameter.setXaipAoidAddressedByEr(r.getAOID());
+            erParameter.setErRef(baseErRef.newChild("asn1EvidenceRecord"));
+            erParameter.getErRef().setxPath("/evidenceRecord/asn1EvidenceRecord");
             if (r.getAsn1EvidenceRecord() != null)
             {
-                er = new ASN1EvidenceRecordParser().parse(r.getAsn1EvidenceRecord());
+                erParameter.setEr(new ASN1EvidenceRecordParser().parse(r.getAsn1EvidenceRecord()));
             }
         }
         else if (parsedEr instanceof CMSSignedData)
@@ -107,6 +108,7 @@ public class FileParameterFinder extends ParameterFinder
         {
             unsupportedRef = baseErRef;
         }
+        providedERs.add(erParameter);
     }
 
     private void setDataAttribute(Path protectedData, Object parsedData) throws IOException
