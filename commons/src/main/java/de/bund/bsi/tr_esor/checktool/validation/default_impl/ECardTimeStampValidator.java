@@ -23,10 +23,13 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 
 import java.io.IOException;
 import java.net.URL;
+import java.security.cert.CertificateException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import de.bund.bsi.tr_esor.checktool.validation.OnlineOcspRequester;
 import oasis.names.tc.dss._1_0.core.schema.AnyType;
 import oasis.names.tc.dss._1_0.core.schema.Base64Data;
 import oasis.names.tc.dss._1_0.core.schema.DocumentHash;
@@ -37,16 +40,23 @@ import oasis.names.tc.dss._1_0.core.schema.SignaturePtr;
 import oasis.names.tc.dss._1_0.core.schema.Timestamp;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificatePathValidityVerificationDetailType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificateStatusType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.CertificateValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+
 
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.ws.BindingProvider;
 import jakarta.xml.ws.WebServiceException;
 
+import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
+import org.bouncycastle.cert.X509CertificateHolder;
+import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.ocsp.OCSPException;
+import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.etsi.uri._19102.v1_2.SignatureQualityType;
 import org.slf4j.Logger;
@@ -64,6 +74,7 @@ import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
 import de.bund.bsi.tr_esor.checktool.validation.ErValidationContext;
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.OCSPValidityType;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart.MinorPriority;
 import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
@@ -201,6 +212,7 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
         }
         else
         {
+            retrieveMissingOcspResponsesForEndEntityCertificates(irt, toCheck);
             timeStampReport = createTimestampReportFromIndividualReport(irt, ref, timeStampReport);
             checkSignatureQuality(irt, timeStampReport, ref);
         }
@@ -208,6 +220,108 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
         return timeStampReport;
     }
 
+    void retrieveMissingOcspResponsesForEndEntityCertificates(IndividualReportType individualReportType, TimeStampToken timeStampToken)
+    {
+        var certificatePathValidity = findCertificatePathValidity(individualReportType);
+        if (certificatePathValidity == null)
+        {
+            return;
+        }
+        fillCertificatePathValidity(certificatePathValidity, timeStampToken);
+        addUpdatedCertificatePathValidity(individualReportType, certificatePathValidity);
+    }
+
+    CertificatePathValidityType findCertificatePathValidity(IndividualReportType individualReportType)
+    {
+        var irtDetails = individualReportType.getDetails();
+        if (irtDetails == null)
+        {
+            return null;
+        }
+        var jaxbReportType = irtDetails.getAny().stream().findFirst();
+        if (jaxbReportType.isEmpty())
+        {
+            return null;
+        }
+        var reportType = ((JAXBElement<?>) jaxbReportType.get()).getValue();
+        if (reportType instanceof TimeStampValidityType)
+        {
+            var timeStampValidityType = (TimeStampValidityType) reportType;
+            return timeStampValidityType.getCertificatePathValidity();
+        }
+        return null;
+    }
+
+    void addUpdatedCertificatePathValidity(IndividualReportType individualReport, CertificatePathValidityType certificatePathValidity)
+    {
+        var oldElement = ((JAXBElement<?>) individualReport.getDetails().getAny().get(0));
+        var reportType = oldElement.getValue();
+        if (reportType instanceof TimeStampValidityType)
+        {
+            var timestampValidity = (TimeStampValidityType) reportType;
+            timestampValidity.setCertificatePathValidity(certificatePathValidity);
+            var jaxbElement = new JAXBElement<>(oldElement.getName(), TimeStampValidityType.class, timestampValidity);
+            individualReport.getDetails().getAny().set(0, jaxbElement);
+        }
+    }
+
+    void fillCertificatePathValidity(CertificatePathValidityType certificatePathValidityType, TimeStampToken timeStampToken)
+    {
+        var certs = timeStampToken.getCertificates().getMatches(null);
+        if (certificatePathValidityType.getPathValidityDetail() == null)
+        {
+            return;
+        }
+        List<CertificateValidityType> validityTypes = new ArrayList<>();
+        for (var certificateValidityType : certificatePathValidityType.getPathValidityDetail().getCertificateValidity()) {
+            var revocationEvidence = certificateValidityType.getCertificateStatus().getRevocationEvidence();
+            if (revocationEvidence == null)
+            {
+                var serialIdentifier = certificateValidityType.getCertificateIdentifier().getX509SerialNumber();
+                var matchingCertificate = certs.stream().filter(c -> ((X509CertificateHolder)c).getSerialNumber().compareTo(serialIdentifier) == 0).findFirst();
+                if (matchingCertificate.isPresent()) {
+                   retrieveOcspResponse(certificateValidityType, ((X509CertificateHolder) matchingCertificate.get()));
+                }
+            }
+            validityTypes.add(certificateValidityType);
+        }
+        certificatePathValidityType.getPathValidityDetail().getCertificateValidity().clear();
+        validityTypes.forEach(v -> certificatePathValidityType.getPathValidityDetail().getCertificateValidity().add(v));
+    }
+
+    private void retrieveOcspResponse(CertificateValidityType certificatePathValidityType, X509CertificateHolder certificateHolder)
+    {
+        try {
+            var onlineOcspRequester = new OnlineOcspRequester();
+            var certificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
+            if (certificate.getBasicConstraints() != -1)
+            {
+                return;
+            }
+            var ocspResponse = onlineOcspRequester.retrieveOcspResponseFromIncludedUrl(certificate);
+            if (ocspResponse == null) {
+                return;
+            }
+            if (isValidResponse(ocspResponse))
+            {
+                var updatedRevocationEvidence = new CertificateStatusType.RevocationEvidence();
+                updatedRevocationEvidence.setOCSPValidity(new OCSPValidityType());
+                updatedRevocationEvidence.getOCSPValidity().setOCSPValue(ocspResponse.getEncoded());
+                certificatePathValidityType.getCertificateStatus().setRevocationEvidence(updatedRevocationEvidence);
+            }
+        } catch (IOException | CertificateException | OCSPException e) {
+            LOG.error("Cannot Retrive Missing OCSPResponse", e);
+        }
+    }
+
+    private static boolean isValidResponse(OCSPResp response)
+    {
+        if (response == null)
+        {
+            return false;
+        }
+        return response.toASN1Structure().getResponseStatus().getValue().intValue() == OCSPResponseStatus.SUCCESSFUL;
+    }
 
     private TimeStampReport createTimeStampReportForNoValidation(Reference ref, TimeStampToken toCheck)
     {
