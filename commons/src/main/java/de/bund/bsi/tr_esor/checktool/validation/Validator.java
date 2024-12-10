@@ -29,36 +29,34 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 
 
 /**
- * Validates objects and returns some report. Implementing classes must have a constructor without parameters
- * or a constructor taking a parameter of type Map&lt;String, String&gt;.
+ * Validates objects and returns some report. Implementing classes must have a constructor without parameters or a constructor taking a
+ * parameter of type Map&lt;String, String&gt;.
  *
- * @author TT
  * @param <T> type of object to be checked
  * @param <C> type of required context
  * @param <R> type of created report
+ * @author TT
  */
 @SuppressWarnings("rawtypes") // C extends ValidationContext<?> cannot be resolved for implementing classes
 public interface Validator<T, C extends ValidationContext, R extends ReportPart>
 {
 
-  /**
-   * Validates a given object.
-   *
-   * @param ref unique identifier of the validated object within the validation request
-   * @param toCheck object to validate
-   * @return Validation result which contains some overall verdict and some specific details. Result type must
-   *         be supported by the used ReportGenerator class(es). If in doubt, let it implement
-   *         {@link OutputCreator}&lt; {@link IndividualReportType} &gt;.
-   */
-  R validate(Reference ref, T toCheck);
+    /**
+     * Validates a given object.
+     *
+     * @param ref unique identifier of the validated object within the validation request
+     * @param toCheck object to validate
+     * @return Validation result which contains some overall verdict and some specific details. Result type must be supported by the used
+     *     ReportGenerator class(es). If in doubt, let it implement {@link OutputCreator}&lt; {@link IndividualReportType} &gt;.
+     */
+    R validate(Reference ref, T toCheck);
 
-  /**
-   * Sets the context object for validating the root element.
-   *
-   * @param context may contain information collected in one part of the object tree and needed while
-   *          validating some other part
-   * @throws IllegalArgumentException if this validator requires another type of context
-   */
-  void setContext(C context);
+    /**
+     * Sets the context object for validating the root element.
+     *
+     * @param context may contain information collected in one part of the object tree and needed while validating some other part
+     * @throws IllegalArgumentException if this validator requires another type of context
+     */
+    void setContext(C context);
 
 }

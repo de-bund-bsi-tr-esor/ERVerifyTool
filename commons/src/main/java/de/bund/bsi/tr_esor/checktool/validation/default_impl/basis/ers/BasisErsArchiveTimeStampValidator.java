@@ -35,14 +35,14 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class BasisErsArchiveTimeStampValidator extends ArchiveTimeStampValidator
 {
 
-  @Override
-  protected ArchiveTimeStampReport validateInternal(Reference ref, ArchiveTimeStamp ats)
-  {
-    var report = super.validateInternal(ref, ats);
-    if (ats.getAttributes() != null)
+    @Override
+    protected ArchiveTimeStampReport validateInternal(Reference ref, ArchiveTimeStamp ats)
     {
-      ctx.getFormatOk().invalidate("attributes must be omitted", ref.newChild("attributes"));
+        var report = super.validateInternal(ref, ats);
+        if (ats.getAttributes() != null)
+        {
+            ctx.getFormatOk().invalidate("attributes must be omitted", ref.newChild("attributes"));
+        }
+        return report;
     }
-    return report;
-  }
 }

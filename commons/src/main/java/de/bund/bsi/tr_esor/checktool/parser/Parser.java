@@ -28,30 +28,30 @@ import java.io.InputStream;
 /**
  * Interface for parsers.
  *
- * @author HMA, TT
  * @param <T> type of parsed object
+ * @author HMA, TT
  */
 public interface Parser<T>
 {
 
-  /**
-   * Specifies input to parse.
-   *
-   * @param input must support mark/reset
-   */
-  void setInput(InputStream input);
+    /**
+     * Specifies input to parse.
+     *
+     * @param input must support mark/reset
+     */
+    void setInput(InputStream input);
 
-  /**
-   * Returns <code>true</code> if this parser can parse the given input. Input will always be reset.
-   *
-   * @throws IOException
-   */
-  boolean canParse() throws IOException;
+    /**
+     * Returns <code>true</code> if this parser can parse the given input. Input will always be reset.
+     *
+     * @throws IOException
+     */
+    boolean canParse() throws IOException;
 
-  /**
-   * Parses the input and returns the parsed object. If successful, the input stream is not reset!
-   */
-  T parse() throws IOException;
+    /**
+     * Parses the input and returns the parsed object. If successful, the input stream is not reset!
+     */
+    T parse() throws IOException;
 
 
 }

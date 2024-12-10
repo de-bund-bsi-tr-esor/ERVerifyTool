@@ -39,34 +39,34 @@ import de.bund.bsi.tr_esor.checktool.conf.AlgorithmCatalog.SupportedHashAlgorith
 public class TestAlgorithmCatalog
 {
 
-  /**
-   * Asserts that the supported algorithms can be returned.
-   */
-  @Test
-  public void testGetSupportedAlgorithms() throws Exception
-  {
-    var algorithms = AlgorithmCatalog.getInstance().getSupportedAlgorithms();
+    /**
+     * Asserts that the supported algorithms can be returned.
+     */
+    @Test
+    public void testGetSupportedAlgorithms() throws Exception
+    {
+        var algorithms = AlgorithmCatalog.getInstance().getSupportedAlgorithms();
 
-    var sha256 = algorithms.get("SHA256");
-    assertThat(sha256.getOids()).contains("1.2.840.113549.2.9", "2.16.840.1.101.3.4.2.1");
-    expiresAfter(sha256, 2099, 12, 31);
-    assertThat(sha256.getParameter()).isEmpty();
+        var sha256 = algorithms.get("SHA256");
+        assertThat(sha256.getOids()).contains("1.2.840.113549.2.9", "2.16.840.1.101.3.4.2.1");
+        expiresAfter(sha256, 2099, 12, 31);
+        assertThat(sha256.getParameter()).isEmpty();
 
-    var dsa = algorithms.get("DSA");
-    assertThat(dsa.getOids()).contains("1.2.840.10040.4");
-    expiresAfter(dsa, 2025, 12, 31);
-    var params = dsa.getParameter();
-    assertThat(params).hasSize(2);
-    assertThat(params.get("plength")).isEqualTo("2048");
-    assertThat(params.get("qlength")).isEqualTo("250");
-  }
+        var dsa = algorithms.get("DSA");
+        assertThat(dsa.getOids()).contains("1.2.840.10040.4");
+        expiresAfter(dsa, 2025, 12, 31);
+        var params = dsa.getParameter();
+        assertThat(params).hasSize(2);
+        assertThat(params.get("plength")).isEqualTo("2048");
+        assertThat(params.get("qlength")).isEqualTo("250");
+    }
 
-  private void expiresAfter(SupportedHashAlgorithm sha256, int year, int month, int day)
-  {
-    var cal = Calendar.getInstance();
-    cal.setTime(sha256.getValidity());
-    assertThat(year).isEqualTo(cal.get(Calendar.YEAR));
-    assertThat(month).isEqualTo(cal.get(Calendar.MONTH) + 1);
-    assertThat(day).isEqualTo(cal.get(Calendar.DATE));
-  }
+    private void expiresAfter(SupportedHashAlgorithm sha256, int year, int month, int day)
+    {
+        var cal = Calendar.getInstance();
+        cal.setTime(sha256.getValidity());
+        assertThat(year).isEqualTo(cal.get(Calendar.YEAR));
+        assertThat(month).isEqualTo(cal.get(Calendar.MONTH) + 1);
+        assertThat(day).isEqualTo(cal.get(Calendar.DATE));
+    }
 }

@@ -35,75 +35,75 @@ import org.w3c.dom.Element;
 public class NamespaceMapper
 {
 
-  private static final Map<String, String> DEFAULT_NS_PREFIX_MAP = new HashMap<>();
+    private static final Map<String, String> DEFAULT_NS_PREFIX_MAP = new HashMap<>();
 
-  static
-  {
-    DEFAULT_NS_PREFIX_MAP.put("http://www.bsi.bund.de/tr-esor/xaip", "xaip");
-    DEFAULT_NS_PREFIX_MAP.put("http://www.w3.org/2001/XMLSchema", "xs");
-    DEFAULT_NS_PREFIX_MAP.put("http://www.w3.org/2000/09/xmldsig#", "ds");
-    DEFAULT_NS_PREFIX_MAP.put("http://uri.etsi.org/01903/v1.3.2#", "xades");
-    DEFAULT_NS_PREFIX_MAP.put("urn:ietf:params:xml:ns:ers", "ers");
-    DEFAULT_NS_PREFIX_MAP.put("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#", "vr");
-    DEFAULT_NS_PREFIX_MAP.put("urn:oasis:names:tc:dss:1.0:core:schema", "dss");
-    DEFAULT_NS_PREFIX_MAP.put("http://www.bsi.bund.de/ecard/api/1.1", "ec");
-    DEFAULT_NS_PREFIX_MAP.put("urn:oasis:names:tc:SAML:2.0:assertion", "saml");
-  }
-
-  private final Map<String, String> nsPrefixMap;
-
-  /**
-   * Constructs a name space mapper using given map
-   *
-   * @param configured
-   */
-  public NamespaceMapper(Map<String, String> configured)
-  {
-    nsPrefixMap = new HashMap<>(DEFAULT_NS_PREFIX_MAP);
-    var tnsSet = false;
-    for ( var entry : configured.entrySet() )
+    static
     {
-      var isTargetNamespace = entry.getValue() == null || entry.getValue().isEmpty();
-      if (tnsSet && isTargetNamespace)
-      {
-        throw new IllegalArgumentException("Only one targetNamespace (empty namespace prefix) may be defined in the configuration!");
-      }
-      tnsSet = tnsSet || isTargetNamespace;
-      nsPrefixMap.put(entry.getKey(), entry.getValue());
+        DEFAULT_NS_PREFIX_MAP.put("http://www.bsi.bund.de/tr-esor/xaip", "xaip");
+        DEFAULT_NS_PREFIX_MAP.put("http://www.w3.org/2001/XMLSchema", "xs");
+        DEFAULT_NS_PREFIX_MAP.put("http://www.w3.org/2000/09/xmldsig#", "ds");
+        DEFAULT_NS_PREFIX_MAP.put("http://uri.etsi.org/01903/v1.3.2#", "xades");
+        DEFAULT_NS_PREFIX_MAP.put("urn:ietf:params:xml:ns:ers", "ers");
+        DEFAULT_NS_PREFIX_MAP.put("urn:oasis:names:tc:dss-x:1.0:profiles:verificationreport:schema#", "vr");
+        DEFAULT_NS_PREFIX_MAP.put("urn:oasis:names:tc:dss:1.0:core:schema", "dss");
+        DEFAULT_NS_PREFIX_MAP.put("http://www.bsi.bund.de/ecard/api/1.1", "ec");
+        DEFAULT_NS_PREFIX_MAP.put("urn:oasis:names:tc:SAML:2.0:assertion", "saml");
     }
-  }
 
-  /**
-   * Reconstructs the namespace prefixes in a given element. When creating elements from JAXB objects, there
-   * is no prefix defined. We manipulate the element because JAXB would require the usage of a class from
-   * package com.sun.* to create the prefixes during marshaling.
-   *
-   * @param element
-   */
-  public void setNSPrefixRecursively(Element element)
-  {
-    if (nsPrefixMap.containsKey(element.getNamespaceURI()))
-    {
-      setNSPrefix(element);
-    }
-    var children = element.getChildNodes().getLength();
-    for ( var i = 0 ; i < children ; i++ )
-    {
-      var child = element.getChildNodes().item(i);
-      if (child instanceof Element)
-      {
-        setNSPrefixRecursively((Element)child);
-      }
-    }
-  }
+    private final Map<String, String> nsPrefixMap;
 
-  void setNSPrefix(Element element)
-  {
-    var prefix = nsPrefixMap.get(element.getNamespaceURI());
-    element.setPrefix(prefix);
-    element.removeAttribute("xmlns");
-    element.setAttributeNS("http://www.w3.org/2000/xmlns/",
-                           prefix == null || prefix.isEmpty() ? "xmlns" : "xmlns:" + prefix,
-                           element.getNamespaceURI());
-  }
+    /**
+     * Constructs a name space mapper using given map
+     *
+     * @param configured
+     */
+    public NamespaceMapper(Map<String, String> configured)
+    {
+        nsPrefixMap = new HashMap<>(DEFAULT_NS_PREFIX_MAP);
+        var tnsSet = false;
+        for (var entry : configured.entrySet())
+        {
+            var isTargetNamespace = entry.getValue() == null || entry.getValue().isEmpty();
+            if (tnsSet && isTargetNamespace)
+            {
+                throw new IllegalArgumentException("Only one targetNamespace (empty namespace prefix) may be defined in the configuration!");
+            }
+            tnsSet = tnsSet || isTargetNamespace;
+            nsPrefixMap.put(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Reconstructs the namespace prefixes in a given element. When creating elements from JAXB objects, there is no prefix defined. We
+     * manipulate the element because JAXB would require the usage of a class from package com.sun.* to create the prefixes during
+     * marshaling.
+     *
+     * @param element
+     */
+    public void setNSPrefixRecursively(Element element)
+    {
+        if (nsPrefixMap.containsKey(element.getNamespaceURI()))
+        {
+            setNSPrefix(element);
+        }
+        var children = element.getChildNodes().getLength();
+        for (var i = 0; i < children; i++)
+        {
+            var child = element.getChildNodes().item(i);
+            if (child instanceof Element)
+            {
+                setNSPrefixRecursively((Element)child);
+            }
+        }
+    }
+
+    void setNSPrefix(Element element)
+    {
+        var prefix = nsPrefixMap.get(element.getNamespaceURI());
+        element.setPrefix(prefix);
+        element.removeAttribute("xmlns");
+        element.setAttributeNS("http://www.w3.org/2000/xmlns/",
+            prefix == null || prefix.isEmpty() ? "xmlns" : "xmlns:" + prefix,
+            element.getNamespaceURI());
+    }
 }

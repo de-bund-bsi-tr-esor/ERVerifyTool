@@ -22,24 +22,24 @@
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
 /**
- * Specifies that an object is able to create a report part of a certain type, mainly because its internal
- * data representation uses that type anyway.
+ * Specifies that an object is able to create a report part of a certain type, mainly because its internal data representation uses that
+ * type anyway.
  *
- * @author TT
  * @param <T> type of output to create
+ * @author TT
  */
 public interface OutputCreator<T>
 {
 
-  /**
-   * Returns an instance of target class filled with data from this object.
-   */
-  T getFormatted();
+    /**
+     * Returns an instance of target class filled with data from this object.
+     */
+    T getFormatted();
 
-  /**
-   * Returns the type of object created by {@link #getFormatted()}. This method my be needed because
-   * instanceof can only check runtime erasure and misses the parameter type.
-   */
-  Class<T> getTargetClass();
+    /**
+     * Returns the type of object created by {@link #getFormatted()}. This method my be needed because instanceof can only check runtime
+     * erasure and misses the parameter type.
+     */
+    Class<T> getTargetClass();
 
 }

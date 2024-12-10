@@ -37,17 +37,16 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestDetachedSignatureValidationContext
 {
 
-  /**
-   * Assert that adding file extensions for unknown objects in the context fails.
-   */
-  @Test
-  public void extensionForWrongObject()
-  {
-    DetachedSignatureValidationContext contextUnderTest = new DetachedSignatureValidationContext(null, null,
-                                                                                                 Collections.emptyMap(),
-                                                                                                 "");
-    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-              .isThrownBy(() -> contextUnderTest.setPreferredExtension(new Reference("falsch"), "*.docx"))
-              .withMessage("Not a reference of protected data: falsch");
-  }
+    /**
+     * Assert that adding file extensions for unknown objects in the context fails.
+     */
+    @Test
+    public void extensionForWrongObject()
+    {
+        DetachedSignatureValidationContext contextUnderTest =
+            new DetachedSignatureValidationContext(null, null, Collections.emptyMap(), "");
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> contextUnderTest.setPreferredExtension(new Reference("falsch"), "*.docx"))
+            .withMessage("Not a reference of protected data: falsch");
+    }
 }

@@ -45,44 +45,35 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 public class TestValidatorRepository
 {
 
-  /**
-   * Asserts that the system prefers values in the profile over general definitions and chooses the most
-   * specific matching class.
-   */
-  @Test
-  public void select()
-  {
-    var systemUnderTest = new ValidatorRepository();
-    systemUnderTest.addGeneral(() -> "map", Map.class, ValidationContext.class, ReportPart.class);
-    systemUnderTest.addGeneral(() -> "hashmap", HashMap.class, ValidationContext.class, ReportPart.class);
-    systemUnderTest.addGeneral(() -> "treemap", TreeMap.class, ValidationContext.class, ReportPart.class);
-    systemUnderTest.addToProfile(() -> "treemap2",
-                                 TreeMap.class,
-                                 ValidationContext.class,
-                                 ReportPart.class,
-                                 "2");
-    systemUnderTest.addToProfile(() -> "map3", Map.class, ValidationContext.class, ReportPart.class, "3");
+    /**
+     * Asserts that the system prefers values in the profile over general definitions and chooses the most specific matching class.
+     */
+    @Test
+    public void select()
+    {
+        var systemUnderTest = new ValidatorRepository();
+        systemUnderTest.addGeneral(() -> "map", Map.class, ValidationContext.class, ReportPart.class);
+        systemUnderTest.addGeneral(() -> "hashmap", HashMap.class, ValidationContext.class, ReportPart.class);
+        systemUnderTest.addGeneral(() -> "treemap", TreeMap.class, ValidationContext.class, ReportPart.class);
+        systemUnderTest.addToProfile(() -> "treemap2", TreeMap.class, ValidationContext.class, ReportPart.class, "2");
+        systemUnderTest.addToProfile(() -> "map3", Map.class, ValidationContext.class, ReportPart.class, "3");
 
-    assertThat("direct match in profile",
-               systemUnderTest.get(TreeMap.class, ValidationContext.class, ReportPart.class, "2").get(),
-               is("treemap2"));
-    assertThat("indirect match in profile (over direct in general)",
-               systemUnderTest.get(HashMap.class, ValidationContext.class, ReportPart.class, "3").get(),
-               is("map3"));
-    assertThat("not in profile",
-               systemUnderTest.get(HashMap.class, ValidationContext.class, ReportPart.class, "2").get(),
-               is("hashmap"));
-    assertThat("unknown profile",
-               systemUnderTest.get(TreeMap.class, ValidationContext.class, ReportPart.class, "unknown").get(),
-               is("treemap"));
-    assertThat("indirect match",
-               systemUnderTest.get(SortedMap.class, ValidationContext.class, ReportPart.class, "2").get(),
-               is("map"));
-    assertThat("best match",
-               systemUnderTest.get(LinkedHashMap.class, ValidationContext.class, ReportPart.class, "2").get(),
-               is("hashmap"));
-    assertThat("no match",
-               systemUnderTest.get(String.class, ValidationContext.class, ReportPart.class, "2"),
-               nullValue());
-  }
+        assertThat("direct match in profile",
+            systemUnderTest.get(TreeMap.class, ValidationContext.class, ReportPart.class, "2").get(),
+            is("treemap2"));
+        assertThat("indirect match in profile (over direct in general)",
+            systemUnderTest.get(HashMap.class, ValidationContext.class, ReportPart.class, "3").get(),
+            is("map3"));
+        assertThat("not in profile",
+            systemUnderTest.get(HashMap.class, ValidationContext.class, ReportPart.class, "2").get(),
+            is("hashmap"));
+        assertThat("unknown profile",
+            systemUnderTest.get(TreeMap.class, ValidationContext.class, ReportPart.class, "unknown").get(),
+            is("treemap"));
+        assertThat("indirect match", systemUnderTest.get(SortedMap.class, ValidationContext.class, ReportPart.class, "2").get(), is("map"));
+        assertThat("best match",
+            systemUnderTest.get(LinkedHashMap.class, ValidationContext.class, ReportPart.class, "2").get(),
+            is("hashmap"));
+        assertThat("no match", systemUnderTest.get(String.class, ValidationContext.class, ReportPart.class, "2"), nullValue());
+    }
 }

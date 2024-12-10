@@ -35,13 +35,13 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class BasisErsArchiveTimeStampChainValidator extends ArchiveTimeStampChainValidator
 {
 
-  @Override
-  protected ATSChainReport validateInternal(Reference ref, ArchiveTimeStampChain toCheck)
-  {
-    if (toCheck.isEmpty())
+    @Override
+    protected ATSChainReport validateInternal(Reference ref, ArchiveTimeStampChain toCheck)
     {
-      ctx.getFormatOk().invalidate("must contain at least one ArchiveTimeStamp", ref.newChild("numberATS"));
+        if (toCheck.isEmpty())
+        {
+            ctx.getFormatOk().invalidate("must contain at least one ArchiveTimeStamp", ref.newChild("numberATS"));
+        }
+        return super.validateInternal(ref, toCheck);
     }
-    return super.validateInternal(ref, toCheck);
-  }
 }

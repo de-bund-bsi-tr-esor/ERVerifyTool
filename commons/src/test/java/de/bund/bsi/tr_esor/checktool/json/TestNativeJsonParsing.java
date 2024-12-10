@@ -44,34 +44,32 @@ public class TestNativeJsonParsing
 {
 
 
-  private ScriptEngine engine;
+    private ScriptEngine engine;
 
-  /**
-   * Initializes the Nashorn ScriptEngine.
-   */
-  @Before
-  public void initEngine()
-  {
-    var sem = new ScriptEngineManager();
-    this.engine = sem.getEngineByName("javascript");
-  }
+    /**
+     * Initializes the Nashorn ScriptEngine.
+     */
+    @Before
+    public void initEngine()
+    {
+        var sem = new ScriptEngineManager();
+        this.engine = sem.getEngineByName("javascript");
+    }
 
-  /**
-   * Asserts that native JSON parsing is possible.
-   *
-   * @throws IOException
-   * @throws ScriptException
-   */
-  @Test
-  public void parseJson() throws IOException, ScriptException
-  {
-    var json = "{\"person\": {\"erster\": {\"name\":\"herbert\"} }}";
-    var script = "Java.asJSONCompatible(" + json + ")";
-    var result = this.engine.eval(script);
-    @SuppressWarnings("unchecked")
-    var name = ((Map<String, Map<String, Map<String, String>>>)result).get("person")
-                                                                      .get("erster")
-                                                                      .get("name");
-    assertThat("Parsed Name", name, is("herbert"));
-  }
+    /**
+     * Asserts that native JSON parsing is possible.
+     *
+     * @throws IOException
+     * @throws ScriptException
+     */
+    @Test
+    public void parseJson() throws IOException, ScriptException
+    {
+        var json = "{\"person\": {\"erster\": {\"name\":\"herbert\"} }}";
+        var script = "Java.asJSONCompatible(" + json + ")";
+        var result = this.engine.eval(script);
+        @SuppressWarnings("unchecked")
+        var name = ((Map<String, Map<String, Map<String, String>>>)result).get("person").get("erster").get("name");
+        assertThat("Parsed Name", name, is("herbert"));
+    }
 }

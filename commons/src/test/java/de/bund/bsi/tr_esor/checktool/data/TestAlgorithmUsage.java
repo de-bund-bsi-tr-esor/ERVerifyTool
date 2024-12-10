@@ -42,20 +42,20 @@ import de.bund.bsi.tr_esor.checktool.data.AlgorithmUsage.UsageType;
 public class TestAlgorithmUsage
 {
 
-  /**
-   * Asserts that creation works for hashed and signed usage type. Asserts that instances are immutable.
-   */
-  @Test
-  public void creation() throws Exception
-  {
-    var date = new Date();
-    var hashed = AlgorithmUsage.createHashed("1.2.3.4.5", date);
-    assertThat(hashed.getUsage(), is(UsageType.DATA_HASHING));
-    assertThat(hashed.getValidationDate(), allOf(is(date), not(sameInstance(date))));
+    /**
+     * Asserts that creation works for hashed and signed usage type. Asserts that instances are immutable.
+     */
+    @Test
+    public void creation() throws Exception
+    {
+        var date = new Date();
+        var hashed = AlgorithmUsage.createHashed("1.2.3.4.5", date);
+        assertThat(hashed.getUsage(), is(UsageType.DATA_HASHING));
+        assertThat(hashed.getValidationDate(), allOf(is(date), not(sameInstance(date))));
 
-    var signed = AlgorithmUsage.createSigned("1.2.3.4.5", date);
-    assertThat(signed.getUsage(), is(UsageType.QES));
-    assertThat(signed.getValidationDate(), allOf(is(date), not(sameInstance(date))));
-  }
+        var signed = AlgorithmUsage.createSigned("1.2.3.4.5", date);
+        assertThat(signed.getUsage(), is(UsageType.QES));
+        assertThat(signed.getValidationDate(), allOf(is(date), not(sameInstance(date))));
+    }
 
 }

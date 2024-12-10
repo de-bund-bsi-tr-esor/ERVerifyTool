@@ -51,90 +51,89 @@ import org.w3c.dom.Element;
 public class TestNamespaceMapper
 {
 
-  /**
-   * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testDefaultMapping() throws Exception
-  {
-    var doc = getDocument();
-    var xaip = buildElementsWithWrongPrefix(doc);
-    doc.appendChild(xaip);
+    /**
+     * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testDefaultMapping() throws Exception
+    {
+        var doc = getDocument();
+        var xaip = buildElementsWithWrongPrefix(doc);
+        doc.appendChild(xaip);
 
-    assertThat("Marshalled xml of unmapped element",
-               toString(doc),
-               allOf(containsString("<test1 xmlns"),
-                     containsString("<notStandardPrefix:test3 xmlns:notStandardPrefix")));
-    var m = new NamespaceMapper(Collections.emptyMap());
-    m.setNSPrefixRecursively(xaip);
-    assertThat("Marshalled xml of unmapped element",
-               toString(doc),
-               allOf(containsString("<xaip:test1 xmlns:xaip="), containsString("<xades:test3 xmlns:xades=")));
-  }
+        assertThat("Marshalled xml of unmapped element",
+            toString(doc),
+            allOf(containsString("<test1 xmlns"), containsString("<notStandardPrefix:test3 xmlns:notStandardPrefix")));
+        var m = new NamespaceMapper(Collections.emptyMap());
+        m.setNSPrefixRecursively(xaip);
+        assertThat("Marshalled xml of unmapped element",
+            toString(doc),
+            allOf(containsString("<xaip:test1 xmlns:xaip="), containsString("<xades:test3 xmlns:xades=")));
+    }
 
-  /**
-   * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testCustomMapping() throws Exception
-  {
-    var doc = getDocument();
-    var xaip = buildElementsWithWrongPrefix(doc);
-    doc.appendChild(xaip);
-    Map<String, String> configuredPrefix = new HashMap<>();
-    configuredPrefix.put("http://uri.etsi.org/01903/v1.3.2#", ""); // target namespace
-    configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip", "other");
-    var m = new NamespaceMapper(configuredPrefix);
-    m.setNSPrefixRecursively(xaip);
-    assertThat("Marshalled xml of unmapped element",
-               toString(doc),
-               allOf(containsString("<other:test1 xmlns:other="), containsString("<test3 xmlns=")));
-  }
+    /**
+     * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCustomMapping() throws Exception
+    {
+        var doc = getDocument();
+        var xaip = buildElementsWithWrongPrefix(doc);
+        doc.appendChild(xaip);
+        Map<String, String> configuredPrefix = new HashMap<>();
+        configuredPrefix.put("http://uri.etsi.org/01903/v1.3.2#", ""); // target namespace
+        configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip", "other");
+        var m = new NamespaceMapper(configuredPrefix);
+        m.setNSPrefixRecursively(xaip);
+        assertThat("Marshalled xml of unmapped element",
+            toString(doc),
+            allOf(containsString("<other:test1 xmlns:other="), containsString("<test3 xmlns=")));
+    }
 
-  /**
-   * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
-   *
-   * @throws Exception
-   */
-  @SuppressWarnings("unused")
-  @Test
-  public void testInvalidConfiguration() throws Exception
-  {
-    Map<String, String> configuredPrefix = new HashMap<>();
-    configuredPrefix.put("http://uri.etsi.org/01903/v1.3.2#", ""); // target namespace
-    configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip/1.2", ""); // duplicate target namespace
-    Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
-              .isThrownBy(() -> new NamespaceMapper(configuredPrefix))
-              .withMessageContaining("Only one targetNamespace");
-  }
+    /**
+     * Tests the mapping with default configuration results in prefixes defined in the ESOR XAIP schema.
+     *
+     * @throws Exception
+     */
+    @SuppressWarnings("unused")
+    @Test
+    public void testInvalidConfiguration() throws Exception
+    {
+        Map<String, String> configuredPrefix = new HashMap<>();
+        configuredPrefix.put("http://uri.etsi.org/01903/v1.3.2#", ""); // target namespace
+        configuredPrefix.put("http://www.bsi.bund.de/tr-esor/xaip/1.2", ""); // duplicate target namespace
+        Assertions.assertThatExceptionOfType(IllegalArgumentException.class)
+            .isThrownBy(() -> new NamespaceMapper(configuredPrefix))
+            .withMessageContaining("Only one targetNamespace");
+    }
 
-  private Element buildElementsWithWrongPrefix(Document doc)
-  {
-    var xaip = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip", "test1");
-    var xaip2 = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip", "test2");
-    var xades = doc.createElementNS("http://uri.etsi.org/01903/v1.3.2#", "test3");
-    xades.setPrefix("notStandardPrefix");
-    xaip.appendChild(xaip2);
-    xaip.appendChild(xades);
-    return xaip;
-  }
+    private Element buildElementsWithWrongPrefix(Document doc)
+    {
+        var xaip = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip", "test1");
+        var xaip2 = doc.createElementNS("http://www.bsi.bund.de/tr-esor/xaip", "test2");
+        var xades = doc.createElementNS("http://uri.etsi.org/01903/v1.3.2#", "test3");
+        xades.setPrefix("notStandardPrefix");
+        xaip.appendChild(xaip2);
+        xaip.appendChild(xades);
+        return xaip;
+    }
 
-  private Document getDocument() throws ParserConfigurationException
-  {
-    var dbf = DocumentBuilderFactory.newInstance();
-    var builder = dbf.newDocumentBuilder();
-    return builder.newDocument();
-  }
+    private Document getDocument() throws ParserConfigurationException
+    {
+        var dbf = DocumentBuilderFactory.newInstance();
+        var builder = dbf.newDocumentBuilder();
+        return builder.newDocument();
+    }
 
-  private String toString(Document doc) throws Exception
-  {
-    var tf = TransformerFactory.newInstance().newTransformer();
-    Writer out = new StringWriter();
-    tf.transform(new DOMSource(doc), new StreamResult(out));
-    return out.toString();
-  }
+    private String toString(Document doc) throws Exception
+    {
+        var tf = TransformerFactory.newInstance().newTransformer();
+        Writer out = new StringWriter();
+        tf.transform(new DOMSource(doc), new StreamResult(out));
+        return out.toString();
+    }
 }

@@ -49,103 +49,105 @@ import de.bund.bsi.tr_esor.xaip.XAIPType;
 public class FileParameterFinder extends ParameterFinder
 {
 
-  /**
-   * Creates an instance based on given files.
-   *
-   * @param protectedData should contain binary data, XAIP or CMS signature, last two possibly with contained
-   *          ERs.
-   * @param er optional, may be ASN.1 ER only or embedded into XML
-   * @param profileName
-   */
-  public FileParameterFinder(Path protectedData, Path er, String profileName) throws IOException
-  {
-    super();
-    handleProfileName(profileName);
+    /**
+     * Creates an instance based on given files.
+     *
+     * @param protectedData should contain binary data, XAIP or CMS signature, last two possibly with contained ERs.
+     * @param er optional, may be ASN.1 ER only or embedded into XML
+     * @param profileName
+     */
+    public FileParameterFinder(Path protectedData, Path er, String profileName) throws IOException
+    {
+        super();
+        handleProfileName(profileName);
 
-    returnVerificationReport = FACTORY_OASIS_VR.createReturnVerificationReport();
-    returnVerificationReport.setReportDetailLevel(ReportDetailLevel.ALL_DETAILS.toString());
-    if (er != null)
-    {
-      setErAttributes(parse(er));
+        returnVerificationReport = FACTORY_OASIS_VR.createReturnVerificationReport();
+        returnVerificationReport.setReportDetailLevel(ReportDetailLevel.ALL_DETAILS.toString());
+        if (er != null)
+        {
+            setErAttributes(parse(er));
+        }
+        if (protectedData != null)
+        {
+            setDataAttribute(protectedData, parse(protectedData));
+        }
     }
-    if (protectedData != null)
-    {
-      setDataAttribute(protectedData, parse(protectedData));
-    }
-  }
 
-  private void setErAttributes(Object parsedEr) throws IOException
-  {
-    var baseErRef = new Reference("command line parameter er");
-    if (parsedEr instanceof EvidenceRecord)
+    private void setErAttributes(Object parsedEr) throws IOException
     {
-      er = (EvidenceRecord)parsedEr;
-      erRef = baseErRef;
+        var baseErRef = new Reference("command line parameter er");
+        var erParameter = new ERParameter();
+        if (parsedEr instanceof EvidenceRecord)
+        {
+            erParameter.setEr((EvidenceRecord)parsedEr);
+            erParameter.setErRef(baseErRef);
+        }
+        else if (parsedEr instanceof EvidenceRecordType)
+        {
+            var r = (EvidenceRecordType)parsedEr;
+            erParameter.setXaipVersionAddressedByEr(r.getVersionID());
+            erParameter.setXaipAoidAddressedByEr(r.getAOID());
+            erParameter.setErRef(baseErRef.newChild("asn1EvidenceRecord"));
+            erParameter.getErRef().setxPath("/evidenceRecord/asn1EvidenceRecord");
+            if (r.getAsn1EvidenceRecord() != null)
+            {
+                erParameter.setEr(new ASN1EvidenceRecordParser().parse(r.getAsn1EvidenceRecord()));
+            }
+        }
+        else if (parsedEr instanceof CMSSignedData)
+        {
+            cmsDocument = (CMSSignedData)parsedEr;
+            cmsRef = baseErRef;
+        }
+        else if (parsedEr instanceof XAIPType) // anticipating a likely usage error
+        {
+            xaip = (XAIPType)parsedEr;
+            xaipRef = baseErRef;
+        }
+        else
+        {
+            unsupportedRef = baseErRef;
+        }
+        providedERs.add(erParameter);
     }
-    else if (parsedEr instanceof EvidenceRecordType)
-    {
-      var r = (EvidenceRecordType)parsedEr;
-      xaipVersionAddressdByEr = r.getVersionID();
-      xaipAoidAddressdByEr = r.getAOID();
-      erRef = baseErRef.newChild("asn1EvidenceRecord");
-      erRef.setxPath("/evidenceRecord/asn1EvidenceRecord");
-      if (r.getAsn1EvidenceRecord() != null)
-      {
-        er = new ASN1EvidenceRecordParser().parse(r.getAsn1EvidenceRecord());
-      }
-    }
-    else if (parsedEr instanceof CMSSignedData)
-    {
-      cmsDocument = (CMSSignedData)parsedEr;
-      cmsRef = baseErRef;
-    }
-    else if (parsedEr instanceof XAIPType) // anticipating a likely usage error
-    {
-      xaip = (XAIPType)parsedEr;
-      xaipRef = baseErRef;
-    }
-    else
-    {
-      unsupportedRef = baseErRef;
-    }
-  }
 
-  private void setDataAttribute(Path protectedData, Object parsedData) throws IOException
-  {
-    var dataRef = new Reference("command line parameter data");
-    if (parsedData instanceof UnsupportedData)
+    private void setDataAttribute(Path protectedData, Object parsedData) throws IOException
     {
-      unsupportedRef = dataRef;
-      unsupportedData = (UnsupportedData)parsedData;
+        var dataRef = new Reference("command line parameter data");
+        if (parsedData instanceof UnsupportedData)
+        {
+            unsupportedRef = dataRef;
+            unsupportedData = (UnsupportedData)parsedData;
+        }
+        else if (parsedData instanceof XaipAndSerializer)
+        {
+            xaip = ((XaipAndSerializer)parsedData).getXaip();
+            serializer = ((XaipAndSerializer)parsedData).getSerializer();
+            xaipRef = dataRef;
+        }
+        else if (parsedData instanceof byte[])
+        {
+            binaryDocuments.put(dataRef, (byte[])parsedData);
+        }
+        else
+        {
+            try (InputStream ins = new FileInputStream(protectedData.toFile()))
+            {
+                binaryDocuments.put(dataRef, ins.readAllBytes());
+            }
+        }
     }
-    else if (parsedData instanceof XaipAndSerializer)
-    {
-      xaip = ((XaipAndSerializer)parsedData).getXaip();
-      serializer = ((XaipAndSerializer)parsedData).getSerializer();
-      xaipRef = dataRef;
-    }
-    else if (parsedData instanceof byte[])
-    {
-      binaryDocuments.put(dataRef, (byte[])parsedData);
-    }
-    else
-    {
-      try (InputStream ins = new FileInputStream(protectedData.toFile()))
-      {
-        binaryDocuments.put(dataRef, ins.readAllBytes());
-      }
-    }
-  }
 
-  private Object parse(Path path) throws IOException
-  {
-    try (InputStream fi = new FileInputStream(path.toFile()); InputStream ins = new BufferedInputStream(fi))
+    private Object parse(Path path) throws IOException
     {
-      return ParserFactory.parse(ins, getProfileName());
+        try (InputStream fi = new FileInputStream(path.toFile());
+            InputStream ins = new BufferedInputStream(fi))
+        {
+            return ParserFactory.parse(ins, getProfileName());
+        }
+        catch (IOException e)
+        {
+            throw new IOException("Cannot read content of file " + path.toAbsolutePath(), e);
+        }
     }
-    catch (IOException e)
-    {
-      throw new IOException("Cannot read content of file " + path.toAbsolutePath(), e);
-    }
-  }
 }

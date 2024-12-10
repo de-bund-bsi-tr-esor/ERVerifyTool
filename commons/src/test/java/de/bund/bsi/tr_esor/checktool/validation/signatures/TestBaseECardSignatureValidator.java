@@ -24,19 +24,18 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_OASIS_VR;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import oasis.names.tc.dss._1_0.core.schema.AnyType;
-import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
-import oasis.names.tc.dss._1_0.core.schema.Result;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
-
-import jakarta.xml.bind.JAXBElement;
-
 import org.junit.Test;
 
 import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
+
+import jakarta.xml.bind.JAXBElement;
+import oasis.names.tc.dss._1_0.core.schema.AnyType;
+import oasis.names.tc.dss._1_0.core.schema.ResponseBaseType;
+import oasis.names.tc.dss._1_0.core.schema.Result;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
 
 
 /**
@@ -47,77 +46,75 @@ import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
 public class TestBaseECardSignatureValidator
 {
 
-  public static final String TEST = "test";
+    public static final String TEST = "test";
 
-  /**
-   * Asserts that report is filled with indetermined result code because of passed given result message.
-   */
-  @Test
-  public void fillInIndetermined()
-  {
-    var report = new SignatureReportPart(new Reference(TEST));
+    /**
+     * Asserts that report is filled with indetermined result code because of passed given result message.
+     */
+    @Test
+    public void fillInIndetermined()
+    {
+        var report = new SignatureReportPart(new Reference(TEST));
 
-    BaseECardSignatureValidator.fillIn(report, null, "some result message");
+        BaseECardSignatureValidator.fillIn(report, null, "some result message");
 
-    assertThat(report.getOverallResult()
-                     .getResultMajor()).isEqualTo(ValidationResultMajor.INDETERMINED.toString());
-    assertThat(report.getOverallResult().getResultMinor()).isEqualTo(ECardResultMinor.PARAMETER_ERROR);
-    assertThat(report.getOverallResult().getResultMessage().getValue()).isEqualTo("some result message");
-    assertThat(report.getVr()).isNull();
-  }
+        assertThat(report.getOverallResult().getResultMajor()).isEqualTo(ValidationResultMajor.INDETERMINED.toString());
+        assertThat(report.getOverallResult().getResultMinor()).isEqualTo(ECardResultMinor.PARAMETER_ERROR);
+        assertThat(report.getOverallResult().getResultMessage().getValue()).isEqualTo("some result message");
+        assertThat(report.getVr()).isNull();
+    }
 
-  /**
-   * Asserts that report is filled with invalid result code.
-   */
-  @Test
-  public void fillInInvalid()
-  {
-    var response = new ResponseBaseType();
-    var optionalOutputs = new AnyType();
-    var verificationReportType = FACTORY_OASIS_VR.createVerificationReportType();
-    var individualReport = new IndividualReportType();
-    var individualReportResult = new Result();
-    individualReportResult.setResultMinor(ECardResultMinor.INVALID_SIGNATURE);
-    individualReport.setResult(individualReportResult);
-    verificationReportType.getIndividualReport().add(individualReport);
-    JAXBElement<VerificationReportType> element = FACTORY_OASIS_VR.createVerificationReport(verificationReportType);
-    optionalOutputs.getAny().add(element);
-    response.setOptionalOutputs(optionalOutputs);
-    var result = new Result();
-    result.setResultMajor(ECardResultMajor.ERROR);
-    response.setResult(result);
-    var report = new SignatureReportPart(new Reference(TEST));
+    /**
+     * Asserts that report is filled with invalid result code.
+     */
+    @Test
+    public void fillInInvalid()
+    {
+        var response = new ResponseBaseType();
+        var optionalOutputs = new AnyType();
+        var verificationReportType = FACTORY_OASIS_VR.createVerificationReportType();
+        var individualReport = new IndividualReportType();
+        var individualReportResult = new Result();
+        individualReportResult.setResultMinor(ECardResultMinor.INVALID_SIGNATURE);
+        individualReport.setResult(individualReportResult);
+        verificationReportType.getIndividualReport().add(individualReport);
+        JAXBElement<VerificationReportType> element = FACTORY_OASIS_VR.createVerificationReport(verificationReportType);
+        optionalOutputs.getAny().add(element);
+        response.setOptionalOutputs(optionalOutputs);
+        var result = new Result();
+        result.setResultMajor(ECardResultMajor.ERROR);
+        response.setResult(result);
+        var report = new SignatureReportPart(new Reference(TEST));
 
-    BaseECardSignatureValidator.fillIn(report, response, null);
+        BaseECardSignatureValidator.fillIn(report, response, null);
 
-    assertThat(report.getOverallResult()
-                     .getResultMajor()).isEqualTo(ValidationResultMajor.INVALID.toString());
-    assertThat(report.getOverallResult().getResultMinor()).isEqualTo(ECardResultMinor.INVALID_SIGNATURE);
-    assertThat(report.getVr()).isEqualTo(verificationReportType);
-  }
+        assertThat(report.getOverallResult().getResultMajor()).isEqualTo(ValidationResultMajor.INVALID.toString());
+        assertThat(report.getOverallResult().getResultMinor()).isEqualTo(ECardResultMinor.INVALID_SIGNATURE);
+        assertThat(report.getVr()).isEqualTo(verificationReportType);
+    }
 
-  /**
-   * Asserts that report is filled with valid result code.
-   */
-  @Test
-  public void fillInValid()
-  {
-    var response = new ResponseBaseType();
-    var optionalOutputs = new AnyType();
-    var verificationReportType = FACTORY_OASIS_VR.createVerificationReportType();
-    verificationReportType.getIndividualReport().add(new IndividualReportType());
-    var element = FACTORY_OASIS_VR.createVerificationReport(verificationReportType);
-    optionalOutputs.getAny().add(element);
-    response.setOptionalOutputs(optionalOutputs);
-    var result = new Result();
-    result.setResultMajor(ECardResultMajor.OK);
-    response.setResult(result);
-    var report = new SignatureReportPart(new Reference(TEST));
+    /**
+     * Asserts that report is filled with valid result code.
+     */
+    @Test
+    public void fillInValid()
+    {
+        var response = new ResponseBaseType();
+        var optionalOutputs = new AnyType();
+        var verificationReportType = FACTORY_OASIS_VR.createVerificationReportType();
+        verificationReportType.getIndividualReport().add(new IndividualReportType());
+        var element = FACTORY_OASIS_VR.createVerificationReport(verificationReportType);
+        optionalOutputs.getAny().add(element);
+        response.setOptionalOutputs(optionalOutputs);
+        var result = new Result();
+        result.setResultMajor(ECardResultMajor.OK);
+        response.setResult(result);
+        var report = new SignatureReportPart(new Reference(TEST));
 
-    BaseECardSignatureValidator.fillIn(report, response, null);
+        BaseECardSignatureValidator.fillIn(report, response, null);
 
-    assertThat(report.getOverallResult().getResultMajor()).isEqualTo(ValidationResultMajor.VALID.toString());
-    assertThat(report.getOverallResult().getResultMessage()).isNull();
-    assertThat(report.getVr()).isEqualTo(verificationReportType);
-  }
+        assertThat(report.getOverallResult().getResultMajor()).isEqualTo(ValidationResultMajor.VALID.toString());
+        assertThat(report.getOverallResult().getResultMessage()).isNull();
+        assertThat(report.getVr()).isEqualTo(verificationReportType);
+    }
 }

@@ -30,8 +30,6 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.dom.DOMSource;
 
-import jakarta.xml.bind.JAXBException;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3._2000._09.xmldsig_.CanonicalizationMethodType;
@@ -44,92 +42,91 @@ import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.xaip.XAIPType;
 
+import jakarta.xml.bind.JAXBException;
+
 
 /**
- * Parses a XAIP and remembers the original DOM structure containing all the non-tag nodes, namespace prefixes
- * and so on. <strong>Warning:</strong> Instances are not thread-safe.
+ * Parses a XAIP and remembers the original DOM structure containing all the non-tag nodes, namespace prefixes and so on.
+ * <strong>Warning:</strong> Instances are not thread-safe.
  *
  * @author TT, WS
  */
 public class XaipParser extends RegexBasedParser<XaipAndSerializer>
 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(XaipParser.class);
+    private static final Logger LOG = LoggerFactory.getLogger(XaipParser.class);
 
-  private static final DocumentBuilderFactory DBF = newDocumentBuilderFactory();
+    private static final DocumentBuilderFactory DBF = newDocumentBuilderFactory();
 
-  private final LXaipReader lXaipReader;
+    private final LXaipReader lXaipReader;
 
-  private Document document;
+    private Document document;
 
-  private String canonicalizationAlgo;
+    private String canonicalizationAlgo;
 
-  /**
-   * Creates new instance which may be re-used but is not thread safe.
-   */
-  public XaipParser(LXaipReader lXaipReader)
-  {
-    super(regexForMainTag("XAIP", "http://www.bsi.bund.de/tr-esor/xaip"));
-    this.lXaipReader = lXaipReader;
-  }
-
-  @Override
-  public XaipAndSerializer parse() throws IOException
-  {
-    try
+    /**
+     * Creates new instance which may be re-used but is not thread safe.
+     */
+    public XaipParser(LXaipReader lXaipReader)
     {
-      DocumentBuilder db = DBF.newDocumentBuilder();
-      document = db.parse(input);
+        super(regexForMainTag("XAIP", "http://www.bsi.bund.de/tr-esor/xaip"));
+        this.lXaipReader = lXaipReader;
+    }
 
-      XAIPType result = XmlHelper.parse(new DOMSource(document),
-                                        XAIPType.class,
-                                        XmlHelper.FACTORY_XAIP.getClass().getPackage().getName() + ":"
-                                                        + XmlHelper.FACTORY_ASIC.getClass()
-                                                                                .getPackage()
-                                                                                .getName());
-      canonicalizationAlgo = Optional.ofNullable(result.getPackageHeader().getCanonicalizationMethod())
-                                     .map(CanonicalizationMethodType::getAlgorithm)
-                                     .orElse("http://www.w3.org/2001/10/xml-exc-c14n#");
-      return new XaipAndSerializer(result, createSerializer());
-    }
-    catch (JAXBException | ParserConfigurationException | SAXException e)
+    @Override
+    public XaipAndSerializer parse() throws IOException
     {
-      LOG.error("problem parsing the XAIP XML", e);
-      throw new IOException("Invalid XML", e);
-    }
-  }
+        try
+        {
+            DocumentBuilder db = DBF.newDocumentBuilder();
+            document = db.parse(input);
 
-  /**
-   * Returns a serializer which preserves document context and name space prefixes of the last parsed XAIP.
-   */
-  public ComprehensiveXaipSerializer createSerializer()
-  {
-    return new ComprehensiveXaipSerializer(document, canonicalizationAlgo, lXaipReader);
-  }
+            XAIPType result = XmlHelper.parse(new DOMSource(document),
+                XAIPType.class,
+                XmlHelper.FACTORY_XAIP.getClass().getPackage().getName() + ":" + XmlHelper.FACTORY_ASIC.getClass().getPackage().getName());
+            canonicalizationAlgo = Optional.ofNullable(result.getPackageHeader().getCanonicalizationMethod())
+                .map(CanonicalizationMethodType::getAlgorithm)
+                .orElse("http://www.w3.org/2001/10/xml-exc-c14n#");
+            return new XaipAndSerializer(result, createSerializer());
+        }
+        catch (JAXBException | ParserConfigurationException | SAXException e)
+        {
+            LOG.error("problem parsing the XAIP XML", e);
+            throw new IOException("Invalid XML", e);
+        }
+    }
 
-  /**
-   * Creates a new instance of a DocumentBuilderFactory avoiding several types of security leaks.
-   */
-  private static DocumentBuilderFactory newDocumentBuilderFactory()
-  {
-    DocumentBuilderFactory inst = DocumentBuilderFactory.newInstance();
-    inst.setNamespaceAware(true);
-    try
+    /**
+     * Returns a serializer which preserves document context and name space prefixes of the last parsed XAIP.
+     */
+    public ComprehensiveXaipSerializer createSerializer()
     {
-      inst.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-      inst.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-      inst.setFeature("http://xml.org/sax/features/external-general-entities", false);
-      inst.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-      inst.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        return new ComprehensiveXaipSerializer(document, canonicalizationAlgo, lXaipReader);
     }
-    catch (ParserConfigurationException e)
+
+    /**
+     * Creates a new instance of a DocumentBuilderFactory avoiding several types of security leaks.
+     */
+    private static DocumentBuilderFactory newDocumentBuilderFactory()
     {
-      throw new IllegalArgumentException("Implementation does not support setting safe parameters!", e);
+        DocumentBuilderFactory inst = DocumentBuilderFactory.newInstance();
+        inst.setNamespaceAware(true);
+        try
+        {
+            inst.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+            inst.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            inst.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            inst.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            inst.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        }
+        catch (ParserConfigurationException e)
+        {
+            throw new IllegalArgumentException("Implementation does not support setting safe parameters!", e);
+        }
+        inst.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        inst.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        inst.setXIncludeAware(false);
+        inst.setExpandEntityReferences(false);
+        return inst;
     }
-    inst.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-    inst.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-    inst.setXIncludeAware(false);
-    inst.setExpandEntityReferences(false);
-    return inst;
-  }
 }

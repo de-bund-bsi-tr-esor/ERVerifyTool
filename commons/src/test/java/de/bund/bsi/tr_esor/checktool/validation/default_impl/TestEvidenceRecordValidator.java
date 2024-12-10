@@ -55,175 +55,176 @@ import de.bund.bsi.tr_esor.checktool.xml.XaipReader;
 public class TestEvidenceRecordValidator
 {
 
-  /**
-   * Loads default configuration.
-   */
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
-
-  protected EvidenceRecordValidator createValidator()
-  {
-    return new EvidenceRecordValidator();
-  }
-
-  /**
-   * Tests three valid evidence records to be checked as valid. No assertions regarding the protected elements
-   * are made. Result can be at most INDETERMINED because no only check of the time stamps is done. Note that
-   * the context is not filled with protected documents, so presence of document hashes is not checked here.
-   */
-  @Test
-  public void testValidER() throws Exception
-  {
-    var erToTest = new String[]{"/bin/example.ers.b64", "/xaip/xaip_ok.ers.b64",
-                                "/xaip/xaip_ok_sig_ok.ers.b64"};
-
-    for ( var erName : erToTest )
+    /**
+     * Loads default configuration.
+     */
+    @BeforeClass
+    public static void setUpClass() throws Exception
     {
-      var erBytes = TestUtils.decodeTestResource(erName);
-      var er = new ASN1EvidenceRecordParser().parse(erBytes);
-      var validator = createValidator();
-      validator.setContext(new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                   TestUtils.createReturnVerificationReport(), false));
-      var report = validator.validate(new Reference("dummy"), er);
-      assertThat("validation result for " + erName,
-                 report.getOverallResult().getResultMajor(),
-                 is(ValidationResultMajor.INDETERMINED.toString()));
-      assertTrue("result message contains no other messages than \"no online validation\" for every time stamp",
-                 report.getSummarizedMessage()
-                       .matches("atss/0: no protected data to check\\s(\\s?atss/0/\\d/tsp: no online validation of time stamp done\\s?)+"));
+        TestUtils.loadDefaultConfig();
     }
-  }
 
-  /**
-   * Tests that a valid additional redundant hash can lead to a positive verification result. The additional
-   * hash has been calculated from the first partial hash tree and manually inserted into the second partial
-   * hash tree which therefore should contain two hashes.
-   */
-  @Test
-  public void testIntermediateHashInEr() throws Exception
-  {
-    var report = getErReportForXaip("src/test/resources/xaip/xaip_ok_ers_intermediate_hash.xml");
-    assertSecondHashInSecondHashTree(report);
-    assertThat("A XAIP containing a valid intermediate hash gets a positive validation result.",
-               report.getOverallResult().getResultMajor(),
-               is(ValidationResultMajor.INDETERMINED.toString()));
-    assertThat("The format of the ER containing an intermediate hash is validated as valid.",
-               report.getFormatted().getFormatOK().getResultMajor(),
-               is(ValidationResultMajor.VALID.toString()));
-  }
+    protected EvidenceRecordValidator createValidator()
+    {
+        return new EvidenceRecordValidator();
+    }
 
-  /**
-   * Tests that a wrong additional hash leads to a negative verification result. The additional hash has been
-   * manually inserted into the second partial hash tree which therefore should contain two hashes.
-   */
-  @Test
-  public void testInvalidIntermediateHashInEr() throws Exception
-  {
-    var report = getErReportForXaip("src/test/resources/xaip/xaip_nok_ers_wrong_intermediate_hash.xml");
-    assertSecondHashInSecondHashTree(report);
-    assertThat("A XAIP containg a wrong additional hash in the hash tree is invalid.",
-               report.getOverallResult().getResultMajor(),
-               is(ValidationResultMajor.INVALID.toString()));
-    assertThat("The wrong additional hash leads to a hashValueMismatch result.",
-               report.getOverallResult().getResultMinor(),
-               is("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
-  }
+    /**
+     * Tests three valid evidence records to be checked as valid. No assertions regarding the protected elements are made. Result can be at
+     * most INDETERMINED because no only check of the time stamps is done. Note that the context is not filled with protected documents, so
+     * presence of document hashes is not checked here.
+     */
+    @Test
+    public void testValidER() throws Exception
+    {
+        var erToTest = new String[]{"/bin/example.ers.b64", "/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
 
-  /**
-   * Tests that missing document digests are recognized by the EvidenceRecordValidator.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testMissingDigestInER() throws Exception
-  {
-    var erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
-    var er = new ASN1EvidenceRecordParser().parse(erBytes);
-    var validator = createValidator();
-    var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                      TestUtils.createReturnVerificationReport(), true);
-    ctx.addProtectedData(new Reference("notInER"),
-                         "this is not protected by ER".getBytes(StandardCharsets.UTF_8));
-    validator.setContext(ctx);
-    var report = validator.validate(new Reference("dummy"), er);
-    assertThat("validation result with missing digests",
-               report.getOverallResult().getResultMajor(),
-               is(ValidationResultMajor.INVALID.toString()));
-    assertThat("result message contains information about missing digest",
-               report.getSummarizedMessage(),
-               containsString("Missing digest(s) for: [notInER]"));
-  }
+        for (var erName : erToTest)
+        {
+            var erBytes = TestUtils.decodeTestResource(erName);
+            var er = new ASN1EvidenceRecordParser().parse(erBytes);
+            var validator = createValidator();
+            validator.setContext(new ErValidationContext(new Reference("dummy"),
+                er,
+                ProfileNames.RFC4998,
+                TestUtils.createReturnVerificationReport(),
+                false));
+            var report = validator.validate(new Reference("dummy"), er);
+            assertThat("validation result for " + erName,
+                report.getOverallResult().getResultMajor(),
+                is(ValidationResultMajor.INDETERMINED.toString()));
+            assertTrue("result message contains no other messages than \"no online validation\" for every time stamp",
+                report.getSummarizedMessage()
+                    .matches("atss/0: no protected data to check\\s(\\s?atss/0/\\d/tsp: no online validation of time stamp done\\s?)+"));
+        }
+    }
 
-  /**
-   * Tests that wrong hash values in the hash tree lead to invalid result.
-   */
-  @Test
-  public void testBrokenHashTree() throws Exception
-  {
-    var erBytes = TestUtils.decodeTestResource("/xaip/xaip_nok.ers.b64");
-    var er = new ASN1EvidenceRecordParser().parse(erBytes);
-    var validator = createValidator();
-    validator.setContext(new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                 TestUtils.createReturnVerificationReport(), true));
-    var report = validator.validate(new Reference("dummy"), er);
-    assertThat("validation result with missing digests",
-               report.getOverallResult().getResultMajor(),
-               is(ValidationResultMajor.INVALID.toString()));
-    assertThat("result message contains information about invalid hash tree root",
-               report.getSummarizedMessage(),
-               containsString("atss/0/0/hashTree: hash tree root hash does not match timestamp"));
-  }
+    /**
+     * Tests that a valid additional redundant hash can lead to a positive verification result. The additional hash has been calculated from
+     * the first partial hash tree and manually inserted into the second partial hash tree which therefore should contain two hashes.
+     */
+    @Test
+    public void testIntermediateHashInEr() throws Exception
+    {
+        var report = getErReportForXaip("src/test/resources/xaip/xaip_ok_ers_intermediate_hash.xml");
+        assertSecondHashInSecondHashTree(report);
+        assertThat("A XAIP containing a valid intermediate hash gets a positive validation result.",
+            report.getOverallResult().getResultMajor(),
+            is(ValidationResultMajor.INDETERMINED.toString()));
+        assertThat("The format of the ER containing an intermediate hash is validated as valid.",
+            report.getFormatted().getFormatOK().getResultMajor(),
+            is(ValidationResultMajor.VALID.toString()));
+    }
 
-  /**
-   * Asserts that a broken configuration or implementation (delegation not possible) leads to correct report.
-   * We simulate that by executing a faked callValidator() line.
-   */
-  @Test
-  public void delegationFailure() throws Exception
-  {
-    var validator = createValidator();
-    var ref = new Reference("fake");
-    validator.setContext(new ErValidationContext(ref, (EvidenceRecord)null, ProfileNames.RFC4998, null,
-                                                 true));
-    var report = validator.callValidator("unsuported Object", ref, TimeStampReport.class);
-    assertThat(report.getSummarizedMessage(), containsString("no validator found for java.lang.String"));
-  }
+    /**
+     * Tests that a wrong additional hash leads to a negative verification result. The additional hash has been manually inserted into the
+     * second partial hash tree which therefore should contain two hashes.
+     */
+    @Test
+    public void testInvalidIntermediateHashInEr() throws Exception
+    {
+        var report = getErReportForXaip("src/test/resources/xaip/xaip_nok_ers_wrong_intermediate_hash.xml");
+        assertSecondHashInSecondHashTree(report);
+        assertThat("A XAIP containg a wrong additional hash in the hash tree is invalid.",
+            report.getOverallResult().getResultMajor(),
+            is(ValidationResultMajor.INVALID.toString()));
+        assertThat("The wrong additional hash leads to a hashValueMismatch result.",
+            report.getOverallResult().getResultMinor(),
+            is("http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/hashValueMismatch"));
+    }
 
-  private EvidenceRecordReport getErReportForXaip(String testXaipPath) throws Exception
-  {
-    ParameterFinder params = new FileParameterFinder(Paths.get(testXaipPath), null, ProfileNames.RFC4998);
-    var er = new ASN1EvidenceRecordParser().parse(params.getXaip()
-                                                        .getCredentialsSection()
-                                                        .getCredential()
-                                                        .get(2)
-                                                        .getEvidenceRecord()
-                                                        .getAsn1EvidenceRecord());
-    var validator = createValidator();
-    var validationContext = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998,
-                                                    TestUtils.createReturnVerificationReport(), true);
-    var reader = new XaipReader(params.getXaip(), new Reference("xaip"), ProfileNames.RFC4998);
-    reader.prepareProtectedElements("V001", params.getSerializer())
-          .forEach(validationContext::addProtectedData);
-    validator.setContext(validationContext);
-    return validator.validate(new Reference("dummy"), er);
-  }
+    /**
+     * Tests that missing document digests are recognized by the EvidenceRecordValidator.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testMissingDigestInER() throws Exception
+    {
+        var erBytes = TestUtils.decodeTestResource("/bin/example.ers.b64");
+        var er = new ASN1EvidenceRecordParser().parse(erBytes);
+        var validator = createValidator();
+        var ctx =
+            new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, TestUtils.createReturnVerificationReport(), true);
+        ctx.addProtectedData(new Reference("notInER"), "this is not protected by ER".getBytes(StandardCharsets.UTF_8));
+        validator.setContext(ctx);
+        var report = validator.validate(new Reference("dummy"), er);
+        assertThat("validation result with missing digests",
+            report.getOverallResult().getResultMajor(),
+            is(ValidationResultMajor.INVALID.toString()));
+        assertThat("result message contains information about missing digest",
+            report.getSummarizedMessage(),
+            containsString("Missing digest(s) for: [notInER]"));
+    }
 
-  private void assertSecondHashInSecondHashTree(EvidenceRecordReport report)
-  {
-    assertThat("An additional hash in the second partial hash tree is present.",
-               report.getFormatted()
-                     .getArchiveTimeStampSequence()
-                     .getArchiveTimeStampChain()
-                     .get(0)
-                     .getArchiveTimeStamp()
-                     .get(0)
-                     .getReducedHashTree()
-                     .getPartialHashTree()
-                     .get(1)
-                     .getHashValue(),
-               hasSize(2));
-  }
+    /**
+     * Tests that wrong hash values in the hash tree lead to invalid result.
+     */
+    @Test
+    public void testBrokenHashTree() throws Exception
+    {
+        var erBytes = TestUtils.decodeTestResource("/xaip/xaip_nok.ers.b64");
+        var er = new ASN1EvidenceRecordParser().parse(erBytes);
+        var validator = createValidator();
+        validator.setContext(new ErValidationContext(new Reference("dummy"),
+            er,
+            ProfileNames.RFC4998,
+            TestUtils.createReturnVerificationReport(),
+            true));
+        var report = validator.validate(new Reference("dummy"), er);
+        assertThat("validation result with missing digests",
+            report.getOverallResult().getResultMajor(),
+            is(ValidationResultMajor.INVALID.toString()));
+        assertThat("result message contains information about invalid hash tree root",
+            report.getSummarizedMessage(),
+            containsString("atss/0/0/hashTree: hash tree root hash does not match timestamp"));
+    }
+
+    /**
+     * Asserts that a broken configuration or implementation (delegation not possible) leads to correct report. We simulate that by
+     * executing a faked callValidator() line.
+     */
+    @Test
+    public void delegationFailure() throws Exception
+    {
+        var validator = createValidator();
+        var ref = new Reference("fake");
+        validator.setContext(new ErValidationContext(ref, (EvidenceRecord)null, ProfileNames.RFC4998, null, true));
+        var report = validator.callValidator("unsuported Object", ref, TimeStampReport.class);
+        assertThat(report.getSummarizedMessage(), containsString("no validator found for java.lang.String"));
+    }
+
+    private EvidenceRecordReport getErReportForXaip(String testXaipPath) throws Exception
+    {
+        ParameterFinder params = new FileParameterFinder(Paths.get(testXaipPath), null, ProfileNames.RFC4998);
+        var er = new ASN1EvidenceRecordParser().parse(params.getXaip()
+            .getCredentialsSection()
+            .getCredential()
+            .get(2)
+            .getEvidenceRecord()
+            .getAsn1EvidenceRecord());
+        var validator = createValidator();
+        var validationContext =
+            new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, TestUtils.createReturnVerificationReport(), true);
+        var reader = new XaipReader(params.getXaip(), new Reference("xaip"), ProfileNames.RFC4998);
+        reader.prepareProtectedElements("V001", params.getSerializer()).forEach(validationContext::addProtectedData);
+        validator.setContext(validationContext);
+        return validator.validate(new Reference("dummy"), er);
+    }
+
+    private void assertSecondHashInSecondHashTree(EvidenceRecordReport report)
+    {
+        assertThat("An additional hash in the second partial hash tree is present.",
+            report.getFormatted()
+                .getArchiveTimeStampSequence()
+                .getArchiveTimeStampChain()
+                .get(0)
+                .getArchiveTimeStamp()
+                .get(0)
+                .getReducedHashTree()
+                .getPartialHashTree()
+                .get(1)
+                .getHashValue(),
+            hasSize(2));
+    }
 }

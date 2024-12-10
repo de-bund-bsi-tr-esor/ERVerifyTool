@@ -45,84 +45,83 @@ import org.slf4j.LoggerFactory;
 public class CAdESReader
 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(CAdESReader.class);
+    private static final Logger LOG = LoggerFactory.getLogger(CAdESReader.class);
 
-  private static final ASN1ObjectIdentifier ID_AA_ER_INTERNAL = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.2.49");
+    private static final ASN1ObjectIdentifier ID_AA_ER_INTERNAL = new ASN1ObjectIdentifier("1.2.840.113549.1.9.16.2.49");
 
-  private final AttributeTable attributeTable;
+    private final AttributeTable attributeTable;
 
-  /**
-   * Creates new instance.
-   *
-   * @param signature
-   */
-  public CAdESReader(CMSSignedData signature)
-  {
-    var signerInfos = signature.getSignerInfos();
-    var info = signerInfos.getSigners().iterator().next();
-    attributeTable = info.getUnsignedAttributes();
-  }
-
-  /**
-   * Returns <code>true</code> if signature has unsigned attributes at all.
-   */
-  public boolean hasUnsignedAttributes()
-  {
-    return attributeTable != null;
-  }
-
-  /**
-   * Returns <code>true</code> if signature contains certificate values.
-   */
-  public boolean hasCertificateValues()
-  {
-    return attributeTable != null && attributeTable.get(PKCSObjectIdentifiers.id_aa_ets_certValues) != null;
-  }
-
-  /**
-   * Returns <code>true</code> if signature contains revocation values.
-   */
-  public boolean hasRevocationValues()
-  {
-    return attributeTable != null
-           && attributeTable.get(PKCSObjectIdentifiers.id_aa_ets_revocationValues) != null;
-  }
-
-  /**
-   * Returns an embedded evidence record if any.
-   */
-  public byte[] getEmbeddedEvidenceRecord()
-  {
-    List<byte[]> parsedValues = getParsedValues(ID_AA_ER_INTERNAL, (o, r) -> r.add(getEncoded(o)));
-    return parsedValues == null || parsedValues.isEmpty() ? null : parsedValues.get(0);
-  }
-
-  private byte[] getEncoded(Object o)
-  {
-    try
+    /**
+     * Creates new instance.
+     *
+     * @param signature
+     */
+    public CAdESReader(CMSSignedData signature)
     {
-      return ((ASN1Object)o).getEncoded();
+        var signerInfos = signature.getSignerInfos();
+        var info = signerInfos.getSigners().iterator().next();
+        attributeTable = info.getUnsignedAttributes();
     }
-    catch (IOException e)
-    {
-      LOG.error("Failed to encode ASN.1 object", e);
-      return new byte[0];
-    }
-  }
 
-  private <T> List<T> getParsedValues(ASN1ObjectIdentifier attributeName, BiConsumer<Object, List<T>> parser)
-  {
-    var attr = attributeTable == null ? null : attributeTable.get(attributeName);
-    if (attr == null)
+    /**
+     * Returns <code>true</code> if signature has unsigned attributes at all.
+     */
+    public boolean hasUnsignedAttributes()
     {
-      return Collections.emptyList();
+        return attributeTable != null;
     }
-    List<T> result = new ArrayList<>();
-    for ( Enumeration<?> e = attr.getAttrValues().getObjects() ; e.hasMoreElements() ; )
+
+    /**
+     * Returns <code>true</code> if signature contains certificate values.
+     */
+    public boolean hasCertificateValues()
     {
-      parser.accept(e.nextElement(), result);
+        return attributeTable != null && attributeTable.get(PKCSObjectIdentifiers.id_aa_ets_certValues) != null;
     }
-    return result;
-  }
+
+    /**
+     * Returns <code>true</code> if signature contains revocation values.
+     */
+    public boolean hasRevocationValues()
+    {
+        return attributeTable != null && attributeTable.get(PKCSObjectIdentifiers.id_aa_ets_revocationValues) != null;
+    }
+
+    /**
+     * Returns an embedded evidence record if any.
+     */
+    public byte[] getEmbeddedEvidenceRecord()
+    {
+        List<byte[]> parsedValues = getParsedValues(ID_AA_ER_INTERNAL, (o, r) -> r.add(getEncoded(o)));
+        return parsedValues == null || parsedValues.isEmpty() ? null : parsedValues.get(0);
+    }
+
+    private byte[] getEncoded(Object o)
+    {
+        try
+        {
+            return ((ASN1Object)o).getEncoded();
+        }
+        catch (IOException e)
+        {
+            LOG.error("Failed to encode ASN.1 object", e);
+            return new byte[0];
+        }
+    }
+
+    private <T> List<T> getParsedValues(ASN1ObjectIdentifier attributeName, BiConsumer<Object, List<T>> parser)
+    {
+        var attr = attributeTable == null ? null : attributeTable.get(attributeName);
+        if (attr == null)
+        {
+            return Collections.emptyList();
+        }
+        List<T> result = new ArrayList<>();
+        for (Enumeration<?> e = attr.getAttrValues().getObjects(); e.hasMoreElements(); )
+        {
+            parser.accept(e.nextElement(), result);
+        }
+        return result;
+    }
 
 }

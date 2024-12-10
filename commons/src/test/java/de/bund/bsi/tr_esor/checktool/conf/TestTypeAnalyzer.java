@@ -42,23 +42,22 @@ import de.bund.bsi.tr_esor.checktool.validation.report.TimeStampReport;
 public class TestTypeAnalyzer
 {
 
-  /**
-   * Asserts that the type analyzer finds out the correct generic types of a validator even in a non-trivial
-   * class hierarchy.
-   */
-  @Test
-  public void checkValidator()
-  {
-    var systemUnderTest = new TypeAnalyzer(BasisErsECardTimeStampValidator.class);
-    assertThat("target class",
-               systemUnderTest.getFirstMatchingTypeArgument(TimeStampToken.class).getName(),
-               is(TimeStampToken.class.getName()));
-    assertThat("Context class",
-               systemUnderTest.getFirstMatchingTypeArgument(ValidationContext.class).getName(),
-               is(ErValidationContext.class.getName()));
-    assertThat("Report class",
-               systemUnderTest.getFirstMatchingTypeArgument(ReportPart.class).getName(),
-               is(TimeStampReport.class.getName()));
+    /**
+     * Asserts that the type analyzer finds out the correct generic types of a validator even in a non-trivial class hierarchy.
+     */
+    @Test
+    public void checkValidator()
+    {
+        var systemUnderTest = new TypeAnalyzer(BasisErsECardTimeStampValidator.class);
+        assertThat("target class",
+            systemUnderTest.getFirstMatchingTypeArgument(TimeStampToken.class).getName(),
+            is(TimeStampToken.class.getName()));
+        assertThat("Context class",
+            systemUnderTest.getFirstMatchingTypeArgument(ValidationContext.class).getName(),
+            is(ErValidationContext.class.getName()));
+        assertThat("Report class",
+            systemUnderTest.getFirstMatchingTypeArgument(ReportPart.class).getName(),
+            is(TimeStampReport.class.getName()));
 
-  }
+    }
 }

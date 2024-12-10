@@ -40,139 +40,142 @@ import org.xml.sax.SAXParseException;
 
 
 /**
- * Matcher which ensures schema conformity of an XML text. Matcher handles Strings to make test report look
- * better.
+ * Matcher which ensures schema conformity of an XML text. Matcher handles Strings to make test report look better.
  *
  * @author TT
  */
 public class IsValidXML extends TypeSafeMatcher<String> implements ErrorHandler
 {
 
-  @SuppressWarnings("PMD.FieldNamingConventions")
-  private static final Map<String, IsValidXML> matcherCache = new HashMap<>();
+    @SuppressWarnings("PMD.FieldNamingConventions")
+    private static final Map<String, IsValidXML> matcherCache = new HashMap<>();
 
-  private final String schemaName;
+    private final String schemaName;
 
-  private Schema schema;
+    private Schema schema;
 
-  private SAXParseException exForItem = null;
+    private SAXParseException exForItem = null;
 
-  /**
-   * Specify the schema to be used at construction time.
-   *
-   * @param schemaName name of the schema to mention in the error message
-   * @param url Location of the schema to check against, optional. If <code>null</code> then any well-formed
-   *          XML will pass.
-   * @throws SAXException in case schema cannot be parsed
-   */
-  public IsValidXML(String schemaName, URL url) throws SAXException
-  {
-    super();
-    if (url == null)
+    /**
+     * Specify the schema to be used at construction time.
+     *
+     * @param schemaName name of the schema to mention in the error message
+     * @param url Location of the schema to check against, optional. If <code>null</code> then any well-formed XML will pass.
+     * @throws SAXException in case schema cannot be parsed
+     */
+    public IsValidXML(String schemaName, URL url) throws SAXException
     {
-      this.schemaName = "undefined";
+        super();
+        if (url == null)
+        {
+            this.schemaName = "undefined";
+        }
+        else
+        {
+            this.schemaName = schemaName;
+            var sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+            schema = sf.newSchema(url);
+        }
     }
-    else
+
+    private static IsValidXML getMatcher(String name, String url) throws SAXException
     {
-      this.schemaName = schemaName;
-      var sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
-      schema = sf.newSchema(url);
+        var result = matcherCache.get(name);
+        if (result == null)
+        {
+            result = new IsValidXML(name, IsValidXML.class.getResource(url));
+            matcherCache.put(name, result);
+        }
+        return result;
     }
-  }
 
-  private static IsValidXML getMatcher(String name, String url) throws SAXException
-  {
-    var result = matcherCache.get(name);
-    if (result == null)
+    /**
+     * Returns a matcher which checks the given input against Verification Report schema.
+     *
+     * @throws SAXException
+     */
+    public static TypeSafeMatcher<String> matcherForValidVerificationReport() throws SAXException
     {
-      result = new IsValidXML(name, IsValidXML.class.getResource(url));
-      matcherCache.put(name, result);
+        return getMatcher("Verification Report", "/oasis-dssx-1.0-profiles-verification-report-cs1.xsd");
     }
-    return result;
-  }
 
-  /**
-   * Returns a matcher which checks the given input against Verification Report schema.
-   *
-   * @throws SAXException
-   */
-  public static TypeSafeMatcher<String> matcherForValidVerificationReport() throws SAXException
-  {
-    return getMatcher("Verification Report", "/oasis-dssx-1.0-profiles-verification-report-cs1.xsd");
-  }
-
-  /**
-   * Returns a matcher which checks the given input against TR Verification Report detail schema.
-   *
-   * @throws SAXException
-   */
-  public static TypeSafeMatcher<String> matcherForValidVerificationReportDetail() throws SAXException
-  {
-    return getMatcher("Verification Report Detail", "/tr-esor-verification-report-V1.3.xsd");
-  }
-
-  /**
-   * Returns <code>true</code> if item satisfies SOAP schema.
-   */
-  @Override
-  public boolean matchesSafely(String item)
-  {
-    try
+    /**
+     * Returns a matcher which checks the given input against TR Verification Report detail schema.
+     *
+     * @throws SAXException
+     */
+    public static TypeSafeMatcher<String> matcherForValidVerificationReportDetail() throws SAXException
     {
-      var ins = new ByteArrayInputStream(item.getBytes(StandardCharsets.UTF_8));
-      var dbf = DocumentBuilderFactory.newInstance();
-      dbf.setNamespaceAware(true);
-      if (schema != null)
-      {
-        dbf.setSchema(schema);
-      }
-      var db = dbf.newDocumentBuilder();
-      db.setErrorHandler(this);
-      db.parse(ins);
-      return true;
+        return getMatcher("Verification Report Detail", "/tr-esor-verification-report-V1.3.xsd");
     }
-    catch (SAXParseException e)
-    {
-      exForItem = e;
-      return false;
-    }
-    catch (Exception e)
-    {
-      return false;
-    }
-  }
 
-  @Override
-  public void describeTo(Description description)
-  {
-    if (exForItem == null)
+    /**
+     * Returns <code>true</code> if item satisfies SOAP schema.
+     */
+    @Override
+    public boolean matchesSafely(String item)
     {
-      description.appendText("XML satisfying " + schemaName + " schema");
+        try
+        {
+            var ins = new ByteArrayInputStream(item.getBytes(StandardCharsets.UTF_8));
+            var dbf = DocumentBuilderFactory.newInstance();
+            dbf.setNamespaceAware(true);
+            if (schema != null)
+            {
+                dbf.setSchema(schema);
+            }
+            var db = dbf.newDocumentBuilder();
+            db.setErrorHandler(this);
+            db.parse(ins);
+            return true;
+        }
+        catch (SAXParseException e)
+        {
+            exForItem = e;
+            return false;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
     }
-    else
+
+    @Override
+    public void describeTo(Description description)
     {
-      description.appendText("XML matching schema " + schemaName + ", but found problem in line "
-                             + exForItem.getLineNumber() + ", col. " + exForItem.getColumnNumber() + ", "
-                             + exForItem.getLocalizedMessage());
+        if (exForItem == null)
+        {
+            description.appendText("XML satisfying " + schemaName + " schema");
+        }
+        else
+        {
+            description.appendText("XML matching schema "
+                + schemaName
+                + ", but found problem in line "
+                + exForItem.getLineNumber()
+                + ", col. "
+                + exForItem.getColumnNumber()
+                + ", "
+                + exForItem.getLocalizedMessage());
+        }
     }
-  }
 
-  @Override
-  public void error(SAXParseException exception) throws SAXException
-  {
-    throw exception;
-  }
+    @Override
+    public void error(SAXParseException exception) throws SAXException
+    {
+        throw exception;
+    }
 
-  @Override
-  public void fatalError(SAXParseException exception) throws SAXException
-  {
-    throw exception;
-  }
+    @Override
+    public void fatalError(SAXParseException exception) throws SAXException
+    {
+        throw exception;
+    }
 
-  @Override
-  public void warning(SAXParseException exception) throws SAXException
-  {
-    throw exception;
-  }
+    @Override
+    public void warning(SAXParseException exception) throws SAXException
+    {
+        throw exception;
+    }
 
 }

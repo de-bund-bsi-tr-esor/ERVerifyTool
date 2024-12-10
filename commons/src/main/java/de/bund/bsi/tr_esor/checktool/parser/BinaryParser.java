@@ -26,33 +26,32 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-
 /**
- * Just a place holder for treating input as binary document of unknown type. Do not use before all more
- * special appropriate formats have been tried!
+ * Just a place holder for treating input as binary document of unknown type. Do not use before all more special appropriate formats have
+ * been tried!
  *
  * @author TT
  */
 public class BinaryParser implements Parser<byte[]>
 {
 
-  private InputStream input;
+    private InputStream input;
 
-  @Override
-  public void setInput(InputStream input)
-  {
-    this.input = input;
-  }
+    @Override
+    public void setInput(InputStream input)
+    {
+        this.input = input;
+    }
 
-  @Override
-  public boolean canParse() throws IOException
-  {
-    return true;
-  }
+    @Override
+    public boolean canParse() throws IOException
+    {
+        return true;
+    }
 
-  @Override
-  public byte[] parse() throws IOException
-  {
-    return input.readAllBytes();
-  }
+    @Override
+    public byte[] parse() throws IOException
+    {
+        return input.readAllBytes();
+    }
 }

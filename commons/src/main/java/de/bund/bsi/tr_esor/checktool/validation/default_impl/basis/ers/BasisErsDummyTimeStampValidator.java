@@ -28,18 +28,18 @@ import de.bund.bsi.tr_esor.checktool.validation.report.FormatOkReport;
 
 
 /**
- * Basis-ERS-Profil requirements for the time stamp inside an ArchiveTimeStamp. This performs an offline
- * validation only, see {@link DummyTimeStampValidator} for further details.
+ * Basis-ERS-Profil requirements for the time stamp inside an ArchiveTimeStamp. This performs an offline validation only, see
+ * {@link DummyTimeStampValidator} for further details.
  *
  * @author MO
  */
 public class BasisErsDummyTimeStampValidator extends DummyTimeStampValidator
 {
 
-  @Override
-  protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
-  {
-    var contentInfoChecker = new ContentInfoChecker(formatOk);
-    contentInfoChecker.checkContentInfo(formatOk.getReference(), ts.toCMSSignedData().toASN1Structure());
-  }
+    @Override
+    protected void checkUnsignedAttributes(TimeStampToken ts, FormatOkReport formatOk)
+    {
+        var contentInfoChecker = new ContentInfoChecker(formatOk);
+        contentInfoChecker.checkContentInfo(formatOk.getReference(), ts.toCMSSignedData().toASN1Structure());
+    }
 }

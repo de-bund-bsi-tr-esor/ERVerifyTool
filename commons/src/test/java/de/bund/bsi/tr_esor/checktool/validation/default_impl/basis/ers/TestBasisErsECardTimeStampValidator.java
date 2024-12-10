@@ -36,19 +36,19 @@ import de.bund.bsi.tr_esor.checktool.validation.default_impl.TestECardTimeStampV
 public class TestBasisErsECardTimeStampValidator extends TestECardTimeStampValidator
 {
 
-  @Override
-  protected BasisErsECardTimeStampValidator sut(String url)
-  {
-    var profile = Configurator.getInstance().getProfile(Configurator.getInstance().getDefaultProfileName());
-    profile.setValidationService(url);
-    return new BasisErsECardTimeStampValidator();
-  }
+    @Override
+    protected BasisErsECardTimeStampValidator sut(String url)
+    {
+        var profile = Configurator.getInstance().getProfile(Configurator.getInstance().getDefaultProfileName());
+        profile.setValidationService(url);
+        return new BasisErsECardTimeStampValidator();
+    }
 
-  @Override
-  protected BasisErsECardTimeStampValidator sut(ECard ecard)
-  {
-    ECard_Service eCardWebservice = when(mock(ECard_Service.class).getECard()).thenReturn(ecard).getMock();
-    return new BasisErsECardTimeStampValidator(eCardWebservice);
-  }
+    @Override
+    protected BasisErsECardTimeStampValidator sut(ECard ecard)
+    {
+        ECard_Service eCardWebservice = when(mock(ECard_Service.class).getECard()).thenReturn(ecard).getMock();
+        return new BasisErsECardTimeStampValidator(eCardWebservice);
+    }
 
 }

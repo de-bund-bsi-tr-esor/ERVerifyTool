@@ -29,36 +29,32 @@ import de.bund.bsi.tr_esor.checktool.validation.default_impl.TestAlgorithmUsageV
 
 
 /**
- * Unit test for {@link BasisErsAlgorithmUsageValidator}. It covers also the test cases of
- * {@link TestAlgorithmUsageValidator} which must be hold by this test too.
+ * Unit test for {@link BasisErsAlgorithmUsageValidator}. It covers also the test cases of {@link TestAlgorithmUsageValidator} which must be
+ * hold by this test too.
  *
  * @author HMA
  */
 public class TestBasisErsAlgorithmUsageValidator extends TestAlgorithmUsageValidator
 {
 
-  /**
-   * Asserts that hmacWithSHA256 is not suitable for {@link BasisErsAlgorithmUsageValidator} but for
-   * {@link AlgorithmUsageValidator}.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testBasisErsProfileRestriction() throws Exception
-  {
-    final var hmacWithSHA256 = "1.2.840.113549.2.9";
-    checkAlgorithm(createValidatorUnderTest(),
-                   hmacWithSHA256,
-                   ValidationResultMajor.INVALID,
-                   "/algorithm#hashAlgorithmNotSuitable");
-    checkAlgorithm(new AlgorithmUsageValidator(), hmacWithSHA256, ValidationResultMajor.VALID, null);
+    /**
+     * Asserts that hmacWithSHA256 is not suitable for {@link BasisErsAlgorithmUsageValidator} but for {@link AlgorithmUsageValidator}.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testBasisErsProfileRestriction() throws Exception
+    {
+        final var hmacWithSHA256 = "1.2.840.113549.2.9";
+        checkAlgorithm(createValidatorUnderTest(), hmacWithSHA256, ValidationResultMajor.INVALID, "/algorithm#hashAlgorithmNotSuitable");
+        checkAlgorithm(new AlgorithmUsageValidator(), hmacWithSHA256, ValidationResultMajor.VALID, null);
 
-  }
+    }
 
-  @Override
-  protected AlgorithmUsageValidator createValidatorUnderTest()
-  {
-    return new BasisErsAlgorithmUsageValidator();
-  }
+    @Override
+    protected AlgorithmUsageValidator createValidatorUnderTest()
+    {
+        return new BasisErsAlgorithmUsageValidator();
+    }
 
 }

@@ -32,81 +32,81 @@ import java.util.Date;
 public final class AlgorithmUsage
 {
 
-  private final String oid;
+    private final String oid;
 
-  private final Date validationDate;
+    private final Date validationDate;
 
-  private final UsageType usage;
+    private final UsageType usage;
 
-  /**
-   * Creates immutable instance.
-   *
-   * @param oid
-   * @param validationDate
-   * @param usage
-   */
-  private AlgorithmUsage(String oid, Date validationDate, UsageType usage)
-  {
-    this.oid = oid;
-    this.validationDate = (Date)validationDate.clone();
-    this.usage = usage;
-  }
+    /**
+     * Creates immutable instance.
+     *
+     * @param oid
+     * @param validationDate
+     * @param usage
+     */
+    private AlgorithmUsage(String oid, Date validationDate, UsageType usage)
+    {
+        this.oid = oid;
+        this.validationDate = (Date)validationDate.clone();
+        this.usage = usage;
+    }
 
-  /**
-   * Creates instance for a hash algorithm.
-   *
-   * @param oid
-   * @param validationDate
-   */
-  public static AlgorithmUsage createHashed(String oid, Date validationDate)
-  {
-    return new AlgorithmUsage(oid, validationDate, UsageType.DATA_HASHING);
-  }
+    /**
+     * Creates instance for a hash algorithm.
+     *
+     * @param oid
+     * @param validationDate
+     */
+    public static AlgorithmUsage createHashed(String oid, Date validationDate)
+    {
+        return new AlgorithmUsage(oid, validationDate, UsageType.DATA_HASHING);
+    }
 
-  /**
-   * Creates instance for a signature algorithm.
-   *
-   * @param oid
-   * @param validationDate
-   */
-  public static AlgorithmUsage createSigned(String oid, Date validationDate)
-  {
-    return new AlgorithmUsage(oid, validationDate, UsageType.QES);
-  }
+    /**
+     * Creates instance for a signature algorithm.
+     *
+     * @param oid
+     * @param validationDate
+     */
+    public static AlgorithmUsage createSigned(String oid, Date validationDate)
+    {
+        return new AlgorithmUsage(oid, validationDate, UsageType.QES);
+    }
 
-  /**
-   * Returns OID.
-   */
-  public String getOid()
-  {
-    return oid;
-  }
+    /**
+     * Returns OID.
+     */
+    public String getOid()
+    {
+        return oid;
+    }
 
-  /**
-   * Returns the data to check validity for.
-   */
-  public Date getValidationDate()
-  {
-    return (Date)validationDate.clone();
-  }
+    /**
+     * Returns the data to check validity for.
+     */
+    public Date getValidationDate()
+    {
+        return (Date)validationDate.clone();
+    }
 
-  /**
-   * Returns the usage type.
-   */
-  public UsageType getUsage()
-  {
-    return usage;
-  }
+    /**
+     * Returns the usage type.
+     */
+    public UsageType getUsage()
+    {
+        return usage;
+    }
 
-  /**
-   * Types of usage needed so far.
-   */
-  public enum UsageType
-  {
-    /** Hash algorithm */
-    DATA_HASHING,
+    /**
+     * Types of usage needed so far.
+     */
+    public enum UsageType
+    {
+        /** Hash algorithm */
+        DATA_HASHING,
 
-    /** Qualified signature algorithm (TSP) */
-    QES
-  }
+        /** Qualified signature algorithm (TSP) */
+        QES
+    }
 }

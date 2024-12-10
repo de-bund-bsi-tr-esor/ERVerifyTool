@@ -42,71 +42,71 @@ import org.bouncycastle.asn1.cms.Attribute;
 public class CryptoInfo implements ASN1Encodable
 {
 
-  /** List of attributes of the crypto info. */
-  private final List<Attribute> attributes = new ArrayList<>();
+    /** List of attributes of the crypto info. */
+    private final List<Attribute> attributes = new ArrayList<>();
 
-  /**
-   * Constructor (generated from input parameter).
-   *
-   * @param obj ASN.1 object
-   * @throws IOException
-   */
-  public CryptoInfo(ASN1Object obj) throws IOException
-  {
-    if (!(obj instanceof ASN1Sequence))
+    /**
+     * Constructor (generated from input parameter).
+     *
+     * @param obj ASN.1 object
+     * @throws IOException
+     */
+    public CryptoInfo(ASN1Object obj) throws IOException
     {
-      throw new IOException("Element is not an ASN1Sequence");
+        if (!(obj instanceof ASN1Sequence))
+        {
+            throw new IOException("Element is not an ASN1Sequence");
+        }
+        var s = (ASN1Sequence)obj;
+        if (s.size() == 0)
+        {
+            throw new IOException("ASN1Sequence is empty");
+        }
+        for (var i = 0; i < s.size(); i++)
+        {
+            var e = s.getObjectAt(i);
+            if (!(e instanceof ASN1Sequence) && !(e instanceof Attribute))
+            {
+                throw new IOException("Element is not an Attribute");
+            }
+            attributes.add(Attribute.getInstance(e));
+        }
     }
-    var s = (ASN1Sequence)obj;
-    if (s.size() == 0)
+
+    /**
+     * Returns the attribute with given index.
+     *
+     * @param idx index of attribute
+     */
+    public Attribute getAttribute(int idx)
     {
-      throw new IOException("ASN1Sequence is empty");
+        return idx < attributes.size() ? attributes.get(idx) : null;
     }
-    for ( var i = 0 ; i < s.size() ; i++ )
+
+    /**
+     * Returns the attributes list
+     */
+    public List<Attribute> getAttributes()
     {
-      var e = s.getObjectAt(i);
-      if (!(e instanceof ASN1Sequence) && !(e instanceof Attribute))
-      {
-        throw new IOException("Element is not an Attribute");
-      }
-      attributes.add(Attribute.getInstance(e));
+        return attributes;
     }
-  }
 
-  /**
-   * Returns the attribute with given index.
-   *
-   * @param idx index of attribute
-   */
-  public Attribute getAttribute(int idx)
-  {
-    return idx < attributes.size() ? attributes.get(idx) : null;
-  }
+    /**
+     * Gets the number of attributes in list.
+     *
+     * @return number of attributes
+     */
+    public int numberOfAttributes()
+    {
+        return attributes.size();
+    }
 
-  /**
-   * Returns the attributes list
-   */
-  public List<Attribute> getAttributes()
-  {
-    return attributes;
-  }
-
-  /**
-   * Gets the number of attributes in list.
-   *
-   * @return number of attributes
-   */
-  public int numberOfAttributes()
-  {
-    return attributes.size();
-  }
-
-  @Override
-  public ASN1Primitive toASN1Primitive()
-  {
-    var attrs = new ASN1EncodableVector();
-    attributes.forEach(attrs::add);
-    return new DERSequence(attrs);
-  }
+    @Override
+    public ASN1Primitive toASN1Primitive()
+    {
+        var attrs = new ASN1EncodableVector();
+        attributes.forEach(attrs::add);
+        return new DERSequence(attrs);
+    }
 
 }

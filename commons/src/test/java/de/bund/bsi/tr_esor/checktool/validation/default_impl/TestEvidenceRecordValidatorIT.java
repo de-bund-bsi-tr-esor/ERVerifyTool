@@ -40,34 +40,32 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestEvidenceRecordValidatorIT
 {
 
-  /**
-   * Loads default configuration.
-   */
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
-
-  /**
-   * Tests two valid evidence records to be checked as valid. No assertions regarding the protected elements
-   * are made. Note that the context is not filled with protected documents, so presence of document hashes is
-   * not checked here.
-   */
-  @Test
-  public void testValidER() throws Exception
-  {
-    var erToTest = new String[]{"/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
-    for ( var erName : erToTest )
+    /**
+     * Loads default configuration.
+     */
+    @BeforeClass
+    public static void setUpClass() throws Exception
     {
-      var erBytes = TestUtils.decodeTestResource(erName);
-      var er = new ASN1EvidenceRecordParser().parse(erBytes);
-      var validator = new EvidenceRecordValidator();
-      validator.setContext(new ErValidationContext(new Reference("dummy"), er, "custom", null, false));
-      var report = validator.validate(new Reference("dummy"), er);
-      assertThat(report.getOverallResult().getResultMajor(),
-                 is(ValidationResultMajor.INDETERMINED.toString()));
+        TestUtils.loadDefaultConfig();
     }
-  }
+
+    /**
+     * Tests two valid evidence records to be checked as valid. No assertions regarding the protected elements are made. Note that the
+     * context is not filled with protected documents, so presence of document hashes is not checked here.
+     */
+    @Test
+    public void testValidER() throws Exception
+    {
+        var erToTest = new String[]{"/xaip/xaip_ok.ers.b64", "/xaip/xaip_ok_sig_ok.ers.b64"};
+        for (var erName : erToTest)
+        {
+            var erBytes = TestUtils.decodeTestResource(erName);
+            var er = new ASN1EvidenceRecordParser().parse(erBytes);
+            var validator = new EvidenceRecordValidator();
+            validator.setContext(new ErValidationContext(new Reference("dummy"), er, "custom", null, false));
+            var report = validator.validate(new Reference("dummy"), er);
+            assertThat(report.getOverallResult().getResultMajor(), is(ValidationResultMajor.INDETERMINED.toString()));
+        }
+    }
 
 }

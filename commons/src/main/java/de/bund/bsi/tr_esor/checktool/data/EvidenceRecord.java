@@ -35,88 +35,85 @@ import org.bouncycastle.asn1.x509.AlgorithmIdentifier;
 public class EvidenceRecord
 {
 
-  private final int version;
+    private final int version;
 
-  /** List of all used hash algorithms. */
-  private final List<AlgorithmIdentifier> digestAlgos;
+    /** List of all used hash algorithms. */
+    private final List<AlgorithmIdentifier> digestAlgos;
 
-  /** Archive timestamp sequence. */
-  private final ArchiveTimeStampSequence atss;
+    /** Archive timestamp sequence. */
+    private final ArchiveTimeStampSequence atss;
 
-  /** Crypto info. */
-  private CryptoInfo cryptoInfo = null;
+    /** Crypto info. */
+    private CryptoInfo cryptoInfo = null;
 
-  /** Encryption info. */
-  private EncryptionInfo encryptInfo = null;
+    /** Encryption info. */
+    private EncryptionInfo encryptInfo = null;
 
 
-  /**
-   * Creates a new EvidenceRecord object based on the given data.
-   *
-   * @param version version number of ER
-   * @param digestAlgos list of hash algorithms
-   * @param atss the used archive timestamp sequence
-   * @param cryptoInfo info about crypto
-   * @param encryptInfo info about encryption
-   */
-  public EvidenceRecord(int version,
-                        List<AlgorithmIdentifier> digestAlgos,
-                        ArchiveTimeStampSequence atss,
-                        CryptoInfo cryptoInfo,
-                        EncryptionInfo encryptInfo)
-  {
-    this.version = version;
-    this.digestAlgos = digestAlgos;
-    this.atss = atss;
-    this.cryptoInfo = cryptoInfo;
-    this.encryptInfo = encryptInfo;
-  }
+    /**
+     * Creates a new EvidenceRecord object based on the given data.
+     *
+     * @param version version number of ER
+     * @param digestAlgos list of hash algorithms
+     * @param atss the used archive timestamp sequence
+     * @param cryptoInfo info about crypto
+     * @param encryptInfo info about encryption
+     */
+    public EvidenceRecord(int version, List<AlgorithmIdentifier> digestAlgos, ArchiveTimeStampSequence atss, CryptoInfo cryptoInfo,
+        EncryptionInfo encryptInfo)
+    {
+        this.version = version;
+        this.digestAlgos = digestAlgos;
+        this.atss = atss;
+        this.cryptoInfo = cryptoInfo;
+        this.encryptInfo = encryptInfo;
+    }
 
-  /**
-   * Gets version number.
-   *
-   * @return version number
-   */
-  public int getVersion()
-  {
-    return version;
-  }
+    /**
+     * Gets version number.
+     *
+     * @return version number
+     */
+    public int getVersion()
+    {
+        return version;
+    }
 
-  /**
-   * Gets list of hash algorithms.
-   *
-   * @return list of hash algorithms
-   */
-  public List<String> getDigestAlgorithms()
-  {
-    return digestAlgos.stream().map(a -> a.getAlgorithm().getId()).collect(Collectors.toList());
-  }
+    /**
+     * Gets list of hash algorithms.
+     *
+     * @return list of hash algorithms
+     */
+    public List<String> getDigestAlgorithms()
+    {
+        return digestAlgos.stream().map(a -> a.getAlgorithm().getId()).collect(Collectors.toList());
+    }
 
-  /**
-   * Gets crypto info.
-   *
-   * @return crypto info
-   */
-  public CryptoInfo getCryptoInfo()
-  {
-    return cryptoInfo;
-  }
+    /**
+     * Gets crypto info.
+     *
+     * @return crypto info
+     */
+    public CryptoInfo getCryptoInfo()
+    {
+        return cryptoInfo;
+    }
 
-  /**
-   * Gets encryption info.
-   *
-   * @return encryption info
-   */
-  public EncryptionInfo getEncryptionInfo()
-  {
-    return encryptInfo;
-  }
+    /**
+     * Gets encryption info.
+     *
+     * @return encryption info
+     */
+    public EncryptionInfo getEncryptionInfo()
+    {
+        return encryptInfo;
+    }
 
-  /**
-   * Returns the archive time stamp sequence.
-   */
-  public ArchiveTimeStampSequence getAtss()
-  {
-    return atss;
-  }
+    /**
+     * Returns the archive time stamp sequence.
+     */
+    public ArchiveTimeStampSequence getAtss()
+    {
+        return atss;
+    }
 }

@@ -25,10 +25,10 @@ import java.io.IOException;
 
 import javax.xml.transform.stream.StreamSource;
 
-import jakarta.xml.bind.JAXBException;
-
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
+
+import jakarta.xml.bind.JAXBException;
 
 
 /**
@@ -39,27 +39,27 @@ import de.bund.bsi.tr_esor.xaip.EvidenceRecordType;
 public class EvidenceRecordTypeParser extends RegexBasedParser<EvidenceRecordType>
 {
 
-  /**
-   * Creates instance.
-   */
-  public EvidenceRecordTypeParser()
-  {
-    super(regexForMainTag("evidenceRecord", "http://www.bsi.bund.de/tr-esor/xaip"));
-  }
+    /**
+     * Creates instance.
+     */
+    public EvidenceRecordTypeParser()
+    {
+        super(regexForMainTag("evidenceRecord", "http://www.bsi.bund.de/tr-esor/xaip"));
+    }
 
-  @Override
-  public EvidenceRecordType parse() throws IOException
-  {
-    try
+    @Override
+    public EvidenceRecordType parse() throws IOException
     {
-      return XmlHelper.parse(new StreamSource(input),
-                             EvidenceRecordType.class,
-                             XmlHelper.FACTORY_XAIP.getClass().getPackage().getName());
+        try
+        {
+            return XmlHelper.parse(new StreamSource(input),
+                EvidenceRecordType.class,
+                XmlHelper.FACTORY_XAIP.getClass().getPackage().getName());
+        }
+        catch (JAXBException e)
+        {
+            throw new IOException("invalid xml", e);
+        }
     }
-    catch (JAXBException e)
-    {
-      throw new IOException("invalid xml", e);
-    }
-  }
 
 }

@@ -35,64 +35,64 @@ import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequenc
 public class EvidenceRecordReport extends ReportPart implements OutputCreator<EvidenceRecordValidityType>
 {
 
-  private final EvidenceRecordValidityType xmlReport;
+    private final EvidenceRecordValidityType xmlReport;
 
-  /**
-   * Creates new instance.
-   *
-   * @param ref
-   */
-  public EvidenceRecordReport(Reference ref)
-  {
-    super(ref);
-    xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityType();
-    xmlReport.setVersion("urn:ietf:rfc:4998");
-    xmlReport.setReportVersion("1.3.0");
-  }
+    /**
+     * Creates new instance.
+     *
+     * @param ref
+     */
+    public EvidenceRecordReport(Reference ref)
+    {
+        super(ref);
+        xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityType();
+        xmlReport.setVersion("urn:ietf:rfc:4998");
+        xmlReport.setReportVersion("1.3.0");
+    }
 
-  @Override
-  public EvidenceRecordValidityType getFormatted()
-  {
-    return xmlReport;
-  }
+    @Override
+    public EvidenceRecordValidityType getFormatted()
+    {
+        return xmlReport;
+    }
 
-  @Override
-  public Class<EvidenceRecordValidityType> getTargetClass()
-  {
-    return EvidenceRecordValidityType.class;
-  }
+    @Override
+    public Class<EvidenceRecordValidityType> getTargetClass()
+    {
+        return EvidenceRecordValidityType.class;
+    }
 
-  /**
-   * Sets the report for the archive time stamp sequence.
-   *
-   * @param validate
-   */
-  public void addChild(ATSSequenceReport validate)
-  {
-    updateCodes(validate);
-    xmlReport.setArchiveTimeStampSequence(VRCreator.translate(validate, ArchiveTimeStampSequence.class));
-  }
+    /**
+     * Sets the report for the archive time stamp sequence.
+     *
+     * @param validate
+     */
+    public void addChild(ATSSequenceReport validate)
+    {
+        updateCodes(validate);
+        xmlReport.setArchiveTimeStampSequence(VRCreator.translate(validate, ArchiveTimeStampSequence.class));
+    }
 
-  /**
-   * Sets the report for the algorithm validity.
-   *
-   * @param validate
-   */
-  public void addChild(AlgorithmValidityReport validate)
-  {
-    updateCodes(validate);
-    xmlReport.getDigestAlgorithm().add(validate.getFormatted());
-  }
+    /**
+     * Sets the report for the algorithm validity.
+     *
+     * @param validate
+     */
+    public void addChild(AlgorithmValidityReport validate)
+    {
+        updateCodes(validate);
+        xmlReport.getDigestAlgorithm().add(validate.getFormatted());
+    }
 
-  /**
-   * Sets the value of the formatOk report part.
-   *
-   * @param formatOk
-   */
-  public void setFormatOk(ReportPart formatOk)
-  {
-    updateCodes(formatOk);
-    xmlReport.setFormatOK(formatOk.getOverallResultVerbose());
-  }
+    /**
+     * Sets the value of the formatOk report part.
+     *
+     * @param formatOk
+     */
+    public void setFormatOk(ReportPart formatOk)
+    {
+        updateCodes(formatOk);
+        xmlReport.setFormatOK(formatOk.getOverallResultVerbose());
+    }
 
 }

@@ -30,6 +30,7 @@ lombok.config
 adapterservice/hf.fo
 frontend/hf.fo
 .idea/*.xml
+.idea/*.iml
 .idea/dataSources/
 .idea/shelf/
 .idea/sonarlint/

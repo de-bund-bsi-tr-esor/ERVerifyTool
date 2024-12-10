@@ -40,40 +40,40 @@ import org.junit.Test;
 public class HashCreatorTest
 {
 
-  /**
-   * Tests local hash creator with SHA-1, SHA-256 and SHA-512, with hash values calculated by OpenSSL.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testHashing() throws Exception
-  {
-    var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
-    HashCreator hashCreator = new LocalHashCreator();
-    var sha1hash = hashCreator.calculateHash(testData, "1.3.14.3.2.26"); // SHA1
-    var sha256hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.1"); // SHA256
-    var sha512hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.3"); // SHA512
-    var expectedSha1hash = Base64.getDecoder().decode("YAdYMOObfFeKOweBAemmaPaNHCg=");
-    var expectedSha256hash = Base64.getDecoder().decode("KiM2HJ3YhN10kF0+7S4MkwIgEZjzZSmgNDhLdIqpGes=");
-    var expectedSha512hash = Base64.getDecoder()
-                                   .decode("yChVyfMAZHt5A2vxLek1TDhVHmRg3E/2aKpHX0L+kiz/9HyR6APIrEbaaM8DtVuzDN+F7McDSbVr1z9MaT22VQ==");
-    assertThat("SHA1 hash", sha1hash, is(expectedSha1hash));
-    assertThat("SHA256 hash", sha256hash, is(expectedSha256hash));
-    assertThat("SHA512 hash", sha512hash, is(expectedSha512hash));
-  }
+    /**
+     * Tests local hash creator with SHA-1, SHA-256 and SHA-512, with hash values calculated by OpenSSL.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testHashing() throws Exception
+    {
+        var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
+        HashCreator hashCreator = new LocalHashCreator();
+        var sha1hash = hashCreator.calculateHash(testData, "1.3.14.3.2.26"); // SHA1
+        var sha256hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.1"); // SHA256
+        var sha512hash = hashCreator.calculateHash(testData, "2.16.840.1.101.3.4.2.3"); // SHA512
+        var expectedSha1hash = Base64.getDecoder().decode("YAdYMOObfFeKOweBAemmaPaNHCg=");
+        var expectedSha256hash = Base64.getDecoder().decode("KiM2HJ3YhN10kF0+7S4MkwIgEZjzZSmgNDhLdIqpGes=");
+        var expectedSha512hash =
+            Base64.getDecoder().decode("yChVyfMAZHt5A2vxLek1TDhVHmRg3E/2aKpHX0L+kiz/9HyR6APIrEbaaM8DtVuzDN+F7McDSbVr1z9MaT22VQ==");
+        assertThat("SHA1 hash", sha1hash, is(expectedSha1hash));
+        assertThat("SHA256 hash", sha256hash, is(expectedSha256hash));
+        assertThat("SHA512 hash", sha512hash, is(expectedSha512hash));
+    }
 
-  /**
-   * Tests that an unsupported OID results in a NoSuchAlgorithmException.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testUnsupportedOID() throws Exception
-  {
-    var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
-    HashCreator hashCreator = new LocalHashCreator();
-    Assertions.assertThatExceptionOfType(NoSuchAlgorithmException.class)
-              .isThrownBy(() -> hashCreator.calculateHash(testData, "1.3.3.7.1"))
-              .withMessage("1.3.3.7.1 MessageDigest not available");
-  }
+    /**
+     * Tests that an unsupported OID results in a NoSuchAlgorithmException.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testUnsupportedOID() throws Exception
+    {
+        var testData = "Something to hash".getBytes(StandardCharsets.UTF_8);
+        HashCreator hashCreator = new LocalHashCreator();
+        Assertions.assertThatExceptionOfType(NoSuchAlgorithmException.class)
+            .isThrownBy(() -> hashCreator.calculateHash(testData, "1.3.3.7.1"))
+            .withMessage("1.3.3.7.1 MessageDigest not available");
+    }
 }

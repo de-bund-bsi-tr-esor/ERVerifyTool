@@ -38,133 +38,131 @@ import org.junit.Test;
 public class TestOutputFolder extends FileOutputChecker
 {
 
-  /**
-   * Check if aoid folder is created correctly.
-   */
-  @Test
-  public void testCreateAoidFolder() throws Exception
-  {
-    new OutputFolder(destination).createAoidFolder("no_aoid");
+    /**
+     * Check if aoid folder is created correctly.
+     */
+    @Test
+    public void testCreateAoidFolder() throws Exception
+    {
+        new OutputFolder(destination).createAoidFolder("no_aoid");
 
-    assertFolderExists("no_aoid");
-  }
+        assertFolderExists("no_aoid");
+    }
 
-  /**
-   * Check if multiple aoid folders are created correctly.
-   */
-  @Test
-  public void testCreateMultipleAoidFolders() throws Exception
-  {
-    new OutputFolder(destination).createAoidFolder("aoid(1)");
+    /**
+     * Check if multiple aoid folders are created correctly.
+     */
+    @Test
+    public void testCreateMultipleAoidFolders() throws Exception
+    {
+        new OutputFolder(destination).createAoidFolder("aoid(1)");
 
-    assertFolderExists("aoid_1_");
+        assertFolderExists("aoid_1_");
 
-    new OutputFolder(destination).createAoidFolder("aoid(2)");
+        new OutputFolder(destination).createAoidFolder("aoid(2)");
 
-    assertFolderExists("aoid_1_");
-    assertFolderExists("aoid_2_");
+        assertFolderExists("aoid_1_");
+        assertFolderExists("aoid_2_");
 
-    new OutputFolder(destination).createAoidFolder("aoid(1)");
+        new OutputFolder(destination).createAoidFolder("aoid(1)");
 
-    assertFolderExists("aoid_1_");
-    assertFolderExists("aoid_1_(1)");
-    assertFolderExists("aoid_2_");
-  }
+        assertFolderExists("aoid_1_");
+        assertFolderExists("aoid_1_(1)");
+        assertFolderExists("aoid_2_");
+    }
 
-  /**
-   * Check if folder with nasty chars is created correctly.
-   */
-  @Test
-  public void testCreateAoidFolderWithNastyChars() throws Exception
-  {
-    new OutputFolder(destination).createAoidFolder("../..");
+    /**
+     * Check if folder with nasty chars is created correctly.
+     */
+    @Test
+    public void testCreateAoidFolderWithNastyChars() throws Exception
+    {
+        new OutputFolder(destination).createAoidFolder("../..");
 
-    assertFolderExists("_____");
-  }
+        assertFolderExists("_____");
+    }
 
-  /**
-   * Check if sub folder is created correctly.
-   */
-  @Test
-  public void testCreateAoidSubFolderSuccess() throws Exception
-  {
-    new OutputFolder(destination).createAoidFolder(".aoid with whitespaces")
-                                 .createAoidSubFolder("awesome sub.folder");
+    /**
+     * Check if sub folder is created correctly.
+     */
+    @Test
+    public void testCreateAoidSubFolderSuccess() throws Exception
+    {
+        new OutputFolder(destination).createAoidFolder(".aoid with whitespaces").createAoidSubFolder("awesome sub.folder");
 
-    assertFolderExists("_aoid_with_whitespaces/awesome_sub_folder");
-  }
+        assertFolderExists("_aoid_with_whitespaces/awesome_sub_folder");
+    }
 
-  /**
-   * Check if missing aoid folder creation is identified with specific exception.
-   */
-  @Test
-  public void testCreateAoidSubFolderWithoutAoidFolder() throws IOException
-  {
-    Assertions.assertThatExceptionOfType(IOException.class)
-              .isThrownBy(() -> new OutputFolder(destination).createAoidSubFolder("awesome sub.folder"))
-              .withMessage("aoid folder must be created before");
-  }
+    /**
+     * Check if missing aoid folder creation is identified with specific exception.
+     */
+    @Test
+    public void testCreateAoidSubFolderWithoutAoidFolder() throws IOException
+    {
+        Assertions.assertThatExceptionOfType(IOException.class)
+            .isThrownBy(() -> new OutputFolder(destination).createAoidSubFolder("awesome sub.folder"))
+            .withMessage("aoid folder must be created before");
+    }
 
-  /**
-   * Check if a dot is handled.
-   */
-  @Test
-  @SuppressWarnings("PMD.JUnitAssertionsShouldIncludeMessage")
-  public void testSanitizeDirNameDot()
-  {
-    var sanitizedString = OutputFolder.sanitizeFolderName(".");
-    assertThat(sanitizedString, is("_"));
-  }
+    /**
+     * Check if a dot is handled.
+     */
+    @Test
+    @SuppressWarnings("PMD.JUnitAssertionsShouldIncludeMessage")
+    public void testSanitizeDirNameDot()
+    {
+        var sanitizedString = OutputFolder.sanitizeFolderName(".");
+        assertThat(sanitizedString, is("_"));
+    }
 
-  /**
-   * Check if alphanumeric characters are not replaced.
-   */
-  @Test
-  @SuppressWarnings("PMD.JUnitAssertionsShouldIncludeMessage")
-  public void testSanitizeDirNameAlphaNumeric()
-  {
-    var sanitizedString = OutputFolder.sanitizeFolderName("QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm1234567890");
-    assertThat(sanitizedString, is("QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm1234567890"));
-  }
+    /**
+     * Check if alphanumeric characters are not replaced.
+     */
+    @Test
+    @SuppressWarnings("PMD.JUnitAssertionsShouldIncludeMessage")
+    public void testSanitizeDirNameAlphaNumeric()
+    {
+        var sanitizedString = OutputFolder.sanitizeFolderName("QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm1234567890");
+        assertThat(sanitizedString, is("QWERTZUIOPASDFGHJKLYXCVBNMqwertzuiopasdfghjklyxcvbnm1234567890"));
+    }
 
-  /**
-   * Check if forbidden filesystem characters are replaced.
-   */
-  @Test
-  @SuppressWarnings("PMD.JUnitAssertionsShouldIncludeMessage")
-  public void testSanitizeDirNameForbiddenFilesystemChars()
-  {
-    var forbiddenChars = new char[]{'*', '"', '/', '\\', '[', ']', ':', ';', '|', '=', ',', ' ', '\0', '\n',
-                                    '.', '_'};
-    var sanitizedString = OutputFolder.sanitizeFolderName(new String(forbiddenChars));
-    assertThat(sanitizedString, is("________________"));
-  }
+    /**
+     * Check if forbidden filesystem characters are replaced.
+     */
+    @Test
+    @SuppressWarnings("PMD.JUnitAssertionsShouldIncludeMessage")
+    public void testSanitizeDirNameForbiddenFilesystemChars()
+    {
+        var forbiddenChars = new char[]{'*', '"', '/', '\\', '[', ']', ':', ';', '|', '=', ',', ' ', '\0', '\n', '.', '_'};
+        var sanitizedString = OutputFolder.sanitizeFolderName(new String(forbiddenChars));
+        assertThat(sanitizedString, is("________________"));
+    }
 
-  /**
-   * Check if multiple calls results in new directories with attached counter.
-   */
-  @Test
-  public void testCreateNewFolderMultiply() throws IOException
-  {
-    var directoryName = "TestDirectory";
+    /**
+     * Check if multiple calls results in new directories with attached counter.
+     */
+    @Test
+    public void testCreateNewFolderMultiply() throws IOException
+    {
+        var directoryName = "TestDirectory";
 
-    var dirZero = destination.resolve(directoryName).toFile();
-    var dirOne = destination.resolve(directoryName + "(1)").toFile();
-    var dirTwo = destination.resolve(directoryName + "(2)").toFile();
+        var dirZero = destination.resolve(directoryName).toFile();
+        var dirOne = destination.resolve(directoryName + "(1)").toFile();
+        var dirTwo = destination.resolve(directoryName + "(2)").toFile();
 
-    OutputFolder.createNewFolder(destination, directoryName);
+        OutputFolder.createNewFolder(destination, directoryName);
 
-    assertThat(dirZero.getAbsolutePath(), dirZero, anExistingDirectory());
+        assertThat(dirZero.getAbsolutePath(), dirZero, anExistingDirectory());
 
-    OutputFolder.createNewFolder(destination, directoryName);
+        OutputFolder.createNewFolder(destination, directoryName);
 
-    assertThat(dirZero.getAbsolutePath(), dirZero, anExistingDirectory());
-    assertThat(dirOne.getAbsolutePath(), dirOne, anExistingDirectory());
+        assertThat(dirZero.getAbsolutePath(), dirZero, anExistingDirectory());
+        assertThat(dirOne.getAbsolutePath(), dirOne, anExistingDirectory());
 
-    OutputFolder.createNewFolder(destination, directoryName);
+        OutputFolder.createNewFolder(destination, directoryName);
 
-    assertThat(dirZero.getAbsolutePath(), dirZero, anExistingDirectory());
-    assertThat(dirOne.getAbsolutePath(), dirOne, anExistingDirectory());
-    assertThat(dirTwo.getAbsolutePath(), dirTwo, anExistingDirectory());
-  }
+        assertThat(dirZero.getAbsolutePath(), dirZero, anExistingDirectory());
+        assertThat(dirOne.getAbsolutePath(), dirOne, anExistingDirectory());
+        assertThat(dirTwo.getAbsolutePath(), dirTwo, anExistingDirectory());
+    }
 }

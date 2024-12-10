@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Configuration xmlns="http://www.bsi.bund.de/tr-esor/checktool/1.2">
+    <General>
+        <VerifierID>urn:Beispiel</VerifierID>
+        <DefaultProfileName>https://tools.ietf.org/html/rfc4998</DefaultProfileName>
+
+    </General>
+    <Profile name="https://tools.ietf.org/html/rfc4998" lxaipDataDirectory="../commons/src/test/resources/lxaip">
+    </Profile>
+
+</Configuration>

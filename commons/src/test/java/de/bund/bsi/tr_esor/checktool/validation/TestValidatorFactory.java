@@ -56,111 +56,104 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestValidatorFactory
 {
 
-  private final ValidatorFactory systemUnderTest = ValidatorFactory.getInstance();
+    private final ValidatorFactory systemUnderTest = ValidatorFactory.getInstance();
 
-  private ValidationContext<?> context;
+    private ValidationContext<?> context;
 
-  /**
-   * Loads special configuration which contains several exception cases.
-   *
-   * @throws Exception
-   */
-  @Before
-  public void setUp() throws Exception
-  {
-    TestUtils.loadConfig("/configForTestingFactory.xml");
-    context = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null,
-                                      ProfileNames.RFC4998, null, true);
-  }
-
-  /**
-   * Resets configuration to continue normal testing.
-   *
-   * @throws Exception
-   */
-  @AfterClass
-  public static void tearDownClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
-
-  /**
-   * Asserts that a hash creator instance can be configured in configuration.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void canGetHashCreator() throws Exception
-  {
-    assertThat("HashCreator instance from test config",
-               systemUnderTest.getHashCreator(),
-               instanceOf(OtherHashCreator.class));
-    TestUtils.loadDefaultConfig();
-    assertThat("HashCreator instance from empty config",
-               systemUnderTest.getHashCreator(),
-               instanceOf(LocalHashCreator.class));
-  }
-
-  /**
-   * Asserts that the validator factory will provide expected validators for a predefined profile.
-   */
-  @Test
-  public void testShippedProfile() throws Exception
-  {
-    Validator<AlgorithmUsage, ?, AlgorithmValidityReport> val = systemUnderTest.getValidator(AlgorithmUsage.class,
-                                                                                             AlgorithmValidityReport.class,
-                                                                                             context);
-    assertThat("for RFC4998", val.getClass().getName(), is(AlgorithmUsageValidator.class.getName()));
-
-    var c2 = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null,
-                                     ProfileNames.BASIS_ERS, null, true);
-    val = systemUnderTest.getValidator(AlgorithmUsage.class, AlgorithmValidityReport.class, c2);
-    assertThat("for Basis", val.getClass().getName(), is(BasisErsAlgorithmUsageValidator.class.getName()));
-  }
-
-  /**
-   * Asserts that the validator factory will provide the configured validators for a configured profile.
-   */
-  @Test
-  public void testConfiguredProfile() throws Exception
-  {
-    // in default profile that validator cannot be constructed.
-    ValidationContext<?> otherContext = new ErValidationContext(new Reference("dummy"), (EvidenceRecord)null,
-                                                                "test_profile", null, true);
-    assertThat(systemUnderTest.getValidator(EvidenceRecord.class, EvidenceRecordReport.class, otherContext),
-               instanceOf(OtherErValidator.class));
-  }
-
-  /**
-   * Asserts that the validator factory recognizes built-in and configured profile names.
-   */
-  @Test
-  public void testSupportedProfiles() throws Exception
-  {
-    assertTrue(systemUnderTest.isProfileSupported(ProfileNames.RFC4998));
-    assertTrue(systemUnderTest.isProfileSupported(ProfileNames.BASIS_ERS));
-    assertTrue(systemUnderTest.isProfileSupported("test_profile"));
-    assertFalse(systemUnderTest.isProfileSupported("unknown"));
-  }
-
-  /**
-   * Special HashCreator class. Do not use otherwise.
-   */
-  public static class OtherHashCreator implements HashCreator
-  {
-
-    @Override
-    public byte[] calculateHash(byte[] data, String oid) throws NoSuchAlgorithmException
+    /**
+     * Loads special configuration which contains several exception cases.
+     *
+     * @throws Exception
+     */
+    @Before
+    public void setUp() throws Exception
     {
-      return "Just for testing".getBytes(StandardCharsets.UTF_8);
+        TestUtils.loadConfig("/configForTestingFactory.xml");
+        context = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null, ProfileNames.RFC4998, null, true);
     }
-  }
 
-  /**
-   * Special validator class. Do not use otherwise.
-   */
-  public static class OtherErValidator extends EvidenceRecordValidator
-  {
-    // nothing
-  }
+    /**
+     * Resets configuration to continue normal testing.
+     *
+     * @throws Exception
+     */
+    @AfterClass
+    public static void tearDownClass() throws Exception
+    {
+        TestUtils.loadDefaultConfig();
+    }
+
+    /**
+     * Asserts that a hash creator instance can be configured in configuration.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void canGetHashCreator() throws Exception
+    {
+        assertThat("HashCreator instance from test config", systemUnderTest.getHashCreator(), instanceOf(OtherHashCreator.class));
+        TestUtils.loadDefaultConfig();
+        assertThat("HashCreator instance from empty config", systemUnderTest.getHashCreator(), instanceOf(LocalHashCreator.class));
+    }
+
+    /**
+     * Asserts that the validator factory will provide expected validators for a predefined profile.
+     */
+    @Test
+    public void testShippedProfile() throws Exception
+    {
+        Validator<AlgorithmUsage, ?, AlgorithmValidityReport> val =
+            systemUnderTest.getValidator(AlgorithmUsage.class, AlgorithmValidityReport.class, context);
+        assertThat("for RFC4998", val.getClass().getName(), is(AlgorithmUsageValidator.class.getName()));
+
+        var c2 = new ErValidationContext(new Reference("dummyReference"), (EvidenceRecord)null, ProfileNames.BASIS_ERS, null, true);
+        val = systemUnderTest.getValidator(AlgorithmUsage.class, AlgorithmValidityReport.class, c2);
+        assertThat("for Basis", val.getClass().getName(), is(BasisErsAlgorithmUsageValidator.class.getName()));
+    }
+
+    /**
+     * Asserts that the validator factory will provide the configured validators for a configured profile.
+     */
+    @Test
+    public void testConfiguredProfile() throws Exception
+    {
+        // in default profile that validator cannot be constructed.
+        ValidationContext<?> otherContext =
+            new ErValidationContext(new Reference("dummy"), (EvidenceRecord)null, "test_profile", null, true);
+        assertThat(systemUnderTest.getValidator(EvidenceRecord.class, EvidenceRecordReport.class, otherContext),
+            instanceOf(OtherErValidator.class));
+    }
+
+    /**
+     * Asserts that the validator factory recognizes built-in and configured profile names.
+     */
+    @Test
+    public void testSupportedProfiles() throws Exception
+    {
+        assertTrue(systemUnderTest.isProfileSupported(ProfileNames.RFC4998));
+        assertTrue(systemUnderTest.isProfileSupported(ProfileNames.BASIS_ERS));
+        assertTrue(systemUnderTest.isProfileSupported("test_profile"));
+        assertFalse(systemUnderTest.isProfileSupported("unknown"));
+    }
+
+    /**
+     * Special HashCreator class. Do not use otherwise.
+     */
+    public static class OtherHashCreator implements HashCreator
+    {
+
+        @Override
+        public byte[] calculateHash(byte[] data, String oid) throws NoSuchAlgorithmException
+        {
+            return "Just for testing".getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
+     * Special validator class. Do not use otherwise.
+     */
+    public static class OtherErValidator extends EvidenceRecordValidator
+    {
+        // nothing
+    }
 }

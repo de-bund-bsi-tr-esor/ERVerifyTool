@@ -32,85 +32,83 @@ import de.bund.bsi.tr_esor.checktool.parser.ASN1EvidenceRecordParser;
 public class TestManipulate
 {
 
-  public static final Logger LOG = LoggerFactory.getLogger(TestManipulate.class);
+    public static final Logger LOG = LoggerFactory.getLogger(TestManipulate.class);
 
-  /**
-   * Loads configuration.
-   */
-  @BeforeClass
-  public static void setUpStatic() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
-
-  /**
-   * Utility function to create a XAIP with intermediate hash. Precondition: Hash Tree with at least two
-   * levels in the partial hash tree, to create a hash from the first level and include it into the second.
-   * Used to create xaip_ok_ers_intermediate_hash.xml.
-   */
-  @Test
-  // @Ignore
-  public void addIntermediateHashToHashTree() throws Exception
-  {
-    var params = new TestParameterFinder();
-    params.setXaip("/xaip/xaip_ok_ers_intermediate_hash.xml");
-    var xaip = params.getXaip();
-    var er = xaip.getCredentialsSection().getCredential().get(2).getEvidenceRecord();
-    var asn1 = new ASN1EvidenceRecordParser().parse(er.getAsn1EvidenceRecord());
-    var partialHashTree0 = asn1.getAtss().get(0).get(0).getPartialHashtree(0);
-    var dataGroup = new DataGroup(partialHashTree0, "2.16.840.1.101.3.4.2.1");
-    asn1.getAtss().get(0).get(0).getPartialHashtree(1).add(dataGroup.getHash());
-    er.setAsn1EvidenceRecord(toASN1Sequence(asn1).getEncoded());
-    LOG.info(new String(Base64.encode(er.getAsn1EvidenceRecord()), StandardCharsets.UTF_8));
-  }
-
-  /**
-   * Utility function to create a broken XAIP with intermediate Hash. Precondition: Hash Tree with at least
-   * two levels in the partial hash tree, to create a hash from the first level and include it into the
-   * second. Used to create xaip_nok_ers_wrong_intermediate_hash.xml;
-   */
-  @Test
-  @Ignore
-  public void addBrokenHashIntoHashTree() throws Exception
-  {
-    var params = new TestParameterFinder();
-    params.setXaip("/xaip/xaip_nok_ers_wrong_intermediate_hash.xml");
-    var xaip = params.getXaip();
-    var er = xaip.getCredentialsSection().getCredential().get(2).getEvidenceRecord();
-    var asn1 = new ASN1EvidenceRecordParser().parse(er.getAsn1EvidenceRecord());
-    var dataGroup = new DataGroup(List.of("bla".getBytes(StandardCharsets.UTF_8)), "2.16.840.1.101.3.4.2.1");
-    asn1.getAtss().get(0).get(0).getPartialHashtree(1).add(dataGroup.getHash());
-    er.setAsn1EvidenceRecord(toASN1Sequence(asn1).getEncoded());
-    LOG.info(new String(Base64.encode(er.getAsn1EvidenceRecord()), StandardCharsets.UTF_8));
-  }
-
-  /**
-   * generate an evidence record
-   */
-  public ASN1Sequence toASN1Sequence(EvidenceRecord evidenceRecord) throws IOException
-  {
-    var v = new ASN1EncodableVector();
-    v.add(new ASN1Integer(evidenceRecord.getVersion()));
-
-    var encodableVector = new ASN1EncodableVector();
-    for ( String hashAlgo : evidenceRecord.getDigestAlgorithms() )
+    /**
+     * Loads configuration.
+     */
+    @BeforeClass
+    public static void setUpStatic() throws Exception
     {
-      var o = new ASN1ObjectIdentifier(hashAlgo);
-      encodableVector.add(new AlgorithmIdentifier(o, DERNull.INSTANCE));
+        TestUtils.loadDefaultConfig();
     }
-    v.add(new DLSequence(encodableVector));
 
-    if (evidenceRecord.getCryptoInfo() != null)
+    /**
+     * Utility function to create a XAIP with intermediate hash. Precondition: Hash Tree with at least two levels in the partial hash tree,
+     * to create a hash from the first level and include it into the second. Used to create xaip_ok_ers_intermediate_hash.xml.
+     */
+    @Test
+    // @Ignore
+    public void addIntermediateHashToHashTree() throws Exception
     {
-      ASN1TaggedObject t = new DLTaggedObject(false, 0, evidenceRecord.getCryptoInfo().toASN1Primitive());
-      v.add(t);
+        var params = new TestParameterFinder();
+        params.setXaip("/xaip/xaip_ok_ers_intermediate_hash.xml");
+        var xaip = params.getXaip();
+        var er = xaip.getCredentialsSection().getCredential().get(2).getEvidenceRecord();
+        var asn1 = new ASN1EvidenceRecordParser().parse(er.getAsn1EvidenceRecord());
+        var partialHashTree0 = asn1.getAtss().get(0).get(0).getPartialHashtree(0);
+        var dataGroup = new DataGroup(partialHashTree0, "2.16.840.1.101.3.4.2.1");
+        asn1.getAtss().get(0).get(0).getPartialHashtree(1).add(dataGroup.getHash());
+        er.setAsn1EvidenceRecord(toASN1Sequence(asn1).getEncoded());
+        LOG.info(new String(Base64.encode(er.getAsn1EvidenceRecord()), StandardCharsets.UTF_8));
     }
-    if (evidenceRecord.getEncryptionInfo() != null)
+
+    /**
+     * Utility function to create a broken XAIP with intermediate Hash. Precondition: Hash Tree with at least two levels in the partial hash
+     * tree, to create a hash from the first level and include it into the second. Used to create xaip_nok_ers_wrong_intermediate_hash.xml;
+     */
+    @Test
+    @Ignore
+    public void addBrokenHashIntoHashTree() throws Exception
     {
-      ASN1TaggedObject t = new DLTaggedObject(false, 1, evidenceRecord.getEncryptionInfo().toASN1Primitive());
-      v.add(t);
+        var params = new TestParameterFinder();
+        params.setXaip("/xaip/xaip_nok_ers_wrong_intermediate_hash.xml");
+        var xaip = params.getXaip();
+        var er = xaip.getCredentialsSection().getCredential().get(2).getEvidenceRecord();
+        var asn1 = new ASN1EvidenceRecordParser().parse(er.getAsn1EvidenceRecord());
+        var dataGroup = new DataGroup(List.of("bla".getBytes(StandardCharsets.UTF_8)), "2.16.840.1.101.3.4.2.1");
+        asn1.getAtss().get(0).get(0).getPartialHashtree(1).add(dataGroup.getHash());
+        er.setAsn1EvidenceRecord(toASN1Sequence(asn1).getEncoded());
+        LOG.info(new String(Base64.encode(er.getAsn1EvidenceRecord()), StandardCharsets.UTF_8));
     }
-    v.add(evidenceRecord.getAtss().toASN1Primitive());
-    return new DLSequence(v);
-  }
+
+    /**
+     * generate an evidence record
+     */
+    public ASN1Sequence toASN1Sequence(EvidenceRecord evidenceRecord) throws IOException
+    {
+        var v = new ASN1EncodableVector();
+        v.add(new ASN1Integer(evidenceRecord.getVersion()));
+
+        var encodableVector = new ASN1EncodableVector();
+        for (String hashAlgo : evidenceRecord.getDigestAlgorithms())
+        {
+            var o = new ASN1ObjectIdentifier(hashAlgo);
+            encodableVector.add(new AlgorithmIdentifier(o, DERNull.INSTANCE));
+        }
+        v.add(new DLSequence(encodableVector));
+
+        if (evidenceRecord.getCryptoInfo() != null)
+        {
+            ASN1TaggedObject t = new DLTaggedObject(false, 0, evidenceRecord.getCryptoInfo().toASN1Primitive());
+            v.add(t);
+        }
+        if (evidenceRecord.getEncryptionInfo() != null)
+        {
+            ASN1TaggedObject t = new DLTaggedObject(false, 1, evidenceRecord.getEncryptionInfo().toASN1Primitive());
+            v.add(t);
+        }
+        v.add(evidenceRecord.getAtss().toASN1Primitive());
+        return new DLSequence(v);
+    }
 }

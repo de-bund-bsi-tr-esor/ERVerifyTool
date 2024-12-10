@@ -21,11 +21,11 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType;
-
 import de.bund.bsi.tr_esor.checktool.xml.VRCreator;
 import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequence.ArchiveTimeStampChain;
+
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ArchiveTimeStampValidityType;
 
 
 /**
@@ -36,44 +36,43 @@ import de.bund.bsi.tr_esor.vr.EvidenceRecordValidityType.ArchiveTimeStampSequenc
 public class ATSChainReport extends ReportPart implements OutputCreator<ArchiveTimeStampChain>
 {
 
-  /**
-   * Default validation results. Note that special validator implementations may produce data which does not
-   * fit that schema.
-   */
-  private final ArchiveTimeStampChain xmlReport;
+    /**
+     * Default validation results. Note that special validator implementations may produce data which does not fit that schema.
+     */
+    private final ArchiveTimeStampChain xmlReport;
 
-  /**
-   * Creates instance.
-   *
-   * @param ref position inside the ATSSequence
-   */
-  public ATSChainReport(Reference ref)
-  {
-    super(ref);
-    xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityTypeArchiveTimeStampSequenceArchiveTimeStampChain();
-  }
+    /**
+     * Creates instance.
+     *
+     * @param ref position inside the ATSSequence
+     */
+    public ATSChainReport(Reference ref)
+    {
+        super(ref);
+        xmlReport = XmlHelper.FACTORY_ESOR_VR.createEvidenceRecordValidityTypeArchiveTimeStampSequenceArchiveTimeStampChain();
+    }
 
-  @Override
-  public ArchiveTimeStampChain getFormatted()
-  {
-    return xmlReport;
-  }
+    @Override
+    public ArchiveTimeStampChain getFormatted()
+    {
+        return xmlReport;
+    }
 
-  @Override
-  public Class<ArchiveTimeStampChain> getTargetClass()
-  {
-    return ArchiveTimeStampChain.class;
-  }
+    @Override
+    public Class<ArchiveTimeStampChain> getTargetClass()
+    {
+        return ArchiveTimeStampChain.class;
+    }
 
-  /**
-   * Adds results to this report.
-   *
-   * @param report
-   */
-  public void addChild(ArchiveTimeStampReport report)
-  {
-    updateCodes(report);
-    xmlReport.getArchiveTimeStamp().add(VRCreator.translate(report, ArchiveTimeStampValidityType.class));
-  }
+    /**
+     * Adds results to this report.
+     *
+     * @param report
+     */
+    public void addChild(ArchiveTimeStampReport report)
+    {
+        updateCodes(report);
+        xmlReport.getArchiveTimeStamp().add(VRCreator.translate(report, ArchiveTimeStampValidityType.class));
+    }
 
 }

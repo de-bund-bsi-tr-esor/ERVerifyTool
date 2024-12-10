@@ -49,115 +49,114 @@ import de.bund.bsi.tr_esor.checktool.data.EvidenceRecord;
 public class ASN1EvidenceRecordParser implements Parser<EvidenceRecord>
 {
 
-  private static final int BUF_SIZE = 133;
+    private static final int BUF_SIZE = 133;
 
-  private static final int TAGNO_CRYPTO_INFOS = 0;
+    private static final int TAGNO_CRYPTO_INFOS = 0;
 
-  private static final int TAGNO_ENCRYPTION_INFO = 1;
+    private static final int TAGNO_ENCRYPTION_INFO = 1;
 
-  private InputStream input;
+    private InputStream input;
 
-  @Override
-  public void setInput(InputStream input)
-  {
-    this.input = input;
-    if (!input.markSupported())
+    @Override
+    public void setInput(InputStream input)
     {
-      throw new IllegalArgumentException("can only handle streams which support mark/reset");
+        this.input = input;
+        if (!input.markSupported())
+        {
+            throw new IllegalArgumentException("can only handle streams which support mark/reset");
+        }
+
     }
 
-  }
-
-  @Override
-  public boolean canParse() throws IOException
-  {
-    input.mark(BUF_SIZE);
-    var buf = new byte[BUF_SIZE];
-    var length = input.read(buf, 0, BUF_SIZE);
-    input.reset();
-
-    final var sequenceTag = 0x30;
-    if (length < BUF_SIZE || buf[0] != sequenceTag)
+    @Override
+    public boolean canParse() throws IOException
     {
-      return false;
+        input.mark(BUF_SIZE);
+        var buf = new byte[BUF_SIZE];
+        var length = input.read(buf, 0, BUF_SIZE);
+        input.reset();
+
+        final var sequenceTag = 0x30;
+        if (length < BUF_SIZE || buf[0] != sequenceTag)
+        {
+            return false;
+        }
+
+        var versionOffset = 1 + getNumberLengthOctets(buf, 1);
+        final var integerTag = 0x02;
+        return buf[versionOffset] == integerTag && buf[versionOffset + 3] == sequenceTag;
     }
 
-    var versionOffset = 1 + getNumberLengthOctets(buf, 1);
-    final var integerTag = 0x02;
-    return buf[versionOffset] == integerTag && buf[versionOffset + 3] == sequenceTag;
-  }
-
-  private int getNumberLengthOctets(byte[] buffer, int offset)
-  {
-    final var indefiniteLength = (byte)0x80;
-    if (buffer[offset] == indefiniteLength)
+    private int getNumberLengthOctets(byte[] buffer, int offset)
     {
-      return 1;
-    }
-    if ((buffer[offset] & indefiniteLength) == 0)
-    {
-      return 1;
-    }
-    return 1 + (0x7f & buffer[offset]);
-  }
-
-  @Override
-  public EvidenceRecord parse() throws IOException
-  {
-    return parse(input.readAllBytes());
-  }
-
-  /**
-   * Parses the given DER encoded EvidenceRecord.
-   *
-   * @param derEncodedER
-   * @return EvidenceRecord
-   * @throws IOException
-   */
-  public EvidenceRecord parse(byte[] derEncodedER) throws IOException
-  {
-
-    return parse(ASN1Primitive.fromByteArray(derEncodedER));
-  }
-
-  private EvidenceRecord parse(ASN1Object asn1Object) throws IOException
-  {
-
-    var rootSequence = Checked.cast(asn1Object).to(ASN1Sequence.class);
-    var iter = rootSequence.iterator();
-    // position 0 - version
-    var asn1Version = Checked.cast(iter.next()).to(ASN1Integer.class);
-    var version = asn1Version.getValue().intValue();
-    // position 1
-    // get all digest algorithms from digestAlgorithm sequence in the asn.1 this data is stored in
-    // sequence[AlgoIdentifier], AlgoIdentifier is a sequence[digestAlgo, parameter]
-    List<AlgorithmIdentifier> digestAlgos = new ArrayList<>();
-    var algoList = Checked.cast(iter.next()).to(ASN1Sequence.class);
-    for ( var algo : algoList )
-    {
-      digestAlgos.add(ASN1Utils.parseAlgorithmIdentifier(algo));
+        final var indefiniteLength = (byte)0x80;
+        if (buffer[offset] == indefiniteLength)
+        {
+            return 1;
+        }
+        if ((buffer[offset] & indefiniteLength) == 0)
+        {
+            return 1;
+        }
+        return 1 + (0x7f & buffer[offset]);
     }
 
-    // check crypto info (optional tagged object)
-    var element = iter.next();
-    CryptoInfo cryptoInfo = null;
-    if (element instanceof ASN1TaggedObject && ((ASN1TaggedObject)element).getTagNo() == TAGNO_CRYPTO_INFOS)
+    @Override
+    public EvidenceRecord parse() throws IOException
     {
-      cryptoInfo = new CryptoInfo(ASN1Sequence.getInstance((ASN1TaggedObject)element, false));
-      element = iter.next();
+        return parse(input.readAllBytes());
     }
 
-    // check encryption info (optional tagged object)
-    EncryptionInfo encryptInfo = null;
-    if (element instanceof ASN1TaggedObject
-        && ((ASN1TaggedObject)element).getTagNo() == TAGNO_ENCRYPTION_INFO)
+    /**
+     * Parses the given DER encoded EvidenceRecord.
+     *
+     * @param derEncodedER
+     * @return EvidenceRecord
+     * @throws IOException
+     */
+    public EvidenceRecord parse(byte[] derEncodedER) throws IOException
     {
-      encryptInfo = new EncryptionInfo(ASN1Sequence.getInstance((ASN1TaggedObject)element, false));
-      element = iter.next();
+
+        return parse(ASN1Primitive.fromByteArray(derEncodedER));
     }
 
-    // ArchiveTimestampSequence
-    var atss = new ArchiveTimeStampSequence(element);
-    return new EvidenceRecord(version, digestAlgos, atss, cryptoInfo, encryptInfo);
-  }
+    private EvidenceRecord parse(ASN1Object asn1Object) throws IOException
+    {
+
+        var rootSequence = Checked.cast(asn1Object).to(ASN1Sequence.class);
+        var iter = rootSequence.iterator();
+        // position 0 - version
+        var asn1Version = Checked.cast(iter.next()).to(ASN1Integer.class);
+        var version = asn1Version.getValue().intValue();
+        // position 1
+        // get all digest algorithms from digestAlgorithm sequence in the asn.1 this data is stored in
+        // sequence[AlgoIdentifier], AlgoIdentifier is a sequence[digestAlgo, parameter]
+        List<AlgorithmIdentifier> digestAlgos = new ArrayList<>();
+        var algoList = Checked.cast(iter.next()).to(ASN1Sequence.class);
+        for (var algo : algoList)
+        {
+            digestAlgos.add(ASN1Utils.parseAlgorithmIdentifier(algo));
+        }
+
+        // check crypto info (optional tagged object)
+        var element = iter.next();
+        CryptoInfo cryptoInfo = null;
+        if (element instanceof ASN1TaggedObject && ((ASN1TaggedObject)element).getTagNo() == TAGNO_CRYPTO_INFOS)
+        {
+            cryptoInfo = new CryptoInfo(ASN1Sequence.getInstance((ASN1TaggedObject)element, false));
+            element = iter.next();
+        }
+
+        // check encryption info (optional tagged object)
+        EncryptionInfo encryptInfo = null;
+        if (element instanceof ASN1TaggedObject && ((ASN1TaggedObject)element).getTagNo() == TAGNO_ENCRYPTION_INFO)
+        {
+            encryptInfo = new EncryptionInfo(ASN1Sequence.getInstance((ASN1TaggedObject)element, false));
+            element = iter.next();
+        }
+
+        // ArchiveTimestampSequence
+        var atss = new ArchiveTimeStampSequence(element);
+        return new EvidenceRecord(version, digestAlgos, atss, cryptoInfo, encryptInfo);
+    }
 }

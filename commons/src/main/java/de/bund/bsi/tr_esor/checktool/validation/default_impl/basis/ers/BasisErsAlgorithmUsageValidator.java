@@ -38,26 +38,25 @@ import de.bund.bsi.tr_esor.checktool.validation.default_impl.AlgorithmUsageValid
 public class BasisErsAlgorithmUsageValidator extends AlgorithmUsageValidator
 {
 
-  private static final Collection<String> ALLOWED_DIGESTS = Collections.unmodifiableList(Arrays.asList(// BSI-TR-ESOR-ERS-5.2.1:
-                                                                                                       "1.3.36.3.2.1", // RIPEMD-160
-                                                                                                       "1.3.14.3.2.26", // SHA-1
-                                                                                                       "2.16.840.1.101.3.4.2.4", // SHA-224
-                                                                                                       // BSI-TR-ESOR-ERS-5.1.1:
-                                                                                                       "2.16.840.1.101.3.4.2.1", // SHA-256
-                                                                                                       "2.16.840.1.101.3.4.2.2", // SHA-384
-                                                                                                       "2.16.840.1.101.3.4.2.3") // SHA-512
-  );
+    private static final Collection<String> ALLOWED_DIGESTS = Collections.unmodifiableList(Arrays.asList(// BSI-TR-ESOR-ERS-5.2.1:
+        "1.3.36.3.2.1", // RIPEMD-160
+        "1.3.14.3.2.26", // SHA-1
+        "2.16.840.1.101.3.4.2.4", // SHA-224
+        // BSI-TR-ESOR-ERS-5.1.1:
+        "2.16.840.1.101.3.4.2.1", // SHA-256
+        "2.16.840.1.101.3.4.2.2", // SHA-384
+        "2.16.840.1.101.3.4.2.3") // SHA-512
+    );
 
-  @Override
-  protected ValidationResultMinor check(AlgorithmUsage algo)
-  {
-    var result = super.check(algo);
-    if (result == ValidationResultMinor.NULL && algo.getUsage() == UsageType.DATA_HASHING
-        && !ALLOWED_DIGESTS.contains(algo.getOid()))
+    @Override
+    protected ValidationResultMinor check(AlgorithmUsage algo)
     {
-      return ValidationResultMinor.HASH_ALGORITHM_NOT_SUITABLE;
+        var result = super.check(algo);
+        if (result == ValidationResultMinor.NULL && algo.getUsage() == UsageType.DATA_HASHING && !ALLOWED_DIGESTS.contains(algo.getOid()))
+        {
+            return ValidationResultMinor.HASH_ALGORITHM_NOT_SUITABLE;
+        }
+        return result;
     }
-    return result;
-  }
 
 }

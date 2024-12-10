@@ -49,52 +49,50 @@ import org.junit.Test;
 public class TestCryptoInfo
 {
 
-  /**
-   * Asserts that a {@link CryptoInfo} can be constructed, its attributes can be accessed and it can be
-   * converted to an ASN1Primitive.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testCryptoInfo() throws Exception
-  {
-    var oid = new ASN1ObjectIdentifier("1.2.3.4.5");
-    var attribute = Attribute.getInstance(new DERSequence(new ASN1Encodable[]{oid, new DERSet()}));
-    var cryptoInfo = new CryptoInfo(new DERSequence(attribute));
-    assertEquals(1, cryptoInfo.numberOfAttributes());
-    assertThat(cryptoInfo.getAttribute(0).getAttrType(), is(oid));
-    assertThat(cryptoInfo.getAttribute(1), nullValue());
-    assertThat(cryptoInfo.toASN1Primitive(), instanceOf(ASN1Sequence.class));
-    assertThat(((ASN1Sequence)cryptoInfo.toASN1Primitive()).iterator().next(), instanceOf(Attribute.class));
-  }
-
-  /**
-   * Asserts that the {@link CryptoInfo} cannot be constructed for invalid parameters but throws a sensible
-   * exception.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void invalidConstruction() throws Exception
-  {
-    assertNoCreation(null, "Element is not an ASN1Sequence");
-    assertNoCreation(ASN1Boolean.getInstance(true), "Element is not an ASN1Sequence");
-    assertNoCreation(new DERSequence(), "ASN1Sequence is empty");
-    assertNoCreation(new DERSequence(new DERSet()), "Element is not an Attribute");
-  }
-
-  @SuppressWarnings("unused")
-  private void assertNoCreation(ASN1Object param, String exceptionMesssage)
-  {
-    try
+    /**
+     * Asserts that a {@link CryptoInfo} can be constructed, its attributes can be accessed and it can be converted to an ASN1Primitive.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testCryptoInfo() throws Exception
     {
-      new CryptoInfo(param);
-      fail("expected IOException with message: " + exceptionMesssage);
+        var oid = new ASN1ObjectIdentifier("1.2.3.4.5");
+        var attribute = Attribute.getInstance(new DERSequence(new ASN1Encodable[]{oid, new DERSet()}));
+        var cryptoInfo = new CryptoInfo(new DERSequence(attribute));
+        assertEquals(1, cryptoInfo.numberOfAttributes());
+        assertThat(cryptoInfo.getAttribute(0).getAttrType(), is(oid));
+        assertThat(cryptoInfo.getAttribute(1), nullValue());
+        assertThat(cryptoInfo.toASN1Primitive(), instanceOf(ASN1Sequence.class));
+        assertThat(((ASN1Sequence)cryptoInfo.toASN1Primitive()).iterator().next(), instanceOf(Attribute.class));
     }
-    catch (IOException e)
+
+    /**
+     * Asserts that the {@link CryptoInfo} cannot be constructed for invalid parameters but throws a sensible exception.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void invalidConstruction() throws Exception
     {
-      assertThat(e.getMessage(), is(exceptionMesssage));
+        assertNoCreation(null, "Element is not an ASN1Sequence");
+        assertNoCreation(ASN1Boolean.getInstance(true), "Element is not an ASN1Sequence");
+        assertNoCreation(new DERSequence(), "ASN1Sequence is empty");
+        assertNoCreation(new DERSequence(new DERSet()), "Element is not an Attribute");
     }
-  }
+
+    @SuppressWarnings("unused")
+    private void assertNoCreation(ASN1Object param, String exceptionMesssage)
+    {
+        try
+        {
+            new CryptoInfo(param);
+            fail("expected IOException with message: " + exceptionMesssage);
+        }
+        catch (IOException e)
+        {
+            assertThat(e.getMessage(), is(exceptionMesssage));
+        }
+    }
 
 }

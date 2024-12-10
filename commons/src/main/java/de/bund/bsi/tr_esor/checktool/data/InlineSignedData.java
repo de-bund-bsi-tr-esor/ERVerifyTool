@@ -12,22 +12,22 @@ import de.bund.bsi.tr_esor.checktool.xml.LXaipReader;
 public abstract class InlineSignedData
 {
 
-  private final Reference reference;
+    protected final LXaipReader lXaipReader;
 
-  protected final LXaipReader lXaipReader;
+    private final Reference reference;
 
-  protected InlineSignedData(Reference ref, LXaipReader lXaipReader)
-  {
-    this.reference = ref;
-    this.lXaipReader = lXaipReader;
-  }
+    protected InlineSignedData(Reference ref, LXaipReader lXaipReader)
+    {
+        this.reference = ref;
+        this.lXaipReader = lXaipReader;
+    }
 
-  /** get reference for content */
-  public Reference getReference()
-  {
-    return reference;
-  }
+    /** get reference for content */
+    public Reference getReference()
+    {
+        return reference;
+    }
 
-  /** get binary content */
-  public abstract byte[] readBinaryData() throws IOException;
+    /** get binary content */
+    public abstract byte[] readBinaryData() throws IOException;
 }

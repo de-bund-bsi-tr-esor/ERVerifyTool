@@ -25,38 +25,37 @@ import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
 
 
 /**
- * {@link ReportPart} containing only result and providing a method for setting minor code
- * ".../invalidFormat".
+ * {@link ReportPart} containing only result and providing a method for setting minor code ".../invalidFormat".
  *
  * @author HMA, TT
  */
 public class FormatOkReport extends ReportPart
 {
 
-  /**
-   * Creates new instance.
-   *
-   * @param reference
-   */
-  public FormatOkReport(Reference reference)
-  {
-    super(reference);
-    detailsPresent = false;
-  }
+    /**
+     * Creates new instance.
+     *
+     * @param reference
+     */
+    public FormatOkReport(Reference reference)
+    {
+        super(reference);
+        detailsPresent = false;
+    }
 
-  /**
-   * Invalidates format report.
-   *
-   * @param newMessage
-   * @param ref
-   */
-  public void invalidate(String newMessage, Reference ref)
-  {
-    updateCodes(ValidationResultMajor.INVALID,
-                "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat",
-                MinorPriority.MOST_IMPORTANT,
-                newMessage,
-                ref);
-  }
+    /**
+     * Invalidates format report.
+     *
+     * @param newMessage
+     * @param ref
+     */
+    public void invalidate(String newMessage, Reference ref)
+    {
+        updateCodes(ValidationResultMajor.INVALID,
+            "http://www.bsi.bund.de/tr-esor/api/1.3/resultminor/invalidFormat",
+            MinorPriority.MOST_IMPORTANT,
+            newMessage,
+            ref);
+    }
 
 }

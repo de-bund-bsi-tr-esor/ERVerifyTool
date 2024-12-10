@@ -21,13 +21,13 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.report;
 
+import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.SignatureValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationResultType;
-
-import de.bund.bsi.tr_esor.checktool.validation.ValidationResultMajor;
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
 /**
@@ -38,144 +38,140 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public class TimeStampReport extends ReportPart implements OutputCreator<TimeStampValidityType>
 {
 
-  private final TimeStampValidityType xmlReport;
+    private final TimeStampValidityType xmlReport;
 
-  private FormatOkReport parsedFormatOk;
+    private FormatOkReport parsedFormatOk;
 
-  /**
-   * Constructs a new report for given timestamp reference.
-   *
-   * @param reference
-   */
-  public TimeStampReport(Reference reference)
-  {
-    super(reference);
-    xmlReport = XmlHelper.FACTORY_OASIS_VR.createTimeStampValidityType();
-  }
-
-  /**
-   * Constructs a new report from an existing time stamp verification result.
-   *
-   * @param reference
-   * @param tsvt TimeStampValidityType from an existing VerificationReport
-   */
-  public TimeStampReport(Reference reference, TimeStampValidityType tsvt, Result result)
-  {
-    super(reference);
-    parsedFormatOk = parseFormatOkFromReport(tsvt);
-    xmlReport = tsvt;
-    updateCodesFromXmlReport();
-    updateCodesFromVR(reference, result);
-  }
-
-  /**
-   * Parses the found formatOk information, making sure no information will be lost in case some additional
-   * checks are added to this class. Furthermore, this is necessary for getting the message propagation
-   * correct.
-   *
-   * @param tsvt
-   */
-  private FormatOkReport parseFormatOkFromReport(TimeStampValidityType tsvt)
-  {
-    var result = new FormatOkReport(getReference());
-    updateCodesFromVR(getReference(), tsvt.getFormatOK(), result);
-    return result;
-  }
-
-  /**
-   * Adds the format check result to the overall result.
-   */
-  public void setFormatOk(FormatOkReport formatOk)
-  {
-    xmlReport.setFormatOK(formatOk.getOverallResultVerbose());
-    updateCodes(formatOk);
-  }
-
-  /**
-   * Updates codes from present XML time stamp verification report. Importance of minor codes is determined by
-   * the order of checking in this method, i.e. formatOK is more important than certificatePathValidity.
-   */
-  private void updateCodesFromXmlReport()
-  {
-    updateCodesFromCertPath();
-    if (xmlReport.getMessageHashAlgorithm() != null
-        && xmlReport.getMessageHashAlgorithm().getSuitability() != null)
+    /**
+     * Constructs a new report for given timestamp reference.
+     *
+     * @param reference
+     */
+    public TimeStampReport(Reference reference)
     {
-      updateCodesFromVR(getReference().newChild("messageHash"),
-                        xmlReport.getMessageHashAlgorithm().getSuitability(),
-                        this);
+        super(reference);
+        xmlReport = XmlHelper.FACTORY_OASIS_VR.createTimeStampValidityType();
     }
-    updateCodesFromSig(getReference(), xmlReport.getSignatureOK());
-  }
 
-  private void updateCodesFromCertPath()
-  {
-    var certPathRef = getReference().newChild("CertPath");
-    if (xmlReport.getCertificatePathValidity().getPathValidityDetail() != null)
+    /**
+     * Constructs a new report from an existing time stamp verification result.
+     *
+     * @param reference
+     * @param tsvt TimeStampValidityType from an existing VerificationReport
+     */
+    public TimeStampReport(Reference reference, TimeStampValidityType tsvt, Result result)
     {
-      var detail = xmlReport.getCertificatePathValidity().getPathValidityDetail();
-      var certValidity = detail.getCertificateValidity();
-      for ( var i = certValidity.size() - 1 ; i >= 0 ; i-- )
-      {
-        var certRef = certPathRef.newChild(Integer.toString(i));
-        var cert = certValidity.get(i);
-        updateCodesFromVR(certRef.newChild("validityPeriod"), cert.getValidityPeriodOK(), this);
-        updateCodesFromVR(certRef.newChild("chaining"), cert.getChainingOK(), this);
-        updateCodesFromSig(certRef, cert.getSignatureOK());
-      }
-      updateCodesFromVR(certPathRef.newChild("trustAnchor"),
-                        xmlReport.getCertificatePathValidity().getPathValidityDetail().getTrustAnchor(),
-                        this);
+        super(reference);
+        parsedFormatOk = parseFormatOkFromReport(tsvt);
+        xmlReport = tsvt;
+        updateCodesFromXmlReport();
+        updateCodesFromVR(reference, result);
     }
-    updateCodesFromVR(certPathRef, xmlReport.getCertificatePathValidity().getPathValiditySummary(), this);
-  }
 
-  private void updateCodesFromSig(Reference sigRef, SignatureValidityType svt)
-  {
-    if (svt.getSignatureAlgorithm() != null && svt.getSignatureAlgorithm().getSuitability() != null)
+    /**
+     * Parses the found formatOk information, making sure no information will be lost in case some additional checks are added to this
+     * class. Furthermore, this is necessary for getting the message propagation correct.
+     *
+     * @param tsvt
+     */
+    private FormatOkReport parseFormatOkFromReport(TimeStampValidityType tsvt)
     {
-      updateCodesFromVR(sigRef.newChild("sigAlgo"), svt.getSignatureAlgorithm().getSuitability(), this);
+        var result = new FormatOkReport(getReference());
+        updateCodesFromVR(getReference(), tsvt.getFormatOK(), result);
+        return result;
     }
-    updateCodesFromVR(sigRef.newChild("math"), svt.getSigMathOK(), this);
-  }
 
-  private void updateCodesFromVR(Reference id, VerificationResultType vrt, ReportPart destination)
-  {
-    destination.updateCodes(ValidationResultMajor.forValue(vrt.getResultMajor()),
-                            vrt.getResultMinor(),
-                            MinorPriority.IMPORTANT,
-                            vrt.getResultMessage() == null ? null : vrt.getResultMessage().getValue(),
-                            id);
-  }
+    /**
+     * Adds the format check result to the overall result.
+     */
+    public void setFormatOk(FormatOkReport formatOk)
+    {
+        xmlReport.setFormatOK(formatOk.getOverallResultVerbose());
+        updateCodes(formatOk);
+    }
 
-  private void updateCodesFromVR(Reference id, Result vrt)
-  {
-    updateCodes(ValidationResultMajor.forDssResult(vrt.getResultMajor(), vrt.getResultMinor()),
-                vrt.getResultMinor(),
-                MinorPriority.IMPORTANT,
-                vrt.getResultMessage() == null ? null : vrt.getResultMessage().getValue(),
-                id);
-  }
+    /**
+     * Updates codes from present XML time stamp verification report. Importance of minor codes is determined by the order of checking in
+     * this method, i.e. formatOK is more important than certificatePathValidity.
+     */
+    private void updateCodesFromXmlReport()
+    {
+        updateCodesFromCertPath();
+        if (xmlReport.getMessageHashAlgorithm() != null && xmlReport.getMessageHashAlgorithm().getSuitability() != null)
+        {
+            updateCodesFromVR(getReference().newChild("messageHash"), xmlReport.getMessageHashAlgorithm().getSuitability(), this);
+        }
+        updateCodesFromSig(getReference(), xmlReport.getSignatureOK());
+    }
 
-  /**
-   * Returns the formatOk report parsed from time stamp verification report which is obtained from another
-   * application via eCard API service.
-   */
-  public FormatOkReport getParsedFormatOk()
-  {
-    return parsedFormatOk;
-  }
+    private void updateCodesFromCertPath()
+    {
+        var certPathRef = getReference().newChild("CertPath");
+        if (xmlReport.getCertificatePathValidity().getPathValidityDetail() != null)
+        {
+            var detail = xmlReport.getCertificatePathValidity().getPathValidityDetail();
+            var certValidity = detail.getCertificateValidity();
+            for (var i = certValidity.size() - 1; i >= 0; i--)
+            {
+                var certRef = certPathRef.newChild(Integer.toString(i));
+                var cert = certValidity.get(i);
+                updateCodesFromVR(certRef.newChild("validityPeriod"), cert.getValidityPeriodOK(), this);
+                updateCodesFromVR(certRef.newChild("chaining"), cert.getChainingOK(), this);
+                updateCodesFromSig(certRef, cert.getSignatureOK());
+            }
+            updateCodesFromVR(certPathRef.newChild("trustAnchor"),
+                xmlReport.getCertificatePathValidity().getPathValidityDetail().getTrustAnchor(),
+                this);
+        }
+        updateCodesFromVR(certPathRef, xmlReport.getCertificatePathValidity().getPathValiditySummary(), this);
+    }
 
-  @Override
-  public TimeStampValidityType getFormatted()
-  {
-    return xmlReport;
-  }
+    private void updateCodesFromSig(Reference sigRef, SignatureValidityType svt)
+    {
+        if (svt.getSignatureAlgorithm() != null && svt.getSignatureAlgorithm().getSuitability() != null)
+        {
+            updateCodesFromVR(sigRef.newChild("sigAlgo"), svt.getSignatureAlgorithm().getSuitability(), this);
+        }
+        updateCodesFromVR(sigRef.newChild("math"), svt.getSigMathOK(), this);
+    }
 
-  @Override
-  public Class<TimeStampValidityType> getTargetClass()
-  {
-    return TimeStampValidityType.class;
-  }
+    private void updateCodesFromVR(Reference id, VerificationResultType vrt, ReportPart destination)
+    {
+        destination.updateCodes(ValidationResultMajor.forValue(vrt.getResultMajor()),
+            vrt.getResultMinor(),
+            MinorPriority.IMPORTANT,
+            vrt.getResultMessage() == null ? null : vrt.getResultMessage().getValue(),
+            id);
+    }
+
+    private void updateCodesFromVR(Reference id, Result vrt)
+    {
+        updateCodes(ValidationResultMajor.forDssResult(vrt.getResultMajor(), vrt.getResultMinor()),
+            vrt.getResultMinor(),
+            MinorPriority.IMPORTANT,
+            vrt.getResultMessage() == null ? null : vrt.getResultMessage().getValue(),
+            id);
+    }
+
+    /**
+     * Returns the formatOk report parsed from time stamp verification report which is obtained from another application via eCard API
+     * service.
+     */
+    public FormatOkReport getParsedFormatOk()
+    {
+        return parsedFormatOk;
+    }
+
+    @Override
+    public TimeStampValidityType getFormatted()
+    {
+        return xmlReport;
+    }
+
+    @Override
+    public Class<TimeStampValidityType> getTargetClass()
+    {
+        return TimeStampValidityType.class;
+    }
 
 }

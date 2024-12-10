@@ -28,83 +28,83 @@ import java.util.Objects;
 
 
 /**
- * Finds out the generic type arguments of a class. Note that the type arguments may by anywhere in the object
- * hierarchy and may even change sequence. Thats why we look only for the one matching some known base class.
+ * Finds out the generic type arguments of a class. Note that the type arguments may by anywhere in the object hierarchy and may even change
+ * sequence. Thats why we look only for the one matching some known base class.
  *
  * @author TT
  */
 public class TypeAnalyzer
 {
 
-  private final Class<?> clazz;
+    private final Class<?> clazz;
 
-  /**
-   * Creates new instance for given class.
-   *
-   * @param clazz
-   */
-  public TypeAnalyzer(Class<?> clazz)
-  {
-    this.clazz = clazz;
-  }
-
-  /**
-   * Analyzing interfaces and type hierarchy, return the first generic type argument (value) which is the
-   * specified class or a subclass of it.
-   *
-   * @param scope base class of parameter type to search
-   * @return null if the class is not generic for specified argument
-   */
-  public <T> Class<? extends T> getFirstMatchingTypeArgument(Class<T> scope)
-  {
-    var intermediate = clazz;
-    Class<? extends T> result = null;
-    while (result == null && intermediate != null)
+    /**
+     * Creates new instance for given class.
+     *
+     * @param clazz
+     */
+    public TypeAnalyzer(Class<?> clazz)
     {
-      result = getParameterTypeExtending(intermediate.getGenericSuperclass(), scope);
-      if (result != null)
-      {
-        break;
-      }
-      for ( var interf : intermediate.getGenericInterfaces() )
-      {
-        result = getParameterTypeExtending(interf, scope);
-        if (result != null)
+        this.clazz = clazz;
+    }
+
+    /**
+     * Analyzing interfaces and type hierarchy, return the first generic type argument (value) which is the specified class or a subclass of
+     * it.
+     *
+     * @param scope base class of parameter type to search
+     * @return null if the class is not generic for specified argument
+     */
+    public <T> Class<? extends T> getFirstMatchingTypeArgument(Class<T> scope)
+    {
+        var intermediate = clazz;
+        Class<? extends T> result = null;
+        while (result == null && intermediate != null)
         {
-          break;
+            result = getParameterTypeExtending(intermediate.getGenericSuperclass(), scope);
+            if (result != null)
+            {
+                break;
+            }
+            for (var interf : intermediate.getGenericInterfaces())
+            {
+                result = getParameterTypeExtending(interf, scope);
+                if (result != null)
+                {
+                    break;
+                }
+            }
+            intermediate = intermediate.getSuperclass();
         }
-      }
-      intermediate = intermediate.getSuperclass();
+        return result;
     }
-    return result;
-  }
 
-  @SuppressWarnings("unchecked")
-  private <T> Class<? extends T> getParameterTypeExtending(Type o, Class<T> parameterType)
-  {
-    if (o instanceof ParameterizedType)
+    @SuppressWarnings("unchecked")
+    private <T> Class<? extends T> getParameterTypeExtending(Type o, Class<T> parameterType)
     {
-      return Arrays.stream(((ParameterizedType)o).getActualTypeArguments())
-                   .map(this::getClass)
-                   .filter(Objects::nonNull)
-                   .filter(parameterType::isAssignableFrom)
-                   .findFirst()
-                   .orElse(null);
+        if (o instanceof ParameterizedType)
+        {
+            return Arrays.stream(((ParameterizedType)o).getActualTypeArguments())
+                .map(this::getClass)
+                .filter(Objects::nonNull)
+                .filter(parameterType::isAssignableFrom)
+                .findFirst()
+                .orElse(null);
+        }
+        return null;
     }
-    return null;
-  }
 
-  @SuppressWarnings("rawtypes")
-  private Class getClass(Type x)
-  {
-    if (x instanceof Class)
+    @SuppressWarnings("rawtypes")
+    private Class getClass(Type x)
     {
-      return (Class)x;
+        if (x instanceof Class)
+        {
+            return (Class)x;
+        }
+        if (x instanceof ParameterizedType)
+        {
+            return (Class)((ParameterizedType)x).getRawType();
+        }
+        return null;
     }
-    if (x instanceof ParameterizedType)
-    {
-      return (Class)((ParameterizedType)x).getRawType();
-    }
-    return null;
-  }
 }

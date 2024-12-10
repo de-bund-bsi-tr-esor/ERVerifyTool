@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import jakarta.xml.bind.JAXBException;
-
 import org.apache.xml.security.c14n.CanonicalizationException;
 import org.apache.xml.security.c14n.InvalidCanonicalizerException;
 import org.slf4j.Logger;
@@ -37,6 +35,8 @@ import de.bund.bsi.tr_esor.checktool.xml.ComprehensiveXaipSerializer;
 import de.bund.bsi.tr_esor.checktool.xml.XaipSerializer;
 import de.bund.bsi.tr_esor.xaip.DataObjectType;
 
+import jakarta.xml.bind.JAXBException;
+
 
 /**
  * Export content of data object to file.
@@ -46,120 +46,117 @@ import de.bund.bsi.tr_esor.xaip.DataObjectType;
 public class XaipObjectWriter
 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DataObjectType.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DataObjectType.class);
 
-  private OutputFolder outFolder;
+    private OutputFolder outFolder;
 
-  private ComprehensiveXaipSerializer xaipSerializer;
+    private ComprehensiveXaipSerializer xaipSerializer;
 
-  /**
-   * @param outputFolder information about output folder
-   * @return this (fluid api)
-   */
-  public XaipObjectWriter withOutputFolder(OutputFolder outputFolder)
-  {
-    this.outFolder = outputFolder;
-    return this;
-  }
-
-  /**
-   * @param serializer used to get data object content which is send to validation
-   * @return this (fluid api)
-   */
-  public XaipObjectWriter withXaipSerializer(XaipSerializer serializer)
-  {
-    if (serializer instanceof ComprehensiveXaipSerializer)
+    /**
+     * @param outputFolder information about output folder
+     * @return this (fluid api)
+     */
+    public XaipObjectWriter withOutputFolder(OutputFolder outputFolder)
     {
-      this.xaipSerializer = (ComprehensiveXaipSerializer)serializer;
-    }
-    return this;
-  }
-
-  /**
-   * Write given data object to<br>
-   * {@literal <destDir>/<aoid>/<data object id>/<data object id>.<data object extension>}
-   *
-   * @param data data object which should be written down
-   */
-  public void write(DataObjectType data)
-  {
-    if (data == null)
-    {
-      LOG.error("nothing to write because data object is null");
-      return;
+        this.outFolder = outputFolder;
+        return this;
     }
 
-    try
+    /**
+     * @param serializer used to get data object content which is send to validation
+     * @return this (fluid api)
+     */
+    public XaipObjectWriter withXaipSerializer(XaipSerializer serializer)
     {
-      var dataObjectId = data.getDataObjectID();
-
-      var targetFolder = outFolder.createAoidSubFolder(dataObjectId);
-
-      var extension = Toolbox.getPreferredExtension(data);
-      var dataAsBytes = xaipSerializer.serialize(data);
-      write(targetFolder, dataObjectId, extension, dataAsBytes);
-    }
-    catch (IOException | JAXBException | CanonicalizationException | InvalidCanonicalizerException e)
-    {
-      LOG.error("serializing data object failed", e);
-    }
-  }
-
-  /**
-   * Write given signature and data objects for detached signature to<br>
-   * {@literal <destDir>/<aoid>/<credential object
-   * id>/signature.dat}<br>
-   * and<br>
-   * {@literal <destDir>/<aoid>/<credential object id>/<data object id>.<data object extension>}
-   *
-   * @param ctx detached signature validation objects with data objects
-   */
-  @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
-  public void write(DetachedSignatureValidationContext ctx)
-  {
-    if (ctx == null)
-    {
-      LOG.error("nothing to write because context is null");
-      return;
+        if (serializer instanceof ComprehensiveXaipSerializer)
+        {
+            this.xaipSerializer = (ComprehensiveXaipSerializer)serializer;
+        }
+        return this;
     }
 
-    try
+    /**
+     * Write given data object to<br> {@literal <destDir>/<aoid>/<data object id>/<data object id>.<data object extension>}
+     *
+     * @param data data object which should be written down
+     */
+    public void write(DataObjectType data)
     {
-      var credentialObjectId = ctx.getReference().toString();
-      var targetFolder = outFolder.createAoidSubFolder(credentialObjectId);
+        if (data == null)
+        {
+            LOG.error("nothing to write because data object is null");
+            return;
+        }
 
-      var signatureValue = ctx.getReference().getSignatureValue();
-      if (signatureValue == null)
-      {
-        LOG.error("signature value is null");
-      }
-      else
-      {
-        write(targetFolder, "signature", ".dat", signatureValue);
-      }
+        try
+        {
+            var dataObjectId = data.getDataObjectID();
 
-      for ( var entry : ctx.getProtectedDataByID().entrySet() )
-      {
-        var dataObjectId = entry.getKey().relativize(ctx.getReference());
-        var extension = ctx.getPreferredExtension(entry.getKey());
-        var dataAsBytes = entry.getValue();
-        write(targetFolder, dataObjectId, extension, dataAsBytes);
-      }
+            var targetFolder = outFolder.createAoidSubFolder(dataObjectId);
+
+            var extension = Toolbox.getPreferredExtension(data);
+            var dataAsBytes = xaipSerializer.serialize(data);
+            write(targetFolder, dataObjectId, extension, dataAsBytes);
+        }
+        catch (IOException | JAXBException | CanonicalizationException | InvalidCanonicalizerException e)
+        {
+            LOG.error("serializing data object failed", e);
+        }
     }
-    catch (IOException e)
+
+    /**
+     * Write given signature and data objects for detached signature to<br>
+     * {@literal <destDir>/<aoid>/<credential object id>/signature.dat}<br> and<br>
+     * {@literal <destDir>/<aoid>/<credential object id>/<data object id>.<data object extension>}
+     *
+     * @param ctx detached signature validation objects with data objects
+     */
+    @SuppressWarnings("PMD.DataflowAnomalyAnalysis")
+    public void write(DetachedSignatureValidationContext ctx)
     {
-      LOG.error("serializing context failed", e);
+        if (ctx == null)
+        {
+            LOG.error("nothing to write because context is null");
+            return;
+        }
+
+        try
+        {
+            var credentialObjectId = ctx.getReference().toString();
+            var targetFolder = outFolder.createAoidSubFolder(credentialObjectId);
+
+            var signatureValue = ctx.getReference().getSignatureValue();
+            if (signatureValue == null)
+            {
+                LOG.error("signature value is null");
+            }
+            else
+            {
+                write(targetFolder, "signature", ".dat", signatureValue);
+            }
+
+            for (var entry : ctx.getProtectedDataByID().entrySet())
+            {
+                var dataObjectId = entry.getKey().relativize(ctx.getReference());
+                var extension = ctx.getPreferredExtension(entry.getKey());
+                var dataAsBytes = entry.getValue();
+                write(targetFolder, dataObjectId, extension, dataAsBytes);
+            }
+        }
+        catch (IOException e)
+        {
+            LOG.error("serializing context failed", e);
+        }
     }
-  }
 
-  private void write(Path targetFolder, String fileName, String extension, byte[] data) throws IOException
-  {
-    var cleanFileNameWithExtension = Toolbox.sanitizeFileName(fileName + extension);
-    var targetFile = targetFolder.resolve(cleanFileNameWithExtension);
+    private void write(Path targetFolder, String fileName, String extension, byte[] data) throws IOException
+    {
+        var cleanFileNameWithExtension = Toolbox.sanitizeFileName(fileName + extension);
+        var targetFile = targetFolder.resolve(cleanFileNameWithExtension);
 
-    LOG.info("export data to '{}'", targetFile);
+        LOG.info("export data to '{}'", targetFile);
 
-    Files.write(targetFile, data);
-  }
+        Files.write(targetFile, data);
+    }
 
 }

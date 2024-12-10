@@ -58,214 +58,211 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 
 /**
- * Dummy validator for TimeStampToken objects. It just returns "indeterminate" for all elements and does not
- * validate anything.
+ * Dummy validator for TimeStampToken objects. It just returns "indeterminate" for all elements and does not validate anything.
  *
  * @author MO
  */
 public class DummyTimeStampValidator extends BaseTimeStampValidator
 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(DummyTimeStampValidator.class);
+    private static final Logger LOG = LoggerFactory.getLogger(DummyTimeStampValidator.class);
 
-  @Override
-  protected TimeStampReport validateInternal(Reference ref, TimeStampToken toCheck)
-  {
-    var tsReport = new TimeStampReport(ref);
-    var formatOk = new FormatOkReport(ref);
-    checkUnsignedAttributes(toCheck, formatOk);
-    tsReport.getFormatted().setCertificatePathValidity(mockCertificatePathValidity());
-    tsReport.getFormatted().setSignatureOK(validateSigMathOK(toCheck));
-    tsReport.updateCodes(ValidationResultMajor.INDETERMINED,
-                         null,
-                         MinorPriority.NORMAL,
-                         "no online validation of time stamp done",
-                         ref);
-    tsReport.setFormatOk(formatOk);
-    return tsReport;
-  }
-
-  private SignatureValidityType validateSigMathOK(TimeStampToken toCheck)
-  {
-    if (sourceOfRootHash == null)
+    @Override
+    protected TimeStampReport validateInternal(Reference ref, TimeStampToken toCheck)
     {
-      return signatureValidityWithResult(verificationResultNoDataToCheck());
+        var tsReport = new TimeStampReport(ref);
+        var formatOk = new FormatOkReport(ref);
+        checkUnsignedAttributes(toCheck, formatOk);
+        tsReport.getFormatted().setCertificatePathValidity(mockCertificatePathValidity());
+        tsReport.getFormatted().setSignatureOK(validateSigMathOK(toCheck));
+        tsReport.updateCodes(ValidationResultMajor.INDETERMINED,
+            null,
+            MinorPriority.NORMAL,
+            "no online validation of time stamp done",
+            ref);
+        tsReport.setFormatOk(formatOk);
+        return tsReport;
     }
 
-    try
+    private SignatureValidityType validateSigMathOK(TimeStampToken toCheck)
     {
-      if (!checkAtsHashMatches(toCheck))
-      {
-        return signatureValidityWithResult(verificationResultHashValueMismatch());
-      }
-    }
-    catch (NoSuchAlgorithmException e)
-    {
-      return signatureValidityWithResult(verificationResultNoSuchAlgorithm(e));
-    }
-
-    return doValidateSigMathOK(toCheck);
-  }
-
-  private SignatureValidityType doValidateSigMathOK(TimeStampToken toCheck)
-  {
-    Collection<X509CertificateHolder> tstMatches = toCheck.getCertificates().getMatches(toCheck.getSID());
-    X509CertificateHolder holder = tstMatches.iterator().next();
-    try
-    {
-      X509Certificate tstCert = new JcaX509CertificateConverter().getCertificate(holder);
-      SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().setProvider(new BouncyCastleProvider())
-                                                                              .build(tstCert);
-      toCheck.validate(siv);
-      return verifyCorrectSigningCertificate(toCheck, tstCert);
-    }
-    catch (CertificateException ex)
-    {
-      LOG.error("unable to get the signing certificate for the given time stamp token");
-      return signatureValidityWithResult(verificationResultInternalError(ex));
-    }
-    catch (OperatorCreationException e)
-    {
-      LOG.error("building the signer information verifier for timestamp verification failed");
-      return signatureValidityWithResult(verificationResultInternalError(e));
-    }
-    catch (TSPValidationException e)
-    {
-      LOG.warn("validation of given time stamp failed");
-      return signatureValidityWithResult(verificationResultSignatureNotOK());
-    }
-    catch (TSPException tspException)
-    {
-      return handleTspException(tspException);
-    }
-  }
-
-  private SignatureValidityType verifyCorrectSigningCertificate(TimeStampToken toCheck,
-                                                                X509Certificate tstCert)
-  {
-    for ( var signer : toCheck.toCMSSignedData().getSignerInfos().getSigners() )
-    {
-      try
-      {
-        if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(new BouncyCastleProvider())
-                                                                  .build(tstCert)))
+        if (sourceOfRootHash == null)
         {
-          LOG.debug("timestamp signature verified");
-          return signatureValidityWithResult(verificationResultOk());
+            return signatureValidityWithResult(verificationResultNoDataToCheck());
         }
-      }
-      catch (Exception e)
-      {
-        LOG.error("building the signer information verifier for timestamp verification failed");
-        return signatureValidityWithResult(verificationResultInternalError(e));
-      }
+
+        try
+        {
+            if (!checkAtsHashMatches(toCheck))
+            {
+                return signatureValidityWithResult(verificationResultHashValueMismatch());
+            }
+        }
+        catch (NoSuchAlgorithmException e)
+        {
+            return signatureValidityWithResult(verificationResultNoSuchAlgorithm(e));
+        }
+
+        return doValidateSigMathOK(toCheck);
     }
 
-    LOG.warn("validation of given time stamp failed");
-    return signatureValidityWithResult(verificationResultSignatureNotOK());
-  }
-
-  private SignatureValidityType handleTspException(TSPException tspException)
-  {
-    if (tspException.getCause() instanceof CMSSignerDigestMismatchException)
+    private SignatureValidityType doValidateSigMathOK(TimeStampToken toCheck)
     {
-      return signatureValidityWithResult(verificationResultSignatureNotOK());
+        Collection<X509CertificateHolder> tstMatches = toCheck.getCertificates().getMatches(toCheck.getSID());
+        X509CertificateHolder holder = tstMatches.iterator().next();
+        try
+        {
+            X509Certificate tstCert = new JcaX509CertificateConverter().getCertificate(holder);
+            SignerInformationVerifier siv = new JcaSimpleSignerInfoVerifierBuilder().setProvider(new BouncyCastleProvider()).build(tstCert);
+            toCheck.validate(siv);
+            return verifyCorrectSigningCertificate(toCheck, tstCert);
+        }
+        catch (CertificateException ex)
+        {
+            LOG.error("unable to get the signing certificate for the given time stamp token");
+            return signatureValidityWithResult(verificationResultInternalError(ex));
+        }
+        catch (OperatorCreationException e)
+        {
+            LOG.error("building the signer information verifier for timestamp verification failed");
+            return signatureValidityWithResult(verificationResultInternalError(e));
+        }
+        catch (TSPValidationException e)
+        {
+            LOG.warn("validation of given time stamp failed");
+            return signatureValidityWithResult(verificationResultSignatureNotOK());
+        }
+        catch (TSPException tspException)
+        {
+            return handleTspException(tspException);
+        }
     }
-    VerificationResultType result = verificationResultInternalError(tspException);
-    return signatureValidityWithResult(result);
-  }
 
-  private boolean checkAtsHashMatches(TimeStampToken toCheck) throws NoSuchAlgorithmException
-  {
-    var hashAlgorithm = toCheck.getTimeStampInfo().getHashAlgorithm();
-    var hashInTimestamp = toCheck.getTimeStampInfo().getMessageImprintDigest();
-    var calculatedHash = new LocalHashCreator().calculateHash(sourceOfRootHash,
-                                                              hashAlgorithm.getAlgorithm().getId());
-    return MessageDigest.isEqual(hashInTimestamp, calculatedHash);
-  }
+    private SignatureValidityType verifyCorrectSigningCertificate(TimeStampToken toCheck, X509Certificate tstCert)
+    {
+        for (var signer : toCheck.toCMSSignedData().getSignerInfos().getSigners())
+        {
+            try
+            {
+                if (signer.verify(new JcaSimpleSignerInfoVerifierBuilder().setProvider(new BouncyCastleProvider()).build(tstCert)))
+                {
+                    LOG.debug("timestamp signature verified");
+                    return signatureValidityWithResult(verificationResultOk());
+                }
+            }
+            catch (Exception e)
+            {
+                LOG.error("building the signer information verifier for timestamp verification failed");
+                return signatureValidityWithResult(verificationResultInternalError(e));
+            }
+        }
 
-  private SignatureValidityType signatureValidityWithResult(VerificationResultType result)
-  {
-    var sig = XmlHelper.FACTORY_OASIS_VR.createSignatureValidityType();
-    sig.setSigMathOK(result);
-    return sig;
-  }
+        LOG.warn("validation of given time stamp failed");
+        return signatureValidityWithResult(verificationResultSignatureNotOK());
+    }
 
-  private VerificationResultType verificationResultInternalError(Exception e)
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
-    result.setResultMinor(ECardResultMinor.INTERNAL_ERROR);
-    result.setResultMessage(resultMessageEnEn("Error parsing timestamp token: " + e.getMessage()));
-    return result;
-  }
+    private SignatureValidityType handleTspException(TSPException tspException)
+    {
+        if (tspException.getCause() instanceof CMSSignerDigestMismatchException)
+        {
+            return signatureValidityWithResult(verificationResultSignatureNotOK());
+        }
+        VerificationResultType result = verificationResultInternalError(tspException);
+        return signatureValidityWithResult(result);
+    }
 
-  private VerificationResultType verificationResultNoDataToCheck()
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
-    result.setResultMinor(ECardResultMinor.DETACHED_SIGNATURE_WITHOUT_E_CONTENT);
-    result.setResultMessage(resultMessageEnEn("No data to check the digest in timestamp is present"));
-    return result;
-  }
+    private boolean checkAtsHashMatches(TimeStampToken toCheck) throws NoSuchAlgorithmException
+    {
+        var hashAlgorithm = toCheck.getTimeStampInfo().getHashAlgorithm();
+        var hashInTimestamp = toCheck.getTimeStampInfo().getMessageImprintDigest();
+        var calculatedHash = new LocalHashCreator().calculateHash(sourceOfRootHash, hashAlgorithm.getAlgorithm().getId());
+        return MessageDigest.isEqual(hashInTimestamp, calculatedHash);
+    }
 
-  private VerificationResultType verificationResultNoSuchAlgorithm(NoSuchAlgorithmException e)
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
-    result.setResultMinor(ECardResultMinor.HASH_ALGORITHM_NOT_SUPPORTED);
-    result.setResultMessage(resultMessageEnEn("Cannot handle hash algorithm: " + e.getMessage()));
-    return result;
-  }
+    private SignatureValidityType signatureValidityWithResult(VerificationResultType result)
+    {
+        var sig = XmlHelper.FACTORY_OASIS_VR.createSignatureValidityType();
+        sig.setSigMathOK(result);
+        return sig;
+    }
 
-  private VerificationResultType verificationResultOk()
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.VALID.toString());
-    return result;
-  }
+    private VerificationResultType verificationResultInternalError(Exception e)
+    {
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor(ECardResultMinor.INTERNAL_ERROR);
+        result.setResultMessage(resultMessageEnEn("Error parsing timestamp token: " + e.getMessage()));
+        return result;
+    }
 
-  private VerificationResultType verificationResultHashValueMismatch()
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.INVALID.toString());
-    result.setResultMinor(BsiResultMinor.HASH_VALUE_MISMATCH.getUri());
-    result.setResultMessage(resultMessageEnEn("The hash value protected by the timestamp does not match the calculated root hash value of the partial hashtree"));
-    return result;
-  }
+    private VerificationResultType verificationResultNoDataToCheck()
+    {
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor(ECardResultMinor.DETACHED_SIGNATURE_WITHOUT_E_CONTENT);
+        result.setResultMessage(resultMessageEnEn("No data to check the digest in timestamp is present"));
+        return result;
+    }
 
-  private VerificationResultType verificationResultSignatureNotOK()
-  {
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.INVALID.toString());
-    result.setResultMinor(ECardResultMinor.INVALID_SIGNATURE);
-    result.setResultMessage(resultMessageEnEn("Validation of the mathematical correctness of the given timestamp failed"));
-    return result;
-  }
+    private VerificationResultType verificationResultNoSuchAlgorithm(NoSuchAlgorithmException e)
+    {
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor(ECardResultMinor.HASH_ALGORITHM_NOT_SUPPORTED);
+        result.setResultMessage(resultMessageEnEn("Cannot handle hash algorithm: " + e.getMessage()));
+        return result;
+    }
 
-  private InternationalStringType resultMessageEnEn(String content)
-  {
-    var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
-    message.setLang("en-en");
-    message.setValue(content);
-    return message;
-  }
+    private VerificationResultType verificationResultOk()
+    {
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.VALID.toString());
+        return result;
+    }
+
+    private VerificationResultType verificationResultHashValueMismatch()
+    {
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.INVALID.toString());
+        result.setResultMinor(BsiResultMinor.HASH_VALUE_MISMATCH.getUri());
+        result.setResultMessage(resultMessageEnEn(
+            "The hash value protected by the timestamp does not match the calculated root hash value of the partial hashtree"));
+        return result;
+    }
+
+    private VerificationResultType verificationResultSignatureNotOK()
+    {
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.INVALID.toString());
+        result.setResultMinor(ECardResultMinor.INVALID_SIGNATURE);
+        result.setResultMessage(resultMessageEnEn("Validation of the mathematical correctness of the given timestamp failed"));
+        return result;
+    }
+
+    private InternationalStringType resultMessageEnEn(String content)
+    {
+        var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
+        message.setLang("en-en");
+        message.setValue(content);
+        return message;
+    }
 
 
-  private CertificatePathValidityType mockCertificatePathValidity()
-  {
-    var certValidity = XmlHelper.FACTORY_OASIS_VR.createCertificatePathValidityType();
-    var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
-    result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
-    result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported");
-    var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
-    message.setLang("en-en");
-    message.setValue("Checking certificate paths is not supported by this tool. To check signatures comprehensively, configure an online eCard validation service.");
-    result.setResultMessage(message);
-    certValidity.setPathValiditySummary(result);
-    certValidity.setCertificateIdentifier(XmlHelper.FACTORY_DSIG.createX509IssuerSerialType());
-    certValidity.getCertificateIdentifier().setX509IssuerName("unknown");
-    certValidity.getCertificateIdentifier().setX509SerialNumber(BigInteger.ZERO);
-    return certValidity;
-  }
+    private CertificatePathValidityType mockCertificatePathValidity()
+    {
+        var certValidity = XmlHelper.FACTORY_OASIS_VR.createCertificatePathValidityType();
+        var result = XmlHelper.FACTORY_OASIS_VR.createVerificationResultType();
+        result.setResultMajor(ValidationResultMajor.INDETERMINED.toString());
+        result.setResultMinor("http://www.bsi.bund.de/ecard/tr-esor/1.3/resultminor/arl/notSupported");
+        var message = XmlHelper.FACTORY_DSS.createInternationalStringType();
+        message.setLang("en-en");
+        message.setValue(
+            "Checking certificate paths is not supported by this tool. To check signatures comprehensively, configure an online eCard validation service.");
+        result.setResultMessage(message);
+        certValidity.setPathValiditySummary(result);
+        certValidity.setCertificateIdentifier(XmlHelper.FACTORY_DSIG.createX509IssuerSerialType());
+        certValidity.getCertificateIdentifier().setX509IssuerName("unknown");
+        certValidity.getCertificateIdentifier().setX509SerialNumber(BigInteger.ZERO);
+        return certValidity;
+    }
 }

@@ -58,249 +58,249 @@ import org.slf4j.LoggerFactory;
 public class ArchiveTimeStamp implements ASN1Encodable
 {
 
-  private static final int TAGNO_DIGESTALGO = 0;
+    private static final int TAGNO_DIGESTALGO = 0;
 
-  private static final int TAGNO_ATTRIBUTES = 1;
+    private static final int TAGNO_ATTRIBUTES = 1;
 
-  private static final int TAGNO_REDUCEDHASHTREE = 2;
+    private static final int TAGNO_REDUCEDHASHTREE = 2;
 
-  private static final Logger LOG = LoggerFactory.getLogger(ArchiveTimeStamp.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ArchiveTimeStamp.class);
 
-  /** Algorithm ID of hash algorithm. */
-  private AlgorithmIdentifier digestAlgo = null;
+    /** Algorithm ID of hash algorithm. */
+    private AlgorithmIdentifier digestAlgo = null;
 
-  /** Attributes of the object. */
-  private Attributes attributes = null;
+    /** Attributes of the object. */
+    private Attributes attributes = null;
 
-  private List<PartialHashtree> reducedHashtree = null;
+    private List<PartialHashtree> reducedHashtree = null;
 
-  private TimeStampToken timeStampToken;
+    private TimeStampToken timeStampToken;
 
-  /**
-   * Initializes the ArchiveTimeStamp by the given ASN1Encodable.
-   *
-   * @param obj ASN.1 object
-   * @throws IOException
-   */
-  public ArchiveTimeStamp(ASN1Encodable obj) throws IOException
-  {
-
-    var indexOfLastElementInDef = -1; // number of element in definition, some may be skipped
-    for ( var element : Checked.cast(obj).to(ASN1Sequence.class) )
+    /**
+     * Initializes the ArchiveTimeStamp by the given ASN1Encodable.
+     *
+     * @param obj ASN.1 object
+     * @throws IOException
+     */
+    public ArchiveTimeStamp(ASN1Encodable obj) throws IOException
     {
-      if (element instanceof DERTaggedObject)
-      {
-        var tagged = (DERTaggedObject)element;
-        switch (tagged.getTagNo())
+
+        var indexOfLastElementInDef = -1; // number of element in definition, some may be skipped
+        for (var element : Checked.cast(obj).to(ASN1Sequence.class))
         {
-          case TAGNO_DIGESTALGO:
-            indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, 1);
-            digestAlgo = ASN1Utils.parseAlgorithmIdentifier(tagged.getObject());
-            break;
-          case TAGNO_ATTRIBUTES:
-            indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, 2);
-            parseAttributes(tagged);
-            break;
-          case TAGNO_REDUCEDHASHTREE:
-            final var defPosRHT = 3;
-            indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, defPosRHT);
-            parseReducedHashtree(tagged);
-            break;
-          default:
-            throw new IOException("unexpected tag number in ATS: " + tagged.getTagNo());
+            if (element instanceof DERTaggedObject)
+            {
+                var tagged = (DERTaggedObject)element;
+                switch (tagged.getTagNo())
+                {
+                    case TAGNO_DIGESTALGO:
+                        indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, 1);
+                        digestAlgo = ASN1Utils.parseAlgorithmIdentifier(tagged.getObject());
+                        break;
+                    case TAGNO_ATTRIBUTES:
+                        indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, 2);
+                        parseAttributes(tagged);
+                        break;
+                    case TAGNO_REDUCEDHASHTREE:
+                        final var defPosRHT = 3;
+                        indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, defPosRHT);
+                        parseReducedHashtree(tagged);
+                        break;
+                    default:
+                        throw new IOException("unexpected tag number in ATS: " + tagged.getTagNo());
+                }
+            }
+            else
+            {
+                final var defPosTsp = 4;
+                indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, defPosTsp);
+                timeStampToken = parseTimeStampToken((ASN1Sequence)element);
+            }
         }
-      }
-      else
-      {
-        final var defPosTsp = 4;
-        indexOfLastElementInDef = checkSequence(indexOfLastElementInDef, defPosTsp);
-        timeStampToken = parseTimeStampToken((ASN1Sequence)element);
-      }
-    }
-  }
-
-  private int checkSequence(int lastIndex, int thisIndex) throws IOException
-  {
-    if (lastIndex < thisIndex)
-    {
-      return thisIndex;
-    }
-    throw new IOException("unexpected element in ASN1Sequence for ATS");
-  }
-
-  private TimeStampToken parseTimeStampToken(ASN1Sequence e) throws IOException
-  {
-    Objects.requireNonNull(e, "ASN.1 encoded time stamp token");
-    try
-    {
-      var encodedBytes = e.toASN1Primitive().getEncoded(ASN1Encoding.DER);
-      Objects.requireNonNull(e, "encoded bytes");
-      return new TimeStampToken(new CMSSignedData(encodedBytes));
-    }
-    catch (TSPException | CMSException ex)
-    {
-      throw new IOException("not valid (ATS-3)", ex);
-    }
-  }
-
-  private void parseReducedHashtree(ASN1TaggedObject t) throws IOException
-  {
-    reducedHashtree = new ArrayList<>();
-    var stt = ASN1Sequence.getInstance(t, false);
-    for ( var et : stt )
-    {
-      reducedHashtree.add(new PartialHashtree((ASN1Object)et));
-    }
-  }
-
-  private void parseAttributes(ASN1TaggedObject t) throws IOException
-  {
-    // This tag is implicit, if only one attribute is present, the data is recognized as ASN1Sequence
-    // (outer element of an attribute).
-    if (t.getObject() instanceof ASN1Sequence)
-    {
-      attributes = Attributes.getInstance(new DLSet(t.getObject()));
-    }
-    else if (t.getObject() instanceof ASN1Set)
-    {
-      attributes = Attributes.getInstance(t.getObject());
-    }
-    else
-    {
-      throw new IOException("Attributes element in ATS is not of type SET");
-    }
-  }
-
-  /**
-   * Gets ID of hash algorithm.
-   *
-   * @return algorithm ID
-   */
-  public AlgorithmIdentifier getDigestAlgorithm()
-  {
-    return digestAlgo;
-  }
-
-  /**
-   * Gets the date of TimeStamp.
-   */
-  public Date getSignDateFromTimeStamp()
-  {
-    if (timeStampToken == null)
-    {
-      return null;
     }
 
-    return timeStampToken.getTimeStampInfo().getGenTime();
-  }
-
-  /**
-   * Gets the OID from the TimeStampToken.
-   */
-  public String getOidFromTimeStamp()
-  {
-    if (timeStampToken == null)
+    private int checkSequence(int lastIndex, int thisIndex) throws IOException
     {
-      return null;
-    }
-    return timeStampToken.getTimeStampInfo().getMessageImprintAlgOID().getId();
-  }
-
-  /**
-   * Gets the partial hashtree with given index. By logic, returns the hash list of the idx-th node in the
-   * reduced hash tree counted from documents on.
-   *
-   * @param idx index of partial hashtree
-   * @return partial hashtree
-   */
-  public PartialHashtree getPartialHashtree(int idx)
-  {
-    if (reducedHashtree == null || reducedHashtree.size() <= idx)
-    {
-      return null;
-    }
-    return reducedHashtree.get(idx);
-  }
-
-  /**
-   * Returns the number of partial hashtrees in list.
-   */
-  public int numberOfPartialHashtrees()
-  {
-    if (reducedHashtree == null)
-    {
-      return 0;
-    }
-    return reducedHashtree.size();
-  }
-
-  /**
-   * Gets the ContentInfo with TimeStampToken as content correctly DER encoded for comparison in ER. This is
-   * NOT the encoded ArchiveTimeStamp (reduced hash tree, ...)!
-   *
-   * @return the DER encoded ContentInfo with TimeStampToken as content
-   * @throws IOException
-   */
-  public byte[] getContentOfTimeStampField() throws IOException
-  {
-    try (var ais = new ASN1InputStream(timeStampToken.getEncoded()))
-    {
-      var info = ContentInfo.getInstance(ais.readObject());
-      return info.getEncoded(ASN1Encoding.DER);
-    }
-  }
-
-  /**
-   * Returns the (bouncycastle) TimeStampToken object.
-   */
-  public TimeStampToken getTimeStampToken()
-  {
-    return timeStampToken;
-  }
-
-  /**
-   * Gets the attributes of the ArchiveTimeStamp.
-   */
-  public Attributes getAttributes()
-  {
-    return attributes;
-  }
-
-  @Override
-  public ASN1Primitive toASN1Primitive()
-  {
-    var ats = new ASN1EncodableVector();
-    if (digestAlgo != null)
-    {
-      var t = new DERTaggedObject(false, TAGNO_DIGESTALGO, digestAlgo);
-      ats.add(t);
-    }
-    if (attributes != null)
-    {
-      var t = new DERTaggedObject(false, TAGNO_ATTRIBUTES, attributes);
-      ats.add(t);
-    }
-    if (reducedHashtree != null)
-    {
-      var va = new ASN1EncodableVector();
-      for ( var i = 0 ; i < reducedHashtree.size() ; i++ )
-      {
-        va.add(reducedHashtree.get(i).toASN1Primitive());
-      }
-      var t = new DERTaggedObject(false, TAGNO_REDUCEDHASHTREE, new DERSequence(va));
-      ats.add(t);
+        if (lastIndex < thisIndex)
+        {
+            return thisIndex;
+        }
+        throw new IOException("unexpected element in ASN1Sequence for ATS");
     }
 
-    try (var ais = new ASN1InputStream(timeStampToken.getEncoded()))
+    private TimeStampToken parseTimeStampToken(ASN1Sequence e) throws IOException
     {
-      var info = ContentInfo.getInstance(ais.readObject());
-      ats.add(info);
-      return new DERSequence(ats);
+        Objects.requireNonNull(e, "ASN.1 encoded time stamp token");
+        try
+        {
+            var encodedBytes = e.toASN1Primitive().getEncoded(ASN1Encoding.DER);
+            Objects.requireNonNull(e, "encoded bytes");
+            return new TimeStampToken(new CMSSignedData(encodedBytes));
+        }
+        catch (TSPException | CMSException ex)
+        {
+            throw new IOException("not valid (ATS-3)", ex);
+        }
     }
-    catch (IOException e)
+
+    private void parseReducedHashtree(ASN1TaggedObject t) throws IOException
     {
-      LOG.error("Invalid input data in TimeStampToken", e);
-      return null;
+        reducedHashtree = new ArrayList<>();
+        var stt = ASN1Sequence.getInstance(t, false);
+        for (var et : stt)
+        {
+            reducedHashtree.add(new PartialHashtree((ASN1Object)et));
+        }
     }
-  }
+
+    private void parseAttributes(ASN1TaggedObject t) throws IOException
+    {
+        // This tag is implicit, if only one attribute is present, the data is recognized as ASN1Sequence
+        // (outer element of an attribute).
+        if (t.getObject() instanceof ASN1Sequence)
+        {
+            attributes = Attributes.getInstance(new DLSet(t.getObject()));
+        }
+        else if (t.getObject() instanceof ASN1Set)
+        {
+            attributes = Attributes.getInstance(t.getObject());
+        }
+        else
+        {
+            throw new IOException("Attributes element in ATS is not of type SET");
+        }
+    }
+
+    /**
+     * Gets ID of hash algorithm.
+     *
+     * @return algorithm ID
+     */
+    public AlgorithmIdentifier getDigestAlgorithm()
+    {
+        return digestAlgo;
+    }
+
+    /**
+     * Gets the date of TimeStamp.
+     */
+    public Date getSignDateFromTimeStamp()
+    {
+        if (timeStampToken == null)
+        {
+            return null;
+        }
+
+        return timeStampToken.getTimeStampInfo().getGenTime();
+    }
+
+    /**
+     * Gets the OID from the TimeStampToken.
+     */
+    public String getOidFromTimeStamp()
+    {
+        if (timeStampToken == null)
+        {
+            return null;
+        }
+        return timeStampToken.getTimeStampInfo().getMessageImprintAlgOID().getId();
+    }
+
+    /**
+     * Gets the partial hashtree with given index. By logic, returns the hash list of the idx-th node in the reduced hash tree counted from
+     * documents on.
+     *
+     * @param idx index of partial hashtree
+     * @return partial hashtree
+     */
+    public PartialHashtree getPartialHashtree(int idx)
+    {
+        if (reducedHashtree == null || reducedHashtree.size() <= idx)
+        {
+            return null;
+        }
+        return reducedHashtree.get(idx);
+    }
+
+    /**
+     * Returns the number of partial hashtrees in list.
+     */
+    public int numberOfPartialHashtrees()
+    {
+        if (reducedHashtree == null)
+        {
+            return 0;
+        }
+        return reducedHashtree.size();
+    }
+
+    /**
+     * Gets the ContentInfo with TimeStampToken as content correctly DER encoded for comparison in ER. This is NOT the encoded
+     * ArchiveTimeStamp (reduced hash tree, ...)!
+     *
+     * @return the DER encoded ContentInfo with TimeStampToken as content
+     * @throws IOException
+     */
+    public byte[] getContentOfTimeStampField() throws IOException
+    {
+        try (var ais = new ASN1InputStream(timeStampToken.getEncoded()))
+        {
+            var info = ContentInfo.getInstance(ais.readObject());
+            return info.getEncoded(ASN1Encoding.DER);
+        }
+    }
+
+    /**
+     * Returns the (bouncycastle) TimeStampToken object.
+     */
+    public TimeStampToken getTimeStampToken()
+    {
+        return timeStampToken;
+    }
+
+    /**
+     * Gets the attributes of the ArchiveTimeStamp.
+     */
+    public Attributes getAttributes()
+    {
+        return attributes;
+    }
+
+    @Override
+    public ASN1Primitive toASN1Primitive()
+    {
+        var ats = new ASN1EncodableVector();
+        if (digestAlgo != null)
+        {
+            var t = new DERTaggedObject(false, TAGNO_DIGESTALGO, digestAlgo);
+            ats.add(t);
+        }
+        if (attributes != null)
+        {
+            var t = new DERTaggedObject(false, TAGNO_ATTRIBUTES, attributes);
+            ats.add(t);
+        }
+        if (reducedHashtree != null)
+        {
+            var va = new ASN1EncodableVector();
+            for (var i = 0; i < reducedHashtree.size(); i++)
+            {
+                va.add(reducedHashtree.get(i).toASN1Primitive());
+            }
+            var t = new DERTaggedObject(false, TAGNO_REDUCEDHASHTREE, new DERSequence(va));
+            ats.add(t);
+        }
+
+        try (var ais = new ASN1InputStream(timeStampToken.getEncoded()))
+        {
+            var info = ContentInfo.getInstance(ais.readObject());
+            ats.add(info);
+            return new DERSequence(ats);
+        }
+        catch (IOException e)
+        {
+            LOG.error("Invalid input data in TimeStampToken", e);
+            return null;
+        }
+    }
 }

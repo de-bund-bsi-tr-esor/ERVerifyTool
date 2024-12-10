@@ -41,70 +41,69 @@ import java.util.regex.Pattern;
 public class TestBase extends FileOutputChecker
 {
 
-  /**
-   * File path to the test resources directory. Access was OK so far, create temp files if commons sub-project
-   * is not present.
-   */
-  protected static final String RES_DIR = "../commons/src/test/resources/";
+    /**
+     * File path to the test resources directory. Access was OK so far, create temp files if commons sub-project is not present.
+     */
+    protected static final String RES_DIR = "../commons/src/test/resources/";
 
-  /**
-   * Calls the command line interface and returns output.
-   *
-   * @return output from application
-   */
-  protected static String callMain(String... args) throws IOException
-  {
-    try (var out = new ByteArrayOutputStream(); var pout = new PrintStream(out, true, "UTF-8"))
+    /**
+     * Calls the command line interface and returns output.
+     *
+     * @return output from application
+     */
+    protected static String callMain(String... args) throws IOException
     {
-      Main.out = pout;
-      Main.err = pout;
-      Main.main(args);
-      return out.toString(StandardCharsets.UTF_8);
+        try (var out = new ByteArrayOutputStream();
+            var pout = new PrintStream(out, true, "UTF-8"))
+        {
+            Main.out = pout;
+            Main.err = pout;
+            Main.main(args);
+            return out.toString(StandardCharsets.UTF_8);
+        }
     }
-  }
 
-  /**
-   * Fails test if first major code in report is not as expected.
-   */
-  protected void assertFirstMajor(String report, String expectedCode)
-  {
-    var p = Pattern.compile("<([a-zA-Z]\\w*:)?ResultMajor( [^>]*)?>([^>]*)<");
-    var m = p.matcher(report);
-    assertThat(m.find()).isTrue();
-    assertThat(m.group(3)).endsWith(expectedCode);
-  }
-
-  /**
-   * Just makes sure that a certain element occurs n times in the report.
-   *
-   * @param name name of element
-   * @param expected number of element of that name
-   */
-  protected void assertNumberElements(String report, String name, int expected)
-  {
-    var p = Pattern.compile("<([a-zA-Z]\\w*:)?" + name + "( [^>]*)?>(.+?)</([a-zA-Z]\\w*:)?" + name + ">",
-                            Pattern.DOTALL);
-    var m = p.matcher(report);
-    for ( var i = 0 ; i < expected ; i++ )
+    /**
+     * Fails test if first major code in report is not as expected.
+     */
+    protected void assertFirstMajor(String report, String expectedCode)
     {
-      assertThat(m.find()).isTrue();
+        var p = Pattern.compile("<([a-zA-Z]\\w*:)?ResultMajor( [^>]*)?>([^>]*)<");
+        var m = p.matcher(report);
+        assertThat(m.find()).isTrue();
+        assertThat(m.group(3)).endsWith(expectedCode);
     }
-    assertThat(m.find()).isFalse();
-  }
 
-  /**
-   * Provides a temporary file with test data.
-   *
-   * @param path resource with base64 encoded data
-   */
-  protected File createDecodedTempFile(String path) throws IOException
-  {
-    var result = File.createTempFile("testOutput", ".bin");
-    result.deleteOnExit();
-    try (OutputStream outs = new FileOutputStream(result))
+    /**
+     * Just makes sure that a certain element occurs n times in the report.
+     *
+     * @param name name of element
+     * @param expected number of element of that name
+     */
+    protected void assertNumberElements(String report, String name, int expected)
     {
-      outs.write(TestUtils.decodeTestResource(path));
+        var p = Pattern.compile("<([a-zA-Z]\\w*:)?" + name + "( [^>]*)?>(.+?)</([a-zA-Z]\\w*:)?" + name + ">", Pattern.DOTALL);
+        var m = p.matcher(report);
+        for (var i = 0; i < expected; i++)
+        {
+            assertThat(m.find()).isTrue();
+        }
+        assertThat(m.find()).isFalse();
     }
-    return result;
-  }
+
+    /**
+     * Provides a temporary file with test data.
+     *
+     * @param path resource with base64 encoded data
+     */
+    protected File createDecodedTempFile(String path) throws IOException
+    {
+        var result = File.createTempFile("testOutput", ".bin");
+        result.deleteOnExit();
+        try (OutputStream outs = new FileOutputStream(result))
+        {
+            outs.write(TestUtils.decodeTestResource(path));
+        }
+        return result;
+    }
 }

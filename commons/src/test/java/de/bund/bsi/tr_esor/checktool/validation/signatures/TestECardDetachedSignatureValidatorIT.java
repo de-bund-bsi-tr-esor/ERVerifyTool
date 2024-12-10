@@ -24,16 +24,15 @@ package de.bund.bsi.tr_esor.checktool.validation.signatures;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.DetailedSignatureReportType;
-
-import jakarta.xml.bind.JAXBElement;
-
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import de.bund.bsi.tr_esor.checktool.SignatureValidationTestHelper;
 import de.bund.bsi.tr_esor.checktool.TestUtils;
 import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
+
+import jakarta.xml.bind.JAXBElement;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.DetailedSignatureReportType;
 
 
 /**
@@ -42,79 +41,76 @@ import de.bund.bsi.tr_esor.checktool.validation.report.SignatureReportPart;
 public class TestECardDetachedSignatureValidatorIT
 {
 
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
+    private final ECardDetachedSignatureValidator systemUnderTest;
 
-  private final ECardDetachedSignatureValidator systemUnderTest;
+    /**
+     * Default constructor. The eCard URL used to create the service is derived from the eCard.url system property or as a default uses a
+     * Verification Interpreter service provided on the the hostname crypto.
+     */
+    public TestECardDetachedSignatureValidatorIT()
+    {
+        systemUnderTest = new ECardDetachedSignatureValidator();
+    }
 
-  /**
-   * Default constructor. The eCard URL used to create the service is derived from the eCard.url system
-   * property or as a default uses a Verification Interpreter service provided on the the hostname crypto.
-   */
-  public TestECardDetachedSignatureValidatorIT()
-  {
-    systemUnderTest = new ECardDetachedSignatureValidator();
-  }
+    @BeforeClass
+    public static void setUpClass() throws Exception
+    {
+        TestUtils.loadDefaultConfig();
+    }
 
-  /**
-   * Asserts that in positive case a verification report is returned which states that the signature is math
-   * OK.
-   */
-  @Test
-  public void providesReport() throws Exception
-  {
-    DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getValidContext();
+    /**
+     * Asserts that in positive case a verification report is returned which states that the signature is math OK.
+     */
+    @Test
+    public void providesReport() throws Exception
+    {
+        DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getValidContext();
 
-    systemUnderTest.setContext(ctx);
-    SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
+        systemUnderTest.setContext(ctx);
+        SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
 
-    DetailedSignatureReportType detailReport = extractDetailedSigReport(report);
-    assertThat(detailReport.getFormatOK().getResultMajor()).endsWith("detail:valid");
-    assertThat(detailReport.getSignatureOK().getSigMathOK().getResultMajor()).endsWith("detail:valid");
-  }
+        DetailedSignatureReportType detailReport = extractDetailedSigReport(report);
+        assertThat(detailReport.getFormatOK().getResultMajor()).endsWith("detail:valid");
+        assertThat(detailReport.getSignatureOK().getSigMathOK().getResultMajor()).endsWith("detail:valid");
+    }
 
-  /**
-   * Asserts that manipulated data is recognized as invalid.
-   */
-  @Test
-  public void changedData() throws Exception
-  {
-    DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getValidContext();
-    ctx.getProtectedDataByID().values().iterator().next()[5] = 0;
+    /**
+     * Asserts that manipulated data is recognized as invalid.
+     */
+    @Test
+    public void changedData() throws Exception
+    {
+        DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getValidContext();
+        ctx.getProtectedDataByID().values().iterator().next()[5] = 0;
 
-    systemUnderTest.setContext(ctx);
-    SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
+        systemUnderTest.setContext(ctx);
+        SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
 
-    assertThat(extractDetailedSigReport(report).getSignatureOK()
-                                               .getSigMathOK()
-                                               .getResultMajor()).endsWith("detail:invalid");
+        assertThat(extractDetailedSigReport(report).getSignatureOK().getSigMathOK().getResultMajor()).endsWith("detail:invalid");
 
-  }
+    }
 
-  /**
-   * Asserts that a detached signature object that is not a signature is detected as not a signature
-   */
-  @Test
-  public void noSignatureInCredential() throws Exception
-  {
-    DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getNoSignatureDetachedContext();
+    /**
+     * Asserts that a detached signature object that is not a signature is detected as not a signature
+     */
+    @Test
+    public void noSignatureInCredential() throws Exception
+    {
+        DetachedSignatureValidationContext ctx = SignatureValidationTestHelper.getNoSignatureDetachedContext();
 
-    systemUnderTest.setContext(ctx);
-    SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
+        systemUnderTest.setContext(ctx);
+        SignatureReportPart report = systemUnderTest.validate(ctx.getReference(), ctx.getObjectToValidate());
 
-    assertThat(report.getSummarizedMessage()).contains("No signature found in credential.");
-  }
+        assertThat(report.getSummarizedMessage()).contains("No signature found in credential.");
+    }
 
-  private DetailedSignatureReportType extractDetailedSigReport(SignatureReportPart report)
-  {
-    assertThat(report.getVr()).isNotNull();
-    Object entry = report.getVr().getIndividualReport().get(0).getDetails().getAny().get(0);
-    assertThat(entry).isInstanceOf(JAXBElement.class);
-    Object detailReport = ((JAXBElement<?>)entry).getValue();
-    assertThat(detailReport).isInstanceOf(DetailedSignatureReportType.class);
-    return (DetailedSignatureReportType)detailReport;
-  }
+    private DetailedSignatureReportType extractDetailedSigReport(SignatureReportPart report)
+    {
+        assertThat(report.getVr()).isNotNull();
+        Object entry = report.getVr().getIndividualReport().get(0).getDetails().getAny().get(0);
+        assertThat(entry).isInstanceOf(JAXBElement.class);
+        Object detailReport = ((JAXBElement<?>)entry).getValue();
+        assertThat(detailReport).isInstanceOf(DetailedSignatureReportType.class);
+        return (DetailedSignatureReportType)detailReport;
+    }
 }

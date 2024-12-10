@@ -31,17 +31,16 @@ import java.util.Base64;
 
 import javax.xml.namespace.QName;
 
-import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.EvidenceRecordValidityType.ArchiveTimeStampSequence;
-import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
+import de.bund.bsi.tr_esor.checktool.conf.Configurator;
+import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
+import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBElement;
 import jakarta.xml.bind.JAXBException;
-
-import de.bund.bsi.tr_esor.checktool.conf.Configurator;
-import de.bund.bsi.tr_esor.checktool.entry.ReportDetailLevel;
-import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
+import oasis.names.tc.dss._1_0.core.schema.VerifyRequest;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.EvidenceRecordValidityType.ArchiveTimeStampSequence;
+import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.ReturnVerificationReport;
 
 
 /**
@@ -52,120 +51,117 @@ import de.bund.bsi.tr_esor.checktool.xml.XmlHelper;
 public final class TestUtils
 {
 
-  private TestUtils()
-  {
-    // Utility class
-  }
-
-  /**
-   * Returns a ReturnVerificationReport with ALL_DETAILS as ReportDetailLevel.
-   */
-  public static ReturnVerificationReport createReturnVerificationReport()
-  {
-    return createReturnVerificationReport(null);
-  }
-
-  /**
-   * Returns a ReturnVerificationReport with the given ReportDetailLevel. If no reportDetailLevel is
-   * specified, the ALL_DETAILS ReportDetailLevel will be used.
-   *
-   * @param reportDetailLevel
-   */
-  public static ReturnVerificationReport createReturnVerificationReport(ReportDetailLevel reportDetailLevel)
-  {
-    var result = FACTORY_OASIS_VR.createReturnVerificationReport();
-    result.setReportDetailLevel(reportDetailLevel == null ? ReportDetailLevel.ALL_DETAILS.toString()
-      : reportDetailLevel.toString());
-    return result;
-
-  }
-
-  /**
-   * Reads the given test resource and decodes it (assuming it is base64 encoded).
-   *
-   * @param testResource
-   */
-  public static byte[] decodeTestResource(String testResource)
-  {
-    try (var erStream = TestUtils.class.getResourceAsStream(testResource))
+    private TestUtils()
     {
-      return Base64.getDecoder()
-                   .decode(new String(erStream.readAllBytes(), StandardCharsets.UTF_8).replace("\n", ""));
+        // Utility class
     }
-    catch (IOException e)
+
+    /**
+     * Returns a ReturnVerificationReport with ALL_DETAILS as ReportDetailLevel.
+     */
+    public static ReturnVerificationReport createReturnVerificationReport()
     {
-      fail("problem decoding " + testResource + ": " + e);
-      return null;
+        return createReturnVerificationReport(null);
     }
-  }
 
-  /**
-   * Returns XML representation of marshalled data.
-   *
-   * @param data
-   * @param contextPath
-   * @throws JAXBException
-   * @throws IOException
-   */
-  public static String toString(Object data, String contextPath) throws JAXBException, IOException
-  {
-    var ctx = JAXBContext.newInstance(contextPath);
-    var m = ctx.createMarshaller();
-    try (var outs = new ByteArrayOutputStream())
+    /**
+     * Returns a ReturnVerificationReport with the given ReportDetailLevel. If no reportDetailLevel is specified, the ALL_DETAILS
+     * ReportDetailLevel will be used.
+     *
+     * @param reportDetailLevel
+     */
+    public static ReturnVerificationReport createReturnVerificationReport(ReportDetailLevel reportDetailLevel)
     {
-      m.marshal(data, outs);
-      return new String(outs.toByteArray(), StandardCharsets.UTF_8);
+        var result = FACTORY_OASIS_VR.createReturnVerificationReport();
+        result.setReportDetailLevel(reportDetailLevel == null ? ReportDetailLevel.ALL_DETAILS.toString() : reportDetailLevel.toString());
+        return result;
+
     }
-  }
 
-  /**
-   * Just for development.
-   *
-   * @param request
-   * @throws JAXBException
-   * @throws IOException
-   */
-  public static void dumpXml(VerifyRequest request) throws JAXBException, IOException
-  {
-    System.out.println(TestUtils.toString(request, XmlHelper.FACTORY_DSS.getClass().getPackage().getName()));
-  }
-
-  /**
-   * Just for development.
-   *
-   * @param atss
-   * @throws JAXBException
-   * @throws IOException
-   */
-  public static void dumpXml(ArchiveTimeStampSequence atss) throws JAXBException, IOException
-  {
-    System.out.println(TestUtils.toString(new JAXBElement<>(new QName("ATSS"), ArchiveTimeStampSequence.class,
-                                                            atss),
-                                          XmlHelper.FACTORY_OASIS_VR.getClass().getPackage().getName()));
-  }
-
-  /**
-   * Loads configuration specified by given resource path.
-   *
-   * @param resourcePath
-   * @throws Exception
-   */
-  public static void loadConfig(String resourcePath) throws Exception
-  {
-    try (var ins = TestUtils.class.getResourceAsStream(resourcePath))
+    /**
+     * Reads the given test resource and decodes it (assuming it is base64 encoded).
+     *
+     * @param testResource
+     */
+    public static byte[] decodeTestResource(String testResource)
     {
-      Configurator.getInstance().load(ins);
+        try (var erStream = TestUtils.class.getResourceAsStream(testResource))
+        {
+            return Base64.getDecoder().decode(new String(erStream.readAllBytes(), StandardCharsets.UTF_8).replace("\n", ""));
+        }
+        catch (IOException e)
+        {
+            fail("problem decoding " + testResource + ": " + e);
+            return null;
+        }
     }
-  }
 
-  /**
-   * Loads default configuration for testing.
-   *
-   * @throws Exception
-   */
-  public static void loadDefaultConfig() throws Exception
-  {
-    loadConfig("/config.xml");
-  }
+    /**
+     * Returns XML representation of marshalled data.
+     *
+     * @param data
+     * @param contextPath
+     * @throws JAXBException
+     * @throws IOException
+     */
+    public static String toString(Object data, String contextPath) throws JAXBException, IOException
+    {
+        var ctx = JAXBContext.newInstance(contextPath);
+        var m = ctx.createMarshaller();
+        try (var outs = new ByteArrayOutputStream())
+        {
+            m.marshal(data, outs);
+            return new String(outs.toByteArray(), StandardCharsets.UTF_8);
+        }
+    }
+
+    /**
+     * Just for development.
+     *
+     * @param request
+     * @throws JAXBException
+     * @throws IOException
+     */
+    public static void dumpXml(VerifyRequest request) throws JAXBException, IOException
+    {
+        System.out.println(TestUtils.toString(request, XmlHelper.FACTORY_DSS.getClass().getPackage().getName()));
+    }
+
+    /**
+     * Just for development.
+     *
+     * @param atss
+     * @throws JAXBException
+     * @throws IOException
+     */
+    public static void dumpXml(ArchiveTimeStampSequence atss) throws JAXBException, IOException
+    {
+        System.out.println(TestUtils.toString(new JAXBElement<>(new QName("ATSS"), ArchiveTimeStampSequence.class, atss),
+            XmlHelper.FACTORY_OASIS_VR.getClass().getPackage().getName()));
+    }
+
+    /**
+     * Loads configuration specified by given resource path.
+     *
+     * @param resourcePath
+     * @throws Exception
+     */
+    public static void loadConfig(String resourcePath) throws Exception
+    {
+        try (var ins = TestUtils.class.getResourceAsStream(resourcePath))
+        {
+            Configurator.getInstance().load(ins);
+        }
+    }
+
+    /**
+     * Loads default configuration for testing.
+     *
+     * @throws Exception
+     */
+    public static void loadDefaultConfig() throws Exception
+    {
+        loadConfig("/config.xml");
+    }
 
 }

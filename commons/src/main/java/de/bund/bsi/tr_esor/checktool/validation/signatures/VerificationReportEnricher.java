@@ -21,13 +21,13 @@
  */
 package de.bund.bsi.tr_esor.checktool.validation.signatures;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import oasis.names.tc.dss._1_0.core.schema.InternationalStringType;
 import oasis.names.tc.dss._1_0.core.schema.Result;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.IndividualReportType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -39,40 +39,40 @@ import org.slf4j.LoggerFactory;
 public class VerificationReportEnricher
 {
 
-  private static final Logger LOG = LoggerFactory.getLogger(VerificationReportEnricher.class);
+    private static final Logger LOG = LoggerFactory.getLogger(VerificationReportEnricher.class);
 
-  /**
-   * This method enriches a given <code>VerificationReportType</code> with additional nodes as specified.
-   *
-   * @param vr
-   */
-  public void enrich(VerificationReportType vr)
-  {
-    // if no verification report exist - may be eCard Service not avail.- nothing to do here
-    if (vr == null)
+    /**
+     * This method enriches a given <code>VerificationReportType</code> with additional nodes as specified.
+     *
+     * @param vr
+     */
+    public void enrich(VerificationReportType vr)
     {
-      LOG.debug("Verification Report is NULL!");
-      return;
-    }
+        // if no verification report exist - may be eCard Service not avail.- nothing to do here
+        if (vr == null)
+        {
+            LOG.debug("Verification Report is NULL!");
+            return;
+        }
 
-    if (vr.getIndividualReport() == null)
-    {
-      LOG.debug("List of Individual Reports ist NULL!");
-      return;
-    }
+        if (vr.getIndividualReport() == null)
+        {
+            LOG.debug("List of Individual Reports ist NULL!");
+            return;
+        }
 
-    // If vr has no individual reports and thus no signed data as input for verification
-    if (vr.getIndividualReport().isEmpty())
-    {
-      IndividualReportType indivReport = new IndividualReportType();
-      Result result = new Result();
-      indivReport.setResult(result);
-      result.setResultMajor(ECardResultMajor.OK);
-      InternationalStringType resultMessage = new InternationalStringType();
-      resultMessage.setLang("en");
-      resultMessage.setValue("No signature found in data object.");
-      result.setResultMessage(resultMessage);
-      vr.getIndividualReport().add(indivReport);
+        // If vr has no individual reports and thus no signed data as input for verification
+        if (vr.getIndividualReport().isEmpty())
+        {
+            IndividualReportType indivReport = new IndividualReportType();
+            Result result = new Result();
+            indivReport.setResult(result);
+            result.setResultMajor(ECardResultMajor.OK);
+            InternationalStringType resultMessage = new InternationalStringType();
+            resultMessage.setLang("en");
+            resultMessage.setValue("No signature found in data object.");
+            result.setResultMessage(resultMessage);
+            vr.getIndividualReport().add(indivReport);
+        }
     }
-  }
 }

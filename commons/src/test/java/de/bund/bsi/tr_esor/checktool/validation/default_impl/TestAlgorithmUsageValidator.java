@@ -44,68 +44,61 @@ import de.bund.bsi.tr_esor.checktool.validation.report.Reference;
 public class TestAlgorithmUsageValidator
 {
 
-  /**
-   * Tests SHA256 which is valid.
-   */
-  @Test
-  public void testValid()
-  {
-    checkAlgorithm(createValidatorUnderTest(), "2.16.840.1.101.3.4.2.1", ValidationResultMajor.VALID, null);
-  }
+    /**
+     * Tests SHA256 which is valid.
+     */
+    @Test
+    public void testValid()
+    {
+        checkAlgorithm(createValidatorUnderTest(), "2.16.840.1.101.3.4.2.1", ValidationResultMajor.VALID, null);
+    }
 
-  /**
-   * Tests unknown OID which is unsupported.
-   */
-  @Test
-  public void testUnsupported()
-  {
-    checkAlgorithm(createValidatorUnderTest(),
-                   "1.12.0.99.2.9",
-                   ValidationResultMajor.INVALID,
-                   "/algorithm#hashAlgorithmNotSupported");
-  }
+    /**
+     * Tests unknown OID which is unsupported.
+     */
+    @Test
+    public void testUnsupported()
+    {
+        checkAlgorithm(createValidatorUnderTest(), "1.12.0.99.2.9", ValidationResultMajor.INVALID, "/algorithm#hashAlgorithmNotSupported");
+    }
 
-  /**
-   * Tests old OID which is not suitable.
-   */
-  @Test
-  public void testNotSuitable()
-  {
-    checkAlgorithm(createValidatorUnderTest(),
-                   "1.2.410.200004.1",
-                   ValidationResultMajor.INVALID,
-                   "/algorithm#hashAlgorithmNotSuitable");
-  }
+    /**
+     * Tests old OID which is not suitable.
+     */
+    @Test
+    public void testNotSuitable()
+    {
+        checkAlgorithm(createValidatorUnderTest(),
+            "1.2.410.200004.1",
+            ValidationResultMajor.INVALID,
+            "/algorithm#hashAlgorithmNotSuitable");
+    }
 
-  /**
-   * Asserts that a validation of the algorithm specified by given OID reports a result with given major code
-   * and minor code ending.
-   *
-   * @param validator
-   * @param oid
-   * @param major
-   * @param minorEnding
-   */
-  protected void checkAlgorithm(AlgorithmUsageValidator validator,
-                                String oid,
-                                ValidationResultMajor major,
-                                String minorEnding)
-  {
-    Matcher<? super String> minorMatcher = minorEnding == null ? nullValue() : endsWith(minorEnding);
-    var toCheck = AlgorithmUsage.createHashed(oid, new Date());
-    var report = validator.validate(new Reference("foo"), toCheck);
-    assertThat(report.getOverallResult().getResultMajor(), is(major.toString()));
-    assertThat(report.getOverallResult().getResultMinor(), minorMatcher);
-    assertThat(report.getFormatted().getSuitability().getResultMajor(), is(major.toString()));
-    assertThat(report.getFormatted().getSuitability().getResultMinor(), minorMatcher);
-  }
+    /**
+     * Asserts that a validation of the algorithm specified by given OID reports a result with given major code and minor code ending.
+     *
+     * @param validator
+     * @param oid
+     * @param major
+     * @param minorEnding
+     */
+    protected void checkAlgorithm(AlgorithmUsageValidator validator, String oid, ValidationResultMajor major, String minorEnding)
+    {
+        Matcher<? super String> minorMatcher = minorEnding == null ? nullValue() : endsWith(minorEnding);
+        var toCheck = AlgorithmUsage.createHashed(oid, new Date());
+        var report = validator.validate(new Reference("foo"), toCheck);
+        assertThat(report.getOverallResult().getResultMajor(), is(major.toString()));
+        assertThat(report.getOverallResult().getResultMinor(), minorMatcher);
+        assertThat(report.getFormatted().getSuitability().getResultMajor(), is(major.toString()));
+        assertThat(report.getFormatted().getSuitability().getResultMinor(), minorMatcher);
+    }
 
-  /**
-   * Returns new instance of validator to be tested.
-   */
-  protected AlgorithmUsageValidator createValidatorUnderTest()
-  {
-    return new AlgorithmUsageValidator();
-  }
+    /**
+     * Returns new instance of validator to be tested.
+     */
+    protected AlgorithmUsageValidator createValidatorUnderTest()
+    {
+        return new AlgorithmUsageValidator();
+    }
 
 }

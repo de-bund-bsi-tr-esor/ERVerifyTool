@@ -44,38 +44,38 @@ import de.bund.bsi.tr_esor.checktool.validation.report.ReportPart;
 public class TestArchiveTimeStampSequenceValidator
 {
 
-  /**
-   * Loads default configuration.
-   */
-  @BeforeClass
-  public static void setUpClass() throws Exception
-  {
-    TestUtils.loadDefaultConfig();
-  }
-
-  /**
-   * Tests two valid evidence records to be checked as valid. No assertions regarding the protected elements
-   * are made. Result can be at most INDETERMINED because no only check of the timestamps is done.
-   *
-   * @throws Exception
-   */
-  @Test
-  public void testValidER() throws Exception
-  {
-    var erToTest = new String[]{"/xaip/xaip_ok.rehashed.ers.b64", "/bin/example.ers.b64"};
-    for ( var erName : erToTest )
+    /**
+     * Loads default configuration.
+     */
+    @BeforeClass
+    public static void setUpClass() throws Exception
     {
-      var erBytes = TestUtils.decodeTestResource(erName);
-      var er = new ASN1EvidenceRecordParser().parse(erBytes);
-      var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, null, false);
-      ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
-      var atssv = new ArchiveTimeStampSequenceValidator();
-      atssv.setContext(ctx);
-      ReportPart report = atssv.validate(new Reference("dummy"), er.getAtss());
-      assertThat("ATSS validation result for " + erName,
-                 report.getOverallResult().getResultMajor(),
-                 is(ValidationResultMajor.INDETERMINED.toString()));
+        TestUtils.loadDefaultConfig();
     }
-  }
+
+    /**
+     * Tests two valid evidence records to be checked as valid. No assertions regarding the protected elements are made. Result can be at
+     * most INDETERMINED because no only check of the timestamps is done.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testValidER() throws Exception
+    {
+        var erToTest = new String[]{"/xaip/xaip_ok.rehashed.ers.b64", "/bin/example.ers.b64"};
+        for (var erName : erToTest)
+        {
+            var erBytes = TestUtils.decodeTestResource(erName);
+            var er = new ASN1EvidenceRecordParser().parse(erBytes);
+            var ctx = new ErValidationContext(new Reference("dummy"), er, ProfileNames.RFC4998, null, false);
+            ctx.setDeclaredDigestOIDs(er.getDigestAlgorithms());
+            var atssv = new ArchiveTimeStampSequenceValidator();
+            atssv.setContext(ctx);
+            ReportPart report = atssv.validate(new Reference("dummy"), er.getAtss());
+            assertThat("ATSS validation result for " + erName,
+                report.getOverallResult().getResultMajor(),
+                is(ValidationResultMajor.INDETERMINED.toString()));
+        }
+    }
 
 }
