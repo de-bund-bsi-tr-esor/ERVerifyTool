@@ -279,7 +279,8 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
             {
                 var serialIdentifier = certificateValidityType.getCertificateIdentifier().getX509SerialNumber();
                 var matchingCertificate = certs.stream().filter(c -> ((X509CertificateHolder)c).getSerialNumber().compareTo(serialIdentifier) == 0).findFirst();
-                if (matchingCertificate.isPresent()) {
+                if (matchingCertificate.isPresent())
+                {
                    retrieveOcspResponse(certificateValidityType, ((X509CertificateHolder) matchingCertificate.get()));
                 }
             }
@@ -291,36 +292,23 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
 
     private void retrieveOcspResponse(CertificateValidityType certificatePathValidityType, X509CertificateHolder certificateHolder)
     {
-        try {
+        try
+        {
             var onlineOcspRequester = new OnlineOcspRequester();
             var certificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
-            if (certificate.getBasicConstraints() != -1)
-            {
-                return;
-            }
             var ocspResponse = onlineOcspRequester.retrieveOcspResponseFromIncludedUrl(certificate);
-            if (ocspResponse == null) {
-                return;
-            }
-            if (isValidResponse(ocspResponse))
+            if (ocspResponse != null)
             {
                 var updatedRevocationEvidence = new CertificateStatusType.RevocationEvidence();
                 updatedRevocationEvidence.setOCSPValidity(new OCSPValidityType());
                 updatedRevocationEvidence.getOCSPValidity().setOCSPValue(ocspResponse.getEncoded());
                 certificatePathValidityType.getCertificateStatus().setRevocationEvidence(updatedRevocationEvidence);
             }
-        } catch (IOException | CertificateException | OCSPException e) {
+        }
+        catch (IOException | CertificateException | OCSPException e)
+        {
             LOG.error("Cannot Retrive Missing OCSPResponse", e);
         }
-    }
-
-    private static boolean isValidResponse(OCSPResp response)
-    {
-        if (response == null)
-        {
-            return false;
-        }
-        return response.toASN1Structure().getResponseStatus().getValue().intValue() == OCSPResponseStatus.SUCCESSFUL;
     }
 
     private TimeStampReport createTimeStampReportForNoValidation(Reference ref, TimeStampToken toCheck)

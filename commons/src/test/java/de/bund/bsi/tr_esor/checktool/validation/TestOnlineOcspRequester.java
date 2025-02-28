@@ -24,6 +24,12 @@ import static org.mockito.Mockito.when;
 
 public class TestOnlineOcspRequester {
 
+    private final String NO_AIA_ISSUER_URL = "no_AIA_issuer_Url.crt";
+
+    private final String INVALID_AIA_ISSUER_URL = "invalid_AIA_issuer_Url.crt";
+
+    private final String VALID_AIA_ISSUER_URL = "invalid_AIA_issuer_Url.crt";
+
     private HttpClient client;
 
     private OnlineOcspRequester sut;
@@ -37,21 +43,9 @@ public class TestOnlineOcspRequester {
     }
 
     @Test
-    public void successfulRetrievalOfOcspResponse() throws Exception
-    {
-        var certificate = loadCertificate();
-        var sutWithRealClient = new OnlineOcspRequester();
-
-        var result = sutWithRealClient.retrieveOcspResponseFromIncludedUrl(certificate);
-
-        assertThat(result).isNotNull();
-        assertThat(result.getStatus()).isEqualTo(OCSPResponseStatus.SUCCESSFUL);
-    }
-
-    @Test
     public void ioExceptionOnHttpRequest() throws Exception
     {
-        var certificate = loadCertificate();
+        var certificate = loadCertificate(VALID_AIA_ISSUER_URL);
         arrangeExceptionOnHttpClientPost();
 
         assertThatThrownBy(() -> sut.retrieveOcspResponseFromIncludedUrl(certificate)).isInstanceOf(OCSPException.class)
@@ -61,7 +55,7 @@ public class TestOnlineOcspRequester {
     @Test
     public void badRequestOnHttpRequest() throws Exception
     {
-        var certificate = loadCertificate();
+        var certificate = loadCertificate(VALID_AIA_ISSUER_URL);
         var response = mock(HttpResponse.class);
         when(response.statusCode()).thenReturn(400);
         arrangeResponseOnHttpClientPost(response);
@@ -73,7 +67,7 @@ public class TestOnlineOcspRequester {
     @Test
     public void noContentInHttpResponse() throws Exception
     {
-        var certificate = loadCertificate();
+        var certificate = loadCertificate(VALID_AIA_ISSUER_URL);
         var response = createResponseWithoutData();
         arrangeResponseOnHttpClientPost(response);
 
@@ -82,10 +76,48 @@ public class TestOnlineOcspRequester {
         assertThat(result).isNull();
     }
 
-
-    private static X509Certificate loadCertificate() throws Exception
+    @Test
+    public void successNoAiaIssuerUrl() throws Exception
     {
-        try (var inputStream = TestOnlineOcspRequester.class.getClassLoader().getResourceAsStream("timeStampTestCertificates/dtrust-certificate-with-ocsp-url.crt"))
+        var certificate = loadCertificate(NO_AIA_ISSUER_URL);
+        var sutWithRealClient = new OnlineOcspRequester();
+
+        var result = sutWithRealClient.retrieveOcspResponseFromIncludedUrl(certificate);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo(OCSPResponseStatus.SUCCESSFUL);
+        assertThat(result.getResponseObject()).isNotNull();
+    }
+
+    @Test
+    public void successInValidAiaIssuerUrl() throws Exception
+    {
+        var certificate = loadCertificate(INVALID_AIA_ISSUER_URL);
+        var sutWithRealClient = new OnlineOcspRequester();
+
+        var result = sutWithRealClient.retrieveOcspResponseFromIncludedUrl(certificate);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo(OCSPResponseStatus.SUCCESSFUL);
+        assertThat(result.getResponseObject()).isNotNull();
+    }
+
+    @Test
+    public void successValidAiaIssuerUrl() throws Exception
+    {
+        var certificate = loadCertificate(VALID_AIA_ISSUER_URL);
+        var sutWithRealClient = new OnlineOcspRequester();
+
+        var result = sutWithRealClient.retrieveOcspResponseFromIncludedUrl(certificate);
+
+        assertThat(result).isNotNull();
+        assertThat(result.getStatus()).isEqualTo(OCSPResponseStatus.SUCCESSFUL);
+        assertThat(result.getResponseObject()).isNotNull();
+    }
+
+    private static X509Certificate loadCertificate(String certificateName) throws Exception
+    {
+        try (var inputStream = TestOnlineOcspRequester.class.getClassLoader().getResourceAsStream("timeStampTestCertificates/" + certificateName))
         {
             var factory = CertificateFactory.getInstance("X.509", new BouncyCastleProvider());
             return (X509Certificate)factory.generateCertificate(inputStream);
@@ -108,4 +140,5 @@ public class TestOnlineOcspRequester {
     {
         when(client.send(any(HttpRequest.class), eq(HttpResponse.BodyHandlers.ofByteArray()))).thenReturn(response);
     }
+
 }
