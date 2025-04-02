@@ -25,21 +25,25 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_DSS;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_ECARD;
 import static de.bund.bsi.tr_esor.checktool.xml.XmlHelper.FACTORY_OASIS_VR;
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.emptyOrNullString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.math.BigInteger;
+import java.security.cert.X509Certificate;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.xml.transform.stream.StreamSource;
@@ -52,6 +56,7 @@ import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.Certificate
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.DetailedSignatureReportType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.TimeStampValidityType;
 import oasis.names.tc.dss_x._1_0.profiles.verificationreport.schema_.VerificationReportType;
+import org.bouncycastle.asn1.x509.Extension;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSSignedData;
 import org.bouncycastle.tsp.TimeStampToken;
@@ -523,6 +528,52 @@ public class TestECardTimeStampValidator
         var report = sut.validateInternal(ref, timeStamp);
 
         assertThat(report.getSummarizedMessage(), containsString("no online validation of time stamp done"));
+    }
+
+    @Test
+    public void noExtensionFound() throws Exception
+    {
+        var certificate = mock(X509Certificate.class);
+        var issuerCertificate = mock(X509Certificate.class);
+        var spy = spy(ECardTimeStampValidator.class);
+        doReturn(null).when(spy).extractExtension(certificate, Extension.authorityKeyIdentifier.getId());
+        var issuerCertChain = List.of(issuerCertificate);
+
+        var actual = spy.findIssuerCertificate(certificate, issuerCertChain);
+
+        assertThat(actual, nullValue());
+    }
+
+    @Test
+    public void noIssuerCertificateFound()
+    {
+        var certificate = mock(X509Certificate.class);
+        var issuerCertificate = mock(X509Certificate.class);
+        var spy = spy(ECardTimeStampValidator.class);
+        byte[] authorityKeyId = {1, 2, 3, 4, 5};
+        doReturn(authorityKeyId).when(spy).extractAuthorityKeyIdentifier(certificate);
+        doReturn(new byte[0]).when(spy).extractSubjectKeyIdentifier(issuerCertificate);
+        var issuerCertChain = List.of(issuerCertificate);
+
+        var actual = spy.findIssuerCertificate(certificate, issuerCertChain);
+
+        assertThat(actual, nullValue());
+    }
+
+    @Test
+    public void issuerCertificateFoundSuccess()
+    {
+        var certificate = mock(X509Certificate.class);
+        var issuerCertificate = mock(X509Certificate.class);
+        var spy = spy(ECardTimeStampValidator.class);
+        byte[] authorityKeyId = {1, 2, 3, 4, 5};
+        doReturn(authorityKeyId).when(spy).extractAuthorityKeyIdentifier(certificate);
+        doReturn(authorityKeyId).when(spy).extractSubjectKeyIdentifier(issuerCertificate);
+        var issuerCertChain = List.of(issuerCertificate);
+
+        var actual = spy.findIssuerCertificate(certificate, issuerCertChain);
+
+        assertThat(actual, is(issuerCertificate));
     }
 
     /**

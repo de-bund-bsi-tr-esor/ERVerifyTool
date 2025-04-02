@@ -24,7 +24,10 @@ package de.bund.bsi.tr_esor.checktool.validation.default_impl;
 import java.io.IOException;
 import java.net.URL;
 import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -52,11 +55,14 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.ws.BindingProvider;
 import jakarta.xml.ws.WebServiceException;
 
-import org.bouncycastle.asn1.ocsp.OCSPResponseStatus;
+import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.x509.AuthorityKeyIdentifier;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.SubjectKeyIdentifier;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.ocsp.OCSPException;
-import org.bouncycastle.cert.ocsp.OCSPResp;
 import org.bouncycastle.tsp.TimeStampToken;
 import org.etsi.uri._19102.v1_2.SignatureQualityType;
 import org.slf4j.Logger;
@@ -267,7 +273,7 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
 
     void fillCertificatePathValidity(CertificatePathValidityType certificatePathValidityType, TimeStampToken timeStampToken)
     {
-        var certs = timeStampToken.getCertificates().getMatches(null);
+        Collection<X509CertificateHolder> certs = timeStampToken.getCertificates().getMatches(null);
         if (certificatePathValidityType.getPathValidityDetail() == null)
         {
             return;
@@ -279,10 +285,12 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
             {
                 var serialIdentifier = certificateValidityType.getCertificateIdentifier().getX509SerialNumber();
                 var matchingCertificate = certs.stream().filter(c -> ((X509CertificateHolder)c).getSerialNumber().compareTo(serialIdentifier) == 0).findFirst();
-                if (matchingCertificate.isPresent())
+                if (matchingCertificate.isEmpty())
                 {
-                   retrieveOcspResponse(certificateValidityType, ((X509CertificateHolder) matchingCertificate.get()));
+                    validityTypes.add(certificateValidityType);
+                   continue;
                 }
+                retrieveOcspResponse(certificateValidityType, matchingCertificate.get(), certs);
             }
             validityTypes.add(certificateValidityType);
         }
@@ -290,13 +298,15 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
         validityTypes.forEach(v -> certificatePathValidityType.getPathValidityDetail().getCertificateValidity().add(v));
     }
 
-    private void retrieveOcspResponse(CertificateValidityType certificatePathValidityType, X509CertificateHolder certificateHolder)
+    private void retrieveOcspResponse(CertificateValidityType certificatePathValidityType, X509CertificateHolder certificateHolder, Collection<X509CertificateHolder> certChain)
     {
         try
         {
             var onlineOcspRequester = new OnlineOcspRequester();
             var certificate = new JcaX509CertificateConverter().getCertificate(certificateHolder);
-            var ocspResponse = onlineOcspRequester.retrieveOcspResponseFromIncludedUrl(certificate);
+            var x509CertChain = convertCertChain(certChain);
+            var issuerCertificate = findIssuerCertificate(certificate, x509CertChain);
+            var ocspResponse = onlineOcspRequester.retrieveOcspResponseFromIncludedUrl(certificate, issuerCertificate);
             if (ocspResponse != null)
             {
                 var updatedRevocationEvidence = new CertificateStatusType.RevocationEvidence();
@@ -309,6 +319,93 @@ public class ECardTimeStampValidator extends BaseTimeStampValidator
         {
             LOG.error("Cannot Retrive Missing OCSPResponse", e);
         }
+    }
+
+    private List<X509Certificate> convertCertChain(Collection<X509CertificateHolder> certificates)
+    {
+        var results = new ArrayList<X509Certificate>();
+        for (var certificate : certificates)
+        {
+            try
+            {
+                results.add(new JcaX509CertificateConverter().getCertificate(certificate));
+            }
+            catch (CertificateException ignored) { }
+        }
+        return results;
+    }
+
+    X509Certificate findIssuerCertificate(X509Certificate certificate, List<X509Certificate> certificateChain)
+    {
+        if (certificateChain.isEmpty())
+        {
+            return null;
+        }
+
+        var authorityKeyId = extractAuthorityKeyIdentifier(certificate);
+        if (authorityKeyId.length == 0)
+        {
+            return null;
+        }
+
+        for (var issuerCert : certificateChain)
+        {
+            var issuerCertSKIid = extractSubjectKeyIdentifier(issuerCert);
+            if (Arrays.equals(issuerCertSKIid, authorityKeyId))
+            {
+                return issuerCert;
+            }
+        }
+        return null;
+    }
+
+    byte[] extractAuthorityKeyIdentifier(X509Certificate certificate)
+    {
+        try
+        {
+            var asn1AuthorityKeyIdentifierExtension = extractExtension(certificate, Extension.authorityKeyIdentifier.getId());
+            if (asn1AuthorityKeyIdentifierExtension == null)
+            {
+                return new byte[0];
+            }
+            var authorityKeyIdentifier = AuthorityKeyIdentifier.getInstance(asn1AuthorityKeyIdentifierExtension);
+            return authorityKeyIdentifier.getKeyIdentifier();
+        }
+        catch (IOException e)
+        {
+            LOG.debug("Could not find authority key identifier for certificate {}", certificate.getSerialNumber());
+        }
+        return new byte[0];
+    }
+
+    byte[] extractSubjectKeyIdentifier(X509Certificate issuerCertificate)
+    {
+        try
+        {
+            var asn1SubjectKeyIdentifier = extractExtension(issuerCertificate, Extension.subjectKeyIdentifier.getId());
+            if (asn1SubjectKeyIdentifier == null)
+            {
+                return new byte[0];
+            }
+            var subjectKeyIdentifier = SubjectKeyIdentifier.getInstance(asn1SubjectKeyIdentifier);
+            return subjectKeyIdentifier.getKeyIdentifier();
+        }
+        catch (IOException e)
+        {
+            LOG.debug("Could not find subject key identifier for certificate {}", issuerCertificate.getSerialNumber());
+        }
+        return new byte[0];
+    }
+
+    ASN1Primitive extractExtension(X509Certificate certificate, String extensionID) throws IOException
+    {
+        var extensionValue = certificate.getExtensionValue(extensionID);
+        if (extensionValue == null)
+        {
+            return null;
+        }
+        var parsedExtensionValue = JcaX509ExtensionUtils.parseExtensionValue(extensionValue);
+        return parsedExtensionValue.toASN1Primitive();
     }
 
     private TimeStampReport createTimeStampReportForNoValidation(Reference ref, TimeStampToken toCheck)

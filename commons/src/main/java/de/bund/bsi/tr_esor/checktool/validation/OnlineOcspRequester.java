@@ -70,43 +70,65 @@ public class OnlineOcspRequester
     /**
      * Retrieves OCSP response for given certificate.
      */
-    public OCSPResp retrieveOcspResponseFromIncludedUrl(X509Certificate certificate) throws OCSPException {
+    public OCSPResp retrieveOcspResponseFromIncludedUrl(X509Certificate certificate, X509Certificate issuerCertificate) throws OCSPException
+    {
         var serialNumber = certificate.getSerialNumber();
         try
         {
-            var accessdescription = extractAuthorityInformationAccess(certificate);
-            if (accessdescription == null)
+            var certificateAccessdescription = extractAuthorityInformationAccess(certificate);
+            if (certificateAccessdescription.length < 1)
             {
                 return null;
             }
-            var ocspUrlS = analyseAuthorityInformationAccess(accessdescription, X509ObjectIdentifiers.id_ad_ocsp);
-            if (ocspUrlS.isEmpty())
+            var ocspUrls = analyseAuthorityInformationAccess(certificateAccessdescription, X509ObjectIdentifiers.id_ad_ocsp);
+            if (ocspUrls.isEmpty())
             {
                 LOG.info("No URL for OCSP found for certificate {}", serialNumber);
                 return null;
             }
-            var issuerCert = extractIssuerCertificate(accessdescription);
-            for (var url : ocspUrlS)
+            if (issuerCertificate == null)
             {
-                LOG.info("Requesting OCSP values from {} for certificate {}", url, serialNumber);
-                var request = buildOcspRequest(certificate, issuerCert);
-                var resp = sendOcspRequest(url, request);
-                if (resp != null)
+                var retrievedIssuerCertificate = extractIssuerCertificate(certificateAccessdescription);
+                if (retrievedIssuerCertificate == null)
                 {
-                    if (resp.toASN1Structure().getResponseStatus().getValue().intValue() == OCSPResponseStatus.SUCCESSFUL)
-                    {
-                        return resp;
-                    }
+                    return null;
                 }
+                return retrieveOcspResponse(certificate, ocspUrls, retrievedIssuerCertificate);
             }
-            return null;
+            return retrieveOcspResponse(certificate, ocspUrls, issuerCertificate);
         }
         catch (IOException | OperatorCreationException | OCSPException | CertificateException exception)
         {
-            throw new OCSPException("Could not retrieve OCSP response for certificate " + serialNumber, exception);
+            throw new OCSPException("Could not retrieve OCSP response for certificate " + certificate.getSerialNumber(), exception);
         }
     }
 
+    /**
+     * this method tries to retrieve Ocsp Responses for the provided certificate
+     */
+    private OCSPResp retrieveOcspResponse(X509Certificate certificate, List<String> ocspUrls, X509Certificate retrievedIssuerCertificate) throws OCSPException, CertificateEncodingException, IOException, OperatorCreationException
+    {
+        for (var url : ocspUrls)
+        {
+            LOG.info("Requesting OCSP values from {} for certificate {}", url, certificate.getSerialNumber());
+            var request = buildOcspRequest(certificate, retrievedIssuerCertificate);
+            var response = sendOcspRequest(url, request);
+            if (response == null)
+            {
+                continue;
+            }
+
+            if (response.toASN1Structure().getResponseStatus().getValue().intValue() == OCSPResponseStatus.SUCCESSFUL)
+            {
+                return response;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * this method tries to obtain a certificate from an AuthorityAccessDescription
+     */
     private X509Certificate extractIssuerCertificate(AccessDescription[] accessdescription)
     {
         var issuerUrls = analyseAuthorityInformationAccess(accessdescription, X509ObjectIdentifiers.id_ad_caIssuers);
@@ -117,61 +139,84 @@ public class OnlineOcspRequester
 
         for (var url : issuerUrls)
         {
-            try
+            var httpResponse = retrieveIssuerCertificate(url);
+            if (httpResponse.length < 1)
             {
-                var httpRequest = buildBaseHttpRequest(url).build();
-                var httpResponse = sendHTTPRequest(url, httpRequest);
-
-                if (httpResponse == null)
-                {
-                    LOG.info("Response received from {} was empty", url);
-                    continue;
-                }
-
-                try (var byteArrayInputStream = new ByteArrayInputStream(httpResponse))
-                {
-                    var issuerCertificate = (X509Certificate) CertificateFactory
-                            .getInstance("X.509").generateCertificate(byteArrayInputStream);
-                    if (issuerCertificate != null)
-                    {
-                        return issuerCertificate;
-                    }
-                }
+                continue;
             }
-            catch (IllegalArgumentException | IOException | CertificateException e)
+
+            var issuerCertificate = generateCertificate(url, httpResponse);
+            if (issuerCertificate != null)
             {
-                LOG.info("Could not build httpRequest with URL: {}", url);
+                return issuerCertificate;
             }
         }
         return null;
     }
 
     /**
-     * Extracts the AuthorityInformationAccess Extension from a Provided Certificate
+     * this method retrieves issuer certificates from the provided URL
      */
-    private AccessDescription[] extractAuthorityInformationAccess(X509Certificate cert) throws IOException {
-        var extensionValue = cert.getExtensionValue(Extension.authorityInfoAccess.getId());
-        if (extensionValue == null)
+    private byte[] retrieveIssuerCertificate(String url)
+    {
+        try
         {
+            var httpRequest = buildBaseHttpRequest(url).build();
+            var httpResponse = sendHTTPRequest(url, httpRequest);
+            if (httpResponse == null || httpResponse.length < 1)
+            {
+                LOG.info("Response received from {} was empty", url);
+                return new byte[0];
+            }
+            return httpResponse;
+        }
+        catch (IOException e) {
+            LOG.info("Could not retrive issuer certificate from URL: {}", url);
+        }
+        return new byte[0];
+    }
+
+    /**
+     * this method converts a http response to a X509Certificate
+     */
+    X509Certificate generateCertificate(String url, byte[] httpResponseContent)
+    {
+        try (var byteArrayInputStream = new ByteArrayInputStream(httpResponseContent))
+        {
+            return (X509Certificate)CertificateFactory.getInstance("X.509").generateCertificate(byteArrayInputStream);
+        }
+        catch (IOException | CertificateException e)
+        {
+            LOG.info("could not generate certificate from issuer url: {}", url);
             return null;
+        }
+    }
+
+    /**
+     * Extracts the AuthorityInformationAccess extension from a provided certificate
+     */
+    AccessDescription[] extractAuthorityInformationAccess(X509Certificate cert) throws IOException {
+        var extensionValue = cert.getExtensionValue(Extension.authorityInfoAccess.getId());
+        if (extensionValue == null || extensionValue.length < 1)
+        {
+            return new AccessDescription[0];
         }
 
         var asn1Sequence = (ASN1Sequence)JcaX509ExtensionUtils.parseExtensionValue(extensionValue);
         if (asn1Sequence == null || asn1Sequence.size() == 0)
         {
-            return null;
+            return new AccessDescription[0];
         }
 
         var authorityInformationAccess = AuthorityInformationAccess.getInstance(asn1Sequence);
-        var accessdescription = authorityInformationAccess.getAccessDescriptions();
-        return accessdescription;
+        return authorityInformationAccess.getAccessDescriptions();
     }
 
     /**
-     * Obtains Information out of a provided AuthorityInformationExtension. This Methode is needed to Obtain Information to the Location of
+     * Obtains Information out of a provided AuthorityInformationExtension. This Method is needed to Obtain Information to the Location of
      * the IssuerCertificate and the OCSPResponderUrl
      */
-    private List<String> analyseAuthorityInformationAccess(AccessDescription[] accessdescription, ASN1ObjectIdentifier identifier)
+    List<String> analyseAuthorityInformationAccess(AccessDescription[] accessdescription, ASN1ObjectIdentifier identifier)
     {
         var foundUrls = new ArrayList<String>();
         for (var desc : accessdescription)
@@ -189,7 +234,7 @@ public class OnlineOcspRequester
         return foundUrls;
     }
 
-    private String parseGeneralName(GeneralName generalName)
+    String parseGeneralName(GeneralName generalName)
     {
         if (GeneralName.uniformResourceIdentifier == generalName.getTagNo())
         {
@@ -204,7 +249,7 @@ public class OnlineOcspRequester
      * Builds an OCSP request from the serial number of the submitted user certificate and the issuer certificate derived from the user certificate.
      * If no issuer certificate was retrieved the user certificate is used instead
      */
-    private byte[] buildOcspRequest(X509Certificate certificate, X509Certificate issuerCertificate)
+    byte[] buildOcspRequest(X509Certificate certificate, X509Certificate issuerCertificate)
             throws OCSPException, CertificateEncodingException, IOException, OperatorCreationException
     {
         var serialNumber = certificate.getSerialNumber();
@@ -234,7 +279,7 @@ public class OnlineOcspRequester
      * @return the OSCP response
      * @throws IOException, if sending the OCSP request failed or if the response could not be parsed as an OCSP response successfully
      */
-    private OCSPResp sendOcspRequest(String url, byte[] ocspReq) throws IOException, IllegalArgumentException
+    OCSPResp sendOcspRequest(String url, byte[] ocspReq) throws IOException, IllegalArgumentException
 
     {
         var httpRequest = buildHttpOCSPRequest(url, ocspReq).build();
@@ -255,6 +300,10 @@ public class OnlineOcspRequester
         try
         {
             var response = client.send(httpRequest, HttpResponse.BodyHandlers.ofByteArray());
+            if (response == null)
+            {
+                throw new IOException(String.format("Could not execute request for url %s.", url));
+            }
             var status = response.statusCode();
             if (status >= MULTIPLE_CHOICES_300)
             {

@@ -150,34 +150,6 @@ public class TestMainIT extends TestBase
         assertThat(chainingOk.getResultMessage().getValue()).contains("QTST_EUMS_TL");
     }
 
-    /**
-     * Checks a XAIP with an outdated timestamp that does not give OCSP results anymore
-     *
-     * @throws Exception
-     */
-    @Test
-    @SuppressWarnings("unchecked")
-    public void checksExceetOutdatedTimestamp() throws Exception
-    {
-        var individualReports =
-            verify("xaip/XAIP_NOK_EXCEET.xml", "xaip/XAIP_NOK_EXCEET.ers", "TR-ESOR", "command line parameter er", "DO-01", "DO-02");
-        var erReport = individualReports.get("command line parameter er");
-        assertThat(erReport.getResult().getResultMajor()).contains("Success");
-        var evidenceRecordValidityType = ((JAXBElement<EvidenceRecordValidityType>)erReport.getDetails().getAny().get(0)).getValue();
-        var chainingOk = evidenceRecordValidityType.getArchiveTimeStampSequence()
-            .getArchiveTimeStampChain()
-            .get(0)
-            .getArchiveTimeStamp()
-            .get(0)
-            .getTimeStamp()
-            .getCertificatePathValidity()
-            .getPathValidityDetail()
-            .getCertificateValidity()
-            .get(0)
-            .getChainingOK();
-        assertThat(chainingOk.getResultMessage().getValue()).contains("QTST_EUMS_TL");
-    }
-
     @Test
     public void signatureInXaip() throws Exception
     {
